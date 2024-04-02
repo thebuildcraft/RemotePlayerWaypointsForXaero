@@ -1,0 +1,16 @@
+{
+  "text.autoconfig.remote_player_waypoints_for_xaero.title": "Remote Player Waypoints For Xaero's Map",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.enabled": "enable mod",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.updateDelay": "update delay",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.minDistance": "min distance",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.maxDistance": "max distance",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.serverEntries": "server entries",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.ServerEntry": "server entry",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.ServerEntry.ip": "ip",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.ServerEntry.link": "link",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.timeUntilAfk": "time until AFK",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.unknownAfkStateColor": "unknown AFK state color",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.AfkColor": "AFK color",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.debugMode": "debugMode - just ignore this",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.showAfkTimeInTabList": "show AFK time in tab list"
+}
