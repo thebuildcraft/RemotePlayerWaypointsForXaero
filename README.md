@@ -16,6 +16,11 @@ The mod is originally based on [RemotePlayers](https://github.com/ewpratten/remo
 - configurable trough Modmenu and cloth config
 - and probably more in the future...
 
+### How to use
+You just have to add the server you want to use this mod on to the list in the config:<br>
+"ip" is the serverip you use to connect to the server<br>
+"link" is the weblink to the Dynmap online (or other maps in the future)
+
 ### Important Notes
 If you have Xaeros Worlmap installed, make sure to set it to render all waypoint sets. This setting can be found in the waypoint menu.
 
