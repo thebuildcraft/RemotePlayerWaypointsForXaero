@@ -31,7 +31,7 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("RemotePlayerWaypointsForXaero");
 
 	// Update task
-	private static final UpdateTask updateTask = new UpdateTask();
+	private static UpdateTask updateTask = new UpdateTask();
 	private static Timer RemoteUpdateThread = null;
 	public static int TimerDelay;
 
@@ -73,6 +73,7 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
 	public static void setUpdateDelay(int ms) {
 		if (RemoteUpdateThread == null ) return;
 		updateTask.cancel();
+		updateTask = new UpdateTask();
 		RemoteUpdateThread.scheduleAtFixedRate(updateTask, 0, ms);
 		TimerDelay = ms;
 		LOGGER.info("Remote update delay has been set to " + ms + " ms");
