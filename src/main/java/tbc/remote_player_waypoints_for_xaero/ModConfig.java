@@ -64,6 +64,8 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         public boolean showAfkTimeInTabList = true;
         public boolean debugMode = false;
 
+        public List<String> ignoredServers = new ArrayList<>();
+
         public ModuleA() {
         }
     }

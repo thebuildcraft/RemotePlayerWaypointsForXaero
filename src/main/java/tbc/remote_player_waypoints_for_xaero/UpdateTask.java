@@ -18,7 +18,10 @@ package tbc.remote_player_waypoints_for_xaero;
 
 import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import xaero.common.XaeroMinimapSession;
 import xaero.common.minimap.waypoints.WaypointWorld;
@@ -42,6 +45,11 @@ public class UpdateTask extends TimerTask {
     }
     private static final String DEFAULT_PLAYER_SET_NAME = "RemotePlayerWaypointsForXaero_Temp";
 
+    private boolean connectionErrorWasShown = false;
+    private boolean cantFindServerErrorWasShown = false;
+    private boolean cantGetPlayerPositionsErrorWasShown = false;
+    public boolean linkBrokenErrorWasShown = false;
+
     @Override
     public void run() {
         ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
@@ -52,14 +60,14 @@ public class UpdateTask extends TimerTask {
 
         // Skip if disabled
         if (!config.general.enabled) {
-            RemotePlayerWaypointsForXaero.setConnection(null);
+            Reset();
             return;
         }
 
         // Skip if not in game
         if (mc.isInSingleplayer() || mc.getNetworkHandler() == null
                 || !mc.getNetworkHandler().getConnection().isOpen()) {
-            RemotePlayerWaypointsForXaero.setConnection(null);
+            Reset();
             return;
         }
 
@@ -76,12 +84,20 @@ public class UpdateTask extends TimerTask {
                     }
                 }
                 if (Objects.equals(serverEntry, null)){
+                    if (!(config.general.ignoredServers.contains(serverIP) || cantFindServerErrorWasShown)) {
+                        mc.inGameHud.getChatHud().addMessage(Text.literal("Could not find an online map link for this server. Make sure to add it to the config. ").setStyle(Style.EMPTY.withColor(Formatting.GOLD)).append(Text.literal("[ignore this server]").setStyle(Style.EMPTY.withColor(Formatting.GREEN).withBold(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ignore_server")))));
+                        cantFindServerErrorWasShown = true;
+                    }
                     RemotePlayerWaypointsForXaero.connected = false;
                     return;
                 }
-                RemotePlayerWaypointsForXaero.setConnection(new DynmapConnection(serverEntry));
+                RemotePlayerWaypointsForXaero.setConnection(new DynmapConnection(serverEntry, this));
             } catch (IOException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                if (!connectionErrorWasShown){
+                    connectionErrorWasShown = true;
+                    mc.inGameHud.getChatHud().addMessage(Text.literal("Error while connecting to the online map. Please check you config or report a bug.").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+                }
                 RemotePlayerWaypointsForXaero.connected = false;
                 return;
             }
@@ -92,7 +108,7 @@ public class UpdateTask extends TimerTask {
         // Skip if the world is null
         if (currentWorld == null) {
             RemotePlayerWaypointsForXaero.LOGGER.info("Player left world, disconnecting from dynmap");
-            RemotePlayerWaypointsForXaero.setConnection(null);
+            Reset();
             return;
         }
 
@@ -102,7 +118,10 @@ public class UpdateTask extends TimerTask {
         try {
             positions = RemotePlayerWaypointsForXaero.getConnection().getAllPlayerPositions();
         } catch (IOException e) {
-            RemotePlayerWaypointsForXaero.LOGGER.warn("Failed to make remote request");
+            if (!cantGetPlayerPositionsErrorWasShown){
+                cantGetPlayerPositionsErrorWasShown = true;
+                mc.inGameHud.getChatHud().addMessage(Text.literal("Failed to make remote request. Please check your config or report a bug.").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+            }
             e.printStackTrace();
             RemotePlayerWaypointsForXaero.setConnection(null);
             return;
@@ -162,5 +181,13 @@ public class UpdateTask extends TimerTask {
         if (config.general.updateDelay != RemotePlayerWaypointsForXaero.TimerDelay){
             RemotePlayerWaypointsForXaero.setUpdateDelay(config.general.updateDelay);
         }
+    }
+
+    private void Reset() {
+        RemotePlayerWaypointsForXaero.setConnection(null);
+        connectionErrorWasShown = false;
+        cantFindServerErrorWasShown = false;
+        cantGetPlayerPositionsErrorWasShown = false;
+        linkBrokenErrorWasShown = false;
     }
 }

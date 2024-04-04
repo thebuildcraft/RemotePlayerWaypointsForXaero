@@ -20,11 +20,16 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.*;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Timer;
 
 public class RemotePlayerWaypointsForXaero implements ModInitializer {
@@ -63,6 +68,14 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
 		RemoteUpdateThread.scheduleAtFixedRate(updateTask, 0, config.general.updateDelay);
 		TimerDelay = config.general.updateDelay;
 
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("ignore_server")
+				.executes(context -> {
+							IgnoreServer();
+							context.getSource().sendFeedback(Text.literal("You will not receive this warning again!"));
+							return 1;
+						}
+				)));
+
 		LOGGER.info("RemotePlayerWaypointsForXaero started");
 	}
 
@@ -97,5 +110,10 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
 	 */
 	public static @Nullable DynmapConnection getConnection() {
 		return RemotePlayerWaypointsForXaero.connection;
+	}
+
+	public static void IgnoreServer(){
+		ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+		config.general.ignoredServers.add(MinecraftClient.getInstance().getCurrentServerEntry().address.toLowerCase(Locale.ROOT));
 	}
 }

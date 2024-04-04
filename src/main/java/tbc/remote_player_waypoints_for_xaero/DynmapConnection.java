@@ -34,7 +34,7 @@ public class DynmapConnection {
     private URL queryURL;
     private final MinecraftClient mc;
 
-    public DynmapConnection(ModConfig.ServerEntry serverEntry) throws IOException {
+    public DynmapConnection(ModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         mc = MinecraftClient.getInstance();
         try {
             var baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
@@ -54,8 +54,12 @@ public class DynmapConnection {
             queryURL = new URL(baseURL + "/up/world/" + firstWorldName + "/");
             RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
         }
-        catch (Exception ignored){
-            mc.inGameHud.getChatHud().addMessage(Text.literal("Error: Your Dynmap link is broken!").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+        catch (Exception e){
+            if (!updateTask.linkBrokenErrorWasShown){
+                updateTask.linkBrokenErrorWasShown = true;
+                mc.inGameHud.getChatHud().addMessage(Text.literal("Error: Your Dynmap link is broken!").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+            }
+            throw e;
         }
     }
 
