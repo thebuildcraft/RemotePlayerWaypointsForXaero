@@ -23,6 +23,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
+import xaero.common.HudMod;
 import xaero.common.XaeroMinimapSession;
 import xaero.common.minimap.waypoints.WaypointWorld;
 import xaero.common.minimap.waypoints.WaypointsManager;
@@ -128,6 +129,7 @@ public class UpdateTask extends TimerTask {
         }
 
         RemotePlayerWaypointsForXaero.connected = true;
+        HudMod.INSTANCE.getSettings().renderAllSets = true;
 
         if (!currentWorld.getSets().containsKey(DEFAULT_PLAYER_SET_NAME)){
             currentWorld.addSet(DEFAULT_PLAYER_SET_NAME);

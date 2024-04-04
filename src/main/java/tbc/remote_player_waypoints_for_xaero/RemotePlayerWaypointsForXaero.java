@@ -27,6 +27,8 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xaero.common.HudMod;
+import xaero.common.IXaeroMinimap;
 
 import java.util.HashMap;
 import java.util.Locale;
