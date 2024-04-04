@@ -76,11 +76,13 @@ public class UpdateTask extends TimerTask {
                     }
                 }
                 if (Objects.equals(serverEntry, null)){
+                    RemotePlayerWaypointsForXaero.connected = false;
                     return;
                 }
                 RemotePlayerWaypointsForXaero.setConnection(new DynmapConnection(serverEntry));
             } catch (IOException e) {
                 e.printStackTrace();
+                RemotePlayerWaypointsForXaero.connected = false;
                 return;
             }
         }
@@ -105,6 +107,8 @@ public class UpdateTask extends TimerTask {
             RemotePlayerWaypointsForXaero.setConnection(null);
             return;
         }
+
+        RemotePlayerWaypointsForXaero.connected = true;
 
         if (!currentWorld.getSets().containsKey(DEFAULT_PLAYER_SET_NAME)){
             currentWorld.addSet(DEFAULT_PLAYER_SET_NAME);

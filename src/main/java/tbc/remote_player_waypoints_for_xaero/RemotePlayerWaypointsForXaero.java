@@ -37,6 +37,7 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
 
 	// Connections
 	private static DynmapConnection connection = null;
+	public static boolean connected = false;
 
 	// AFK detection
 	public static HashMap<String, Boolean> AfkDic = new HashMap<>();
@@ -85,6 +86,7 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
 	 * @param connection Connection
 	 */
 	public static void setConnection(DynmapConnection connection) {
+		connected = connection != null;
 		RemotePlayerWaypointsForXaero.connection = connection;
 	}
 

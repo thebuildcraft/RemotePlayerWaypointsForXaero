@@ -40,7 +40,7 @@ public class PlayerListMixin {
             playerName = rv.copy();
         }
 
-        if (!RemotePlayerWaypointsForXaero.enabled) {
+        if (!(RemotePlayerWaypointsForXaero.enabled && RemotePlayerWaypointsForXaero.connected)) {
             cir.setReturnValue(playerName);
             return;
         }
