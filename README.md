@@ -2,7 +2,7 @@
 
 # Remote player waypoints for Xaero's Map
 
-
+<a href="https://modrinth.com/mod/remote-player-waypoints-for-xaeros-map"><img src="https://img.shields.io/modrinth/dt/remote-player-waypoints-for-xaeros-map?logo=modrinth&label=&suffix=%20&style=flat&color=242629&labelColor=5ca424&logoColor=1c1c1c" alt="Modrinth"></a>
 
 This is a small fabric client mod that allows you to see other players from further away on servers.
 It does this by getting the position data from Dynmap and other online maps running on the server and displaying it with waypoints in [Xaero's Minimap](https://modrinth.com/mod/xaeros-minimap) and [Worldmap](https://modrinth.com/mod/xaeros-world-map).
