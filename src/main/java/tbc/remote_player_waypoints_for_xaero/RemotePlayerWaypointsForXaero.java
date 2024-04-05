@@ -27,8 +27,7 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xaero.common.HudMod;
-import xaero.common.IXaeroMinimap;
+import tbc.remote_player_waypoints_for_xaero.connections.MapConnection;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -43,7 +42,7 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
 	public static int TimerDelay;
 
 	// Connections
-	private static DynmapConnection connection = null;
+	private static MapConnection connection = null;
 	public static boolean connected = false;
 
 	// AFK detection
@@ -100,7 +99,7 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
 	 *
 	 * @param connection Connection
 	 */
-	public static void setConnection(DynmapConnection connection) {
+	public static void setConnection(MapConnection connection) {
 		connected = connection != null;
 		RemotePlayerWaypointsForXaero.connection = connection;
 	}
@@ -110,7 +109,7 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
 	 *
 	 * @return Connection
 	 */
-	public static @Nullable DynmapConnection getConnection() {
+	public static @Nullable MapConnection getConnection() {
 		return RemotePlayerWaypointsForXaero.connection;
 	}
 

@@ -46,7 +46,7 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         public boolean enabled = true;
         @Comment("in ms")
         @ConfigEntry.BoundedDiscrete(min = 2000, max = 10000)
-        int updateDelay = 2000;
+        public int updateDelay = 2000;
         @Comment("in m")
         @ConfigEntry.BoundedDiscrete(min = 0, max = 20)
         int minDistance = 0;
@@ -54,6 +54,9 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
         int maxDistance = 100000;
         public List<ServerEntry> serverEntries = new ArrayList<>();
+        @Comment("default Y coordinate for maps that don't provide Y coordinates")
+        @ConfigEntry.BoundedDiscrete(min = -100, max = 400)
+        public int defaultY = 64;
         @Comment("in sec")
         @ConfigEntry.BoundedDiscrete(min = 60, max = 600)
         public int timeUntilAfk = 120;
@@ -71,16 +74,29 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
     }
 
     public static class ServerEntry {
+        @ConfigEntry.Gui.EnumHandler(
+                option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON
+        )
+        public Maptype maptype;
         public String ip;
         public String link;
 
         public ServerEntry() {
-            this("", "");
+            this("", "", Maptype.Dynmap);
         }
 
-        public ServerEntry(String ip, String link) {
+        public ServerEntry(String ip, String link, Maptype maptype) {
             this.ip = ip;
             this.link = link;
+            this.maptype = maptype;
+        }
+
+        static enum Maptype {
+            Dynmap,
+            Squaremap;
+
+            private Maptype() {
+            }
         }
     }
 }

@@ -14,27 +14,19 @@
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <https://www.gnu.org/licenses/>.*/
 
-package tbc.remote_player_waypoints_for_xaero;
+package tbc.remote_player_waypoints_for_xaero.MapUpdates;
 
 /**
- * A player's auth profile and position
+ * JSON object from dynmap API. Send in update requests
  */
-public class PlayerPosition {
-    public final String player;
-    public final int x;
-    public final int y;
-    public final int z;
-    public final String world;
-
-    public PlayerPosition(String username, int x, int y, int z, String world) {
-        this.player = username;
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.world = world;
+public class DynmapUpdate {
+    public static class Player {
+        public String account;
+        public String world;
+        public int x;
+        public int y;
+        public int z;
     }
 
-    public boolean CompareCords(PlayerPosition otherPosition){
-        return (x == otherPosition.x) && (y == otherPosition.y) && (z == otherPosition.z);
-    }
+    public Player[] players;
 }

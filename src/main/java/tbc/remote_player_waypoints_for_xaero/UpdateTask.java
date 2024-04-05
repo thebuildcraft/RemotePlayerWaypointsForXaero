@@ -23,6 +23,8 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
+import tbc.remote_player_waypoints_for_xaero.connections.DynmapConnection;
+import tbc.remote_player_waypoints_for_xaero.connections.SquareMapConnection;
 import xaero.common.HudMod;
 import xaero.common.XaeroMinimapSession;
 import xaero.common.minimap.waypoints.WaypointWorld;
@@ -92,8 +94,12 @@ public class UpdateTask extends TimerTask {
                     RemotePlayerWaypointsForXaero.connected = false;
                     return;
                 }
-                RemotePlayerWaypointsForXaero.setConnection(new DynmapConnection(serverEntry, this));
-            } catch (IOException e) {
+                switch (serverEntry.maptype){
+                    case Dynmap -> RemotePlayerWaypointsForXaero.setConnection(new DynmapConnection(serverEntry, this));
+                    case Squaremap -> RemotePlayerWaypointsForXaero.setConnection(new SquareMapConnection(serverEntry, this));
+                    default -> throw new IllegalStateException("Unexpected value: " + serverEntry.maptype);
+                }
+            } catch (Exception e) {
                 //e.printStackTrace();
                 if (!connectionErrorWasShown){
                     connectionErrorWasShown = true;
@@ -117,11 +123,11 @@ public class UpdateTask extends TimerTask {
         // Get a list of all player's positions
         PlayerPosition[] positions;
         try {
-            positions = RemotePlayerWaypointsForXaero.getConnection().getAllPlayerPositions();
+            positions = RemotePlayerWaypointsForXaero.getConnection().getPlayerPositions(config);
         } catch (IOException e) {
             if (!cantGetPlayerPositionsErrorWasShown){
                 cantGetPlayerPositionsErrorWasShown = true;
-                mc.inGameHud.getChatHud().addMessage(Text.literal("Failed to make remote request. Please check your config or report a bug.").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+                mc.inGameHud.getChatHud().addMessage(Text.literal("Failed to make online map request. Please check your config (probably your link...) or report a bug.").setStyle(Style.EMPTY.withColor(Formatting.RED)));
             }
             e.printStackTrace();
             RemotePlayerWaypointsForXaero.setConnection(null);

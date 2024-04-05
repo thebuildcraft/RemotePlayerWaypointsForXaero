@@ -14,14 +14,15 @@
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <https://www.gnu.org/licenses/>.*/
 
-package tbc.remote_player_waypoints_for_xaero;
+package tbc.remote_player_waypoints_for_xaero.MapUpdates;
 
-/**
- * JSON object from dynmap API. Used to read the default world name.
- */
-public class DynmapConfiguration {
-    public World[] worlds;
-    public static class World{
+public class SquareMapUpdate {
+    public static class Player {
         public String name;
+        public String world;
+        public int x;
+        public int z;
     }
+
+    public Player[] players;
 }
