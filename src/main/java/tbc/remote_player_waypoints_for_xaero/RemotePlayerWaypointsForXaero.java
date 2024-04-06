@@ -55,6 +55,8 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
 
 	public static boolean enabled = true;
 
+	public static HashMap<String, String> PlayerNameDic = new HashMap<>();
+
 	@Override
 	public void onInitialize() {
 		LOGGER.info("RemotePlayerWaypointsForXaero starting ...");

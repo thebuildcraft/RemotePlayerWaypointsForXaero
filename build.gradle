@@ -99,3 +99,7 @@ publishing {
 		// retrieving dependencies.
 	}
 }
+
+loom {
+	accessWidenerPath = file("src/main/resources/remote_player_waypoints_for_xaero.accesswidener")
+}

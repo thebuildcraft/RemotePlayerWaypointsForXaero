@@ -3,7 +3,7 @@
   "package": "tbc.remote_player_waypoints_for_xaero.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "PlayerListMixin"
+    "PlayerListHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1

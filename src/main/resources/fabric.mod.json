@@ -43,5 +43,6 @@
 		"xaeros-minimap": "*",
 		"modmenu": "*",
 		"cloth-config-fabric": "*"
-	}
+	},
+	"accessWidener" : "remote_player_waypoints_for_xaero.accesswidener"
 }

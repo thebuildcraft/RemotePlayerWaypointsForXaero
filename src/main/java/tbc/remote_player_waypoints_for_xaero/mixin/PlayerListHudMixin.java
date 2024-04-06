@@ -14,48 +14,51 @@
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <https://www.gnu.org/licenses/>.*/
 
+
 package tbc.remote_player_waypoints_for_xaero.mixin;
 
+import net.minecraft.client.gui.hud.PlayerListHud;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.text.MutableText;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import tbc.remote_player_waypoints_for_xaero.*;
+import tbc.remote_player_waypoints_for_xaero.RemotePlayerWaypointsForXaero;
 
-@Mixin(PlayerListEntry.class)
-public class PlayerListMixin {
-    @Inject(at = @At("RETURN"), method = "getDisplayName()Lnet/minecraft/text/Text;", cancellable = true)
-    void injected(CallbackInfoReturnable<Text> cir) {
-        var thisObject = (PlayerListEntry) (Object) this;
-        var playerNameString = thisObject.getProfile().getName();
-        MutableText playerName;
-        var rv = cir.getReturnValue();
-        if (rv == null) {
-            playerName = Text.literal(playerNameString);
+@Mixin(PlayerListHud.class)
+public class PlayerListHudMixin {
+    @Inject(method = "getPlayerName", at = @At("RETURN"), cancellable = true)
+    private void injected(PlayerListEntry entry, CallbackInfoReturnable<Text> cir){
+        Text newText;
+        var playerNameString = entry.getProfile().getName();
+        if (entry.getDisplayName() == null) {
+            newText = ((PlayerListHud)(Object)this).applyGameModeFormatting(entry, Team.decorateName(entry.getScoreboardTeam(), Text.literal(playerNameString)));
         } else {
-            playerName = rv.copy();
+            newText = ((PlayerListHud)(Object)this).applyGameModeFormatting(entry, entry.getDisplayName().copy());
         }
 
         if (!(RemotePlayerWaypointsForXaero.enabled && RemotePlayerWaypointsForXaero.connected)) {
-            cir.setReturnValue(playerName);
+            cir.setReturnValue(newText);
             return;
         }
 
         if (RemotePlayerWaypointsForXaero.AfkDic.containsKey(playerNameString)) {
             if (RemotePlayerWaypointsForXaero.AfkDic.get(playerNameString)) {
                 if (RemotePlayerWaypointsForXaero.showAfkTimeInTabList){
-                    cir.setReturnValue(playerName.append(Text.literal("  [AFK " + (RemotePlayerWaypointsForXaero.AfkTimeDic.get(playerNameString) / 60) + " min]").setStyle(Style.EMPTY.withColor(RemotePlayerWaypointsForXaero.AfkColor))));
+                    cir.setReturnValue(newText.copy().append(Text.literal("  [AFK " + (RemotePlayerWaypointsForXaero.AfkTimeDic.get(playerNameString) / 60) + " min]").setStyle(Style.EMPTY.withColor(RemotePlayerWaypointsForXaero.AfkColor))));
                 }
                 else{
-                    cir.setReturnValue(playerName.append(Text.literal("  [AFK]").setStyle(Style.EMPTY.withColor(RemotePlayerWaypointsForXaero.AfkColor))));
+                    cir.setReturnValue(newText.copy().append(Text.literal("  [AFK]").setStyle(Style.EMPTY.withColor(RemotePlayerWaypointsForXaero.AfkColor))));
                 }
+                return;
             }
         } else {
-            cir.setReturnValue(playerName.append(Text.literal("  [???]").setStyle(Style.EMPTY.withColor(RemotePlayerWaypointsForXaero.unknownAfkStateColor))));
+            cir.setReturnValue(newText.copy().append(Text.literal("  [???]").setStyle(Style.EMPTY.withColor(RemotePlayerWaypointsForXaero.unknownAfkStateColor))));
+            return;
         }
+        cir.setReturnValue(newText);
     }
 }

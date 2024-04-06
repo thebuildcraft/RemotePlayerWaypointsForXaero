@@ -1,0 +1,2 @@
+accessWidener v2 named
+accessible method net/minecraft/client/gui/hud/PlayerListHud applyGameModeFormatting (Lnet/minecraft/client/network/PlayerListEntry;Lnet/minecraft/text/MutableText;)Lnet/minecraft/text/Text;
