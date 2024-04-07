@@ -20,11 +20,10 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import tbc.remote_player_waypoints_for_xaero.*;
-import tbc.remote_player_waypoints_for_xaero.MapUpdates.DynmapUpdate;
 import tbc.remote_player_waypoints_for_xaero.MapUpdates.SquareMapUpdate;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.Locale;
 
 public class SquareMapConnection extends MapConnection {
@@ -42,15 +41,32 @@ public class SquareMapConnection extends MapConnection {
             }
 
             // Build the url
-            queryURL = new URL(baseURL + "/tiles/players.json");
+            queryURL = URI.create(baseURL + "/tiles/players.json").toURL();
             RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
         }
-        catch (Exception e){
-            if (!updateTask.linkBrokenErrorWasShown){
-                updateTask.linkBrokenErrorWasShown = true;
-                mc.inGameHud.getChatHud().addMessage(Text.literal("Error: Your Squaremap link is broken!").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+        catch (Exception ignored){
+            try {
+                var baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
+                if (!baseURL.startsWith("https://")){
+                    baseURL = "https://" + baseURL;
+                }
+
+                int i = baseURL.indexOf("?");
+                if (i != -1){
+                    baseURL = baseURL.substring(0, i - 1);
+                }
+
+                // Build the url
+                queryURL = URI.create(baseURL + "/tiles/players.json").toURL();
+                RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
             }
-            throw e;
+            catch (Exception e){
+                if (!updateTask.linkBrokenErrorWasShown){
+                    updateTask.linkBrokenErrorWasShown = true;
+                    mc.inGameHud.getChatHud().addMessage(Text.literal("Error: Your Squaremap link is broken!").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+                }
+                throw e;
+            }
         }
     }
 
