@@ -37,7 +37,7 @@ import java.util.Objects;
 import java.util.TimerTask;
 
 /**
- * Threaded task that is run once every few seconds to fetch data from dynmap
+ * Threaded task that is run once every few seconds to fetch data from the online map
  * and update the local maps
  */
 public class UpdateTask extends TimerTask {
@@ -88,7 +88,7 @@ public class UpdateTask extends TimerTask {
                 }
                 if (Objects.equals(serverEntry, null)){
                     if (!(config.general.ignoredServers.contains(serverIP) || cantFindServerErrorWasShown)) {
-                        mc.inGameHud.getChatHud().addMessage(Text.literal("Could not find an online map link for this server. Make sure to add it to the config. ").setStyle(Style.EMPTY.withColor(Formatting.GOLD)).append(Text.literal("[ignore this server]").setStyle(Style.EMPTY.withColor(Formatting.GREEN).withBold(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ignore_server")))));
+                        mc.inGameHud.getChatHud().addMessage(Text.literal("Could not find an online map link for this server. Make sure to add it to the config. (this server ip was detected: " + serverIP + ") ").setStyle(Style.EMPTY.withColor(Formatting.GOLD)).append(Text.literal("[ignore this server]").setStyle(Style.EMPTY.withColor(Formatting.GREEN).withBold(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ignore_server")))));
                         cantFindServerErrorWasShown = true;
                     }
                     RemotePlayerWaypointsForXaero.connected = false;
