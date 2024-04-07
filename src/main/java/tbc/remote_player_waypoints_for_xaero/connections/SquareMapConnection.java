@@ -16,6 +16,7 @@
 
 package tbc.remote_player_waypoints_for_xaero.connections;
 
+import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -29,6 +30,7 @@ import java.util.Locale;
 public class SquareMapConnection extends MapConnection {
     public SquareMapConnection(ModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         super(serverEntry, updateTask);
+        ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
         try {
             var baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
             if (!baseURL.startsWith("http://")){
@@ -40,9 +42,24 @@ public class SquareMapConnection extends MapConnection {
                 baseURL = baseURL.substring(0, i - 1);
             }
 
+            i = baseURL.indexOf("#");
+            if (i != -1){
+                baseURL = baseURL.substring(0, i - 1);
+            }
+
+            if (baseURL.endsWith("/")){
+                baseURL = baseURL.substring(0, baseURL.length() - 1);
+            }
+
             // Build the url
             queryURL = URI.create(baseURL + "/tiles/players.json").toURL();
+            // Test the url
+            var a = this.getPlayerPositions(config);
+
             RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
+            if (config.general.debugMode){
+                mc.inGameHud.getChatHud().addMessage(Text.literal("new link: " + queryURL));
+            }
         }
         catch (Exception ignored){
             try {
@@ -56,9 +73,24 @@ public class SquareMapConnection extends MapConnection {
                     baseURL = baseURL.substring(0, i - 1);
                 }
 
+                i = baseURL.indexOf("#");
+                if (i != -1){
+                    baseURL = baseURL.substring(0, i - 1);
+                }
+
+                if (baseURL.endsWith("/")){
+                    baseURL = baseURL.substring(0, baseURL.length() - 1);
+                }
+
                 // Build the url
                 queryURL = URI.create(baseURL + "/tiles/players.json").toURL();
+                // Test the url
+                var a = this.getPlayerPositions(config);
+
                 RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
+                if (config.general.debugMode){
+                    mc.inGameHud.getChatHud().addMessage(Text.literal("new link: " + queryURL));
+                }
             }
             catch (Exception e){
                 if (!updateTask.linkBrokenErrorWasShown){

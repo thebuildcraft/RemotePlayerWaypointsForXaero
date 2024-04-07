@@ -16,6 +16,7 @@
 
 package tbc.remote_player_waypoints_for_xaero.connections;
 
+import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -33,6 +34,7 @@ import java.util.Locale;
 public class DynmapConnection extends MapConnection {
     public DynmapConnection(ModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         super(serverEntry, updateTask);
+        ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
         try {
             var baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
             if (!baseURL.startsWith("http://")){
@@ -49,13 +51,23 @@ public class DynmapConnection extends MapConnection {
                 baseURL = baseURL.substring(0, i - 1);
             }
 
+            if (baseURL.endsWith("/")){
+                baseURL = baseURL.substring(0, baseURL.length() - 1);
+            }
+
             // Get the first world name. I know it seems random. Just trust me...
             var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
                     URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name;
 
             // Build the url
             queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
+            // Test the url
+            var a = this.getPlayerPositions(config);
+
             RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
+            if (config.general.debugMode){
+                mc.inGameHud.getChatHud().addMessage(Text.literal("new link: " + queryURL));
+            }
         }
         catch (Exception ignored){
             try {
@@ -74,13 +86,23 @@ public class DynmapConnection extends MapConnection {
                     baseURL = baseURL.substring(0, i - 1);
                 }
 
+                if (baseURL.endsWith("/")){
+                    baseURL = baseURL.substring(0, baseURL.length() - 1);
+                }
+
                 // Get the first world name. I know it seems random. Just trust me...
                 var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
                         URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name;
 
                 // Build the url
                 queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
+                // Test the url
+                var a = this.getPlayerPositions(config);
+
                 RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
+                if (config.general.debugMode){
+                    mc.inGameHud.getChatHud().addMessage(Text.literal("new link: " + queryURL));
+                }
             }
             catch (Exception e){
                 if (!updateTask.linkBrokenErrorWasShown){
