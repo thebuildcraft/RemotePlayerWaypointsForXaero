@@ -23,9 +23,9 @@ public class DynmapUpdate {
     public static class Player {
         public String account;
         public String world;
-        public int x;
-        public int y;
-        public int z;
+        public float x;
+        public float y;
+        public float z;
     }
 
     public Player[] players;

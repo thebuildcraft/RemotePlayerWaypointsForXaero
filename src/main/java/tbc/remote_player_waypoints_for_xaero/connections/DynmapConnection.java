@@ -23,6 +23,7 @@ import tbc.remote_player_waypoints_for_xaero.*;
 import tbc.remote_player_waypoints_for_xaero.MapUpdates.DynmapUpdate;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Locale;
 
@@ -43,20 +44,51 @@ public class DynmapConnection extends MapConnection {
                 baseURL = baseURL.substring(0, i - 1);
             }
 
-            // Get the first world name
+            i = baseURL.indexOf("#");
+            if (i != -1){
+                baseURL = baseURL.substring(0, i - 1);
+            }
+
+            // Get the first world name. I know it seems random. Just trust me...
             var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
-                    new URL(baseURL + "/up/configuration"), DynmapConfiguration.class)).worlds[0].name;
+                    URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name;
 
             // Build the url
-            queryURL = new URL(baseURL + "/up/world/" + firstWorldName + "/");
+            queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
             RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
         }
-        catch (Exception e){
-            if (!updateTask.linkBrokenErrorWasShown){
-                updateTask.linkBrokenErrorWasShown = true;
-                mc.inGameHud.getChatHud().addMessage(Text.literal("Error: Your Dynmap link is broken!").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+        catch (Exception ignored){
+            try {
+                var baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
+                if (!baseURL.startsWith("https://")){
+                    baseURL = "https://" + baseURL;
+                }
+
+                int i = baseURL.indexOf("?");
+                if (i != -1){
+                    baseURL = baseURL.substring(0, i - 1);
+                }
+
+                i = baseURL.indexOf("#");
+                if (i != -1){
+                    baseURL = baseURL.substring(0, i - 1);
+                }
+
+                // Get the first world name. I know it seems random. Just trust me...
+                var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
+                        URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name;
+
+                // Build the url
+                queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
+                RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
             }
-            throw e;
+            catch (Exception e){
+                if (!updateTask.linkBrokenErrorWasShown){
+                    updateTask.linkBrokenErrorWasShown = true;
+                    mc.inGameHud.getChatHud().addMessage(Text.literal("Error: Your Dynmap link is broken!").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+                }
+                throw e;
+            }
         }
     }
 
@@ -75,7 +107,7 @@ public class DynmapConnection extends MapConnection {
         PlayerPosition[] positions = new PlayerPosition[update.players.length];
         for (int i = 0; i < update.players.length; i++){
             DynmapUpdate.Player player = update.players[i];
-            positions[i] = new PlayerPosition(player.account, player.x, player.y, player.z, player.world);
+            positions[i] = new PlayerPosition(player.account, Math.round(player.x), Math.round(player.y), Math.round(player.z), player.world);
         }
 
         return HandlePlayerPositions(positions, config);
