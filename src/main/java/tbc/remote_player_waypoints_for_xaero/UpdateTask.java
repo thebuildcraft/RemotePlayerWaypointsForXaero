@@ -23,6 +23,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
+import tbc.remote_player_waypoints_for_xaero.connections.BlueMapConnection;
 import tbc.remote_player_waypoints_for_xaero.connections.DynmapConnection;
 import tbc.remote_player_waypoints_for_xaero.connections.SquareMapConnection;
 import xaero.common.HudMod;
@@ -97,6 +98,7 @@ public class UpdateTask extends TimerTask {
                 switch (serverEntry.maptype){
                     case Dynmap -> RemotePlayerWaypointsForXaero.setConnection(new DynmapConnection(serverEntry, this));
                     case Squaremap -> RemotePlayerWaypointsForXaero.setConnection(new SquareMapConnection(serverEntry, this));
+                    case Bluemap -> RemotePlayerWaypointsForXaero.setConnection(new BlueMapConnection(serverEntry, this));
                     default -> throw new IllegalStateException("Unexpected value: " + serverEntry.maptype);
                 }
             } catch (Exception e) {

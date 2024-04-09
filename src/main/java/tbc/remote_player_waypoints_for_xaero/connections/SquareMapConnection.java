@@ -25,72 +25,17 @@ import tbc.remote_player_waypoints_for_xaero.MapUpdates.SquareMapUpdate;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Locale;
 
 public class SquareMapConnection extends MapConnection {
     public SquareMapConnection(ModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         super(serverEntry, updateTask);
         ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
         try {
-            var baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
-            if (!baseURL.startsWith("http://")){
-                baseURL = "http://" + baseURL;
-            }
-
-            int i = baseURL.indexOf("?");
-            if (i != -1){
-                baseURL = baseURL.substring(0, i - 1);
-            }
-
-            i = baseURL.indexOf("#");
-            if (i != -1){
-                baseURL = baseURL.substring(0, i - 1);
-            }
-
-            if (baseURL.endsWith("/")){
-                baseURL = baseURL.substring(0, baseURL.length() - 1);
-            }
-
-            // Build the url
-            queryURL = URI.create(baseURL + "/tiles/players.json").toURL();
-            // Test the url
-            var a = this.getPlayerPositions(config);
-
-            RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
-            if (config.general.debugMode){
-                mc.inGameHud.getChatHud().addMessage(Text.literal("new link: " + queryURL));
-            }
+            generateLink(serverEntry, config, false);
         }
         catch (Exception ignored){
             try {
-                var baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
-                if (!baseURL.startsWith("https://")){
-                    baseURL = "https://" + baseURL;
-                }
-
-                int i = baseURL.indexOf("?");
-                if (i != -1){
-                    baseURL = baseURL.substring(0, i - 1);
-                }
-
-                i = baseURL.indexOf("#");
-                if (i != -1){
-                    baseURL = baseURL.substring(0, i - 1);
-                }
-
-                if (baseURL.endsWith("/")){
-                    baseURL = baseURL.substring(0, baseURL.length() - 1);
-                }
-
-                // Build the url
-                queryURL = URI.create(baseURL + "/tiles/players.json").toURL();
-                // Test the url
-                var a = this.getPlayerPositions(config);
-
-                RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
-                if (config.general.debugMode){
-                    mc.inGameHud.getChatHud().addMessage(Text.literal("new link: " + queryURL));
-                }
+                generateLink(serverEntry, config, true);
             }
             catch (Exception e){
                 if (!updateTask.linkBrokenErrorWasShown){
@@ -99,6 +44,20 @@ public class SquareMapConnection extends MapConnection {
                 }
                 throw e;
             }
+        }
+    }
+
+    private void generateLink(ModConfig.ServerEntry serverEntry, ModConfig config, boolean useHttps) throws IOException {
+        String baseURL = getBaseURL(serverEntry, useHttps);
+
+        // Build the url
+        queryURL = URI.create(baseURL + "/tiles/players.json").toURL();
+        // Test the url
+        var a = this.getPlayerPositions(config);
+
+        RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
+        if (config.general.debugMode){
+            mc.inGameHud.getChatHud().addMessage(Text.literal("new link: " + queryURL));
         }
     }
 

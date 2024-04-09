@@ -93,7 +93,8 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
 
         static enum Maptype {
             Dynmap,
-            Squaremap;
+            Squaremap,
+            Bluemap;
 
             private Maptype() {
             }

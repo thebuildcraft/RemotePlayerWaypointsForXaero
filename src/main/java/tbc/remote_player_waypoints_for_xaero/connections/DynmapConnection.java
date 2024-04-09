@@ -25,8 +25,6 @@ import tbc.remote_player_waypoints_for_xaero.MapUpdates.DynmapUpdate;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
-import java.util.Locale;
 
 /**
  * Represents a connection to a dynmap server
@@ -36,73 +34,11 @@ public class DynmapConnection extends MapConnection {
         super(serverEntry, updateTask);
         ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
         try {
-            var baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
-            if (!baseURL.startsWith("http://")){
-                baseURL = "http://" + baseURL;
-            }
-
-            int i = baseURL.indexOf("?");
-            if (i != -1){
-                baseURL = baseURL.substring(0, i - 1);
-            }
-
-            i = baseURL.indexOf("#");
-            if (i != -1){
-                baseURL = baseURL.substring(0, i - 1);
-            }
-
-            if (baseURL.endsWith("/")){
-                baseURL = baseURL.substring(0, baseURL.length() - 1);
-            }
-
-            // Get the first world name. I know it seems random. Just trust me...
-            var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
-                    URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name;
-
-            // Build the url
-            queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
-            // Test the url
-            var a = this.getPlayerPositions(config);
-
-            RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
-            if (config.general.debugMode){
-                mc.inGameHud.getChatHud().addMessage(Text.literal("new link: " + queryURL));
-            }
+            generateLink(serverEntry, config, false);
         }
         catch (Exception ignored){
             try {
-                var baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
-                if (!baseURL.startsWith("https://")){
-                    baseURL = "https://" + baseURL;
-                }
-
-                int i = baseURL.indexOf("?");
-                if (i != -1){
-                    baseURL = baseURL.substring(0, i - 1);
-                }
-
-                i = baseURL.indexOf("#");
-                if (i != -1){
-                    baseURL = baseURL.substring(0, i - 1);
-                }
-
-                if (baseURL.endsWith("/")){
-                    baseURL = baseURL.substring(0, baseURL.length() - 1);
-                }
-
-                // Get the first world name. I know it seems random. Just trust me...
-                var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
-                        URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name;
-
-                // Build the url
-                queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
-                // Test the url
-                var a = this.getPlayerPositions(config);
-
-                RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
-                if (config.general.debugMode){
-                    mc.inGameHud.getChatHud().addMessage(Text.literal("new link: " + queryURL));
-                }
+                generateLink(serverEntry, config, true);
             }
             catch (Exception e){
                 if (!updateTask.linkBrokenErrorWasShown){
@@ -111,6 +47,24 @@ public class DynmapConnection extends MapConnection {
                 }
                 throw e;
             }
+        }
+    }
+
+    private void generateLink(ModConfig.ServerEntry serverEntry, ModConfig config, boolean useHttps) throws IOException {
+        var baseURL = getBaseURL(serverEntry, useHttps);
+
+        // Get the first world name. I know it seems random. Just trust me...
+        var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
+                URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name;
+
+        // Build the url
+        queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
+        // Test the url
+        var a = this.getPlayerPositions(config);
+
+        RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
+        if (config.general.debugMode){
+            mc.inGameHud.getChatHud().addMessage(Text.literal("new link: " + queryURL));
         }
     }
 

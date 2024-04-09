@@ -16,9 +16,9 @@
 
 package tbc.remote_player_waypoints_for_xaero.connections;
 
-import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import tbc.remote_player_waypoints_for_xaero.ModConfig;
 import tbc.remote_player_waypoints_for_xaero.PlayerPosition;
 import tbc.remote_player_waypoints_for_xaero.RemotePlayerWaypointsForXaero;
@@ -26,6 +26,7 @@ import tbc.remote_player_waypoints_for_xaero.UpdateTask;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.Objects;
 
 public abstract class MapConnection {
@@ -34,6 +35,29 @@ public abstract class MapConnection {
 
     public MapConnection(ModConfig.ServerEntry serverEntry, UpdateTask updateTask) {
         this.mc = MinecraftClient.getInstance();
+    }
+
+    @NotNull
+    protected String getBaseURL(ModConfig.ServerEntry serverEntry, boolean useHttps) {
+        var baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
+        if (!baseURL.startsWith(useHttps ? "https://" : "http://")){
+            baseURL = (useHttps ? "https://" : "http://") + baseURL;
+        }
+
+        int i = baseURL.indexOf("?");
+        if (i != -1){
+            baseURL = baseURL.substring(0, i - 1);
+        }
+
+        i = baseURL.indexOf("#");
+        if (i != -1){
+            baseURL = baseURL.substring(0, i - 1);
+        }
+
+        if (baseURL.endsWith("/")){
+            baseURL = baseURL.substring(0, baseURL.length() - 1);
+        }
+        return baseURL;
     }
 
     public abstract PlayerPosition[] getPlayerPositions(ModConfig config) throws IOException;
