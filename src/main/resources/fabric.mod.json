@@ -3,7 +3,7 @@
 	"id": "remote_player_waypoints_for_xaero",
 	"version": "${version}",
 	"name": "Remote Player Waypoints For Xaero's Map",
-	"description": "Shows player positions from Dynmap and other online maps in game using Xaeros Minimap and Worldmap. Based on \"remoteplayers\" by ewpratten.",
+	"description": "Shows player positions from Dynmap, Bluemap and other online maps in game using Xaeros Minimap and Worldmap.",
 	"authors": [
 		"the_build_craft"
 	],
@@ -11,13 +11,6 @@
 		"homepage": "https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero",
 		"issues": "https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero/issues",
 		"sources": "https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero"
-	},
-	"custom": {
-		"modmenu": {
-			"links": {
-				"remoteplayers by ewpratten": "https://github.com/ewpratten/remoteplayers"
-			}
-		}
 	},
 	"license": "GPL-3.0",
 	"icon": "assets/remote_player_waypoints_for_xaero/icon.png",
@@ -34,15 +27,16 @@
 		"remote_player_waypoints_for_xaero.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.15.0",
+		"fabricloader": ">=0.15.7",
 		"minecraft": "1.20.4",
 		"java": ">=17",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"xaerominimap": "*",
+		"cloth-config": "*"
 	},
 	"suggests": {
-		"xaeros-minimap": "*",
-		"modmenu": "*",
-		"cloth-config-fabric": "*"
+		"xaeroworldmap": "*",
+		"modmenu": "*"
 	},
 	"accessWidener" : "remote_player_waypoints_for_xaero.accesswidener"
 }
