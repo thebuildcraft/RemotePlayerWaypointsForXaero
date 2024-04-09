@@ -4,11 +4,10 @@
 
 <a href="https://modrinth.com/mod/remote-player-waypoints-for-xaeros-map"><img src="https://img.shields.io/modrinth/dt/remote-player-waypoints-for-xaeros-map?logo=modrinth&label=&suffix=%20&style=flat&color=242629&labelColor=5ca424&logoColor=1c1c1c" alt="Modrinth"></a>
 <a href="https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero/blob/main/LICENSE"><img src="https://img.shields.io/github/license/thebuildcraft/RemotePlayerWaypointsForXaero?style=flat&color=900c3f" alt="License"></a>
-![Modrinth Game Versions](https://img.shields.io/modrinth/game-versions/kiByZ6gx)
 
 
 This is a small fabric client mod that allows you to see other players from further away on servers.
-It does this by getting the position data from Dynmap and other online maps running on the server and displaying it with waypoints in [Xaero's Minimap](https://modrinth.com/mod/xaeros-minimap) and [Worldmap](https://modrinth.com/mod/xaeros-world-map).
+It does this by getting the position data from Dynmap, Bluemap and other online maps running on the server and displaying it with waypoints in [Xaero's Minimap](https://modrinth.com/mod/xaeros-minimap) and [Worldmap](https://modrinth.com/mod/xaeros-world-map).
 
 ### Features
 - see player positions on Xaeros Minimap and Worldmap
@@ -19,6 +18,7 @@ It does this by getting the position data from Dynmap and other online maps runn
 ### Supported Maps
 - Dynmap
 - Squaremap
+- Bluemap
 - ...more planned
 
 ### How to use
@@ -29,4 +29,4 @@ And Make sure to set the "map-type" correctly!
 
 The mod is originally based on [RemotePlayers](https://github.com/ewpratten/remoteplayers) from ewpratten.
 
-_This mod is not officially affiliated with Dynmap, Squaremap or Xaero in any way._
+_This mod is not officially affiliated with Dynmap, Squaremap, Bluemap or Xaero in any way._
