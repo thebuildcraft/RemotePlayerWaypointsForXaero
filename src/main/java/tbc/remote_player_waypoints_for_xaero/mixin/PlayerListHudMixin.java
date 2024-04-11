@@ -23,30 +23,24 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tbc.remote_player_waypoints_for_xaero.RemotePlayerWaypointsForXaero;
 
-
-
-
 @Mixin(PlayerListHud.class)
 public class PlayerListHudMixin {
     // duration in min
+    @Unique
     private static String formatDuration(int duration) {
-        var hours = 0;
-        var minutes = 0;
+        var hours = Math.floor((double) duration / 60);
+        var minutes = duration % 60;
 
-        while (duration > 60) {
-            hours += 1;
-            duration = duration - 60;
-        }
-        minutes = duration;
         if (hours == 0) {
-            return  minutes + " min"
+            return minutes + " min";
         } else {
-            return hours + " h " + minutes + "min";
+            return hours + " h " + minutes + " min";
         }
     }
 
