@@ -28,8 +28,29 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tbc.remote_player_waypoints_for_xaero.RemotePlayerWaypointsForXaero;
 
+
+
+
 @Mixin(PlayerListHud.class)
 public class PlayerListHudMixin {
+    // duration in min
+    private static String formatDuration(int duration) {
+        var hours = 0;
+        var minutes = 0;
+
+        while (duration > 60) {
+            hours += 1;
+            duration = duration - 60;
+        }
+        minutes = duration;
+        if (hours == 0) {
+            return  minutes + " min"
+        } else {
+            return hours + " h " + minutes + "min";
+        }
+    }
+
+
     @Inject(method = "getPlayerName", at = @At("RETURN"), cancellable = true)
     private void injected(PlayerListEntry entry, CallbackInfoReturnable<Text> cir){
         Text newText;
@@ -48,7 +69,7 @@ public class PlayerListHudMixin {
         if (RemotePlayerWaypointsForXaero.AfkDic.containsKey(playerNameString)) {
             if (RemotePlayerWaypointsForXaero.AfkDic.get(playerNameString)) {
                 if (RemotePlayerWaypointsForXaero.showAfkTimeInTabList){
-                    cir.setReturnValue(newText.copy().append(Text.literal("  [AFK " + (RemotePlayerWaypointsForXaero.AfkTimeDic.get(playerNameString) / 60) + " min]").setStyle(Style.EMPTY.withColor(RemotePlayerWaypointsForXaero.AfkColor))));
+                    cir.setReturnValue(newText.copy().append(Text.literal("  [AFK " + formatDuration(RemotePlayerWaypointsForXaero.AfkTimeDic.get(playerNameString) / 60) + " min]").setStyle(Style.EMPTY.withColor(RemotePlayerWaypointsForXaero.AfkColor))));
                 }
                 else{
                     cir.setReturnValue(newText.copy().append(Text.literal("  [AFK]").setStyle(Style.EMPTY.withColor(RemotePlayerWaypointsForXaero.AfkColor))));
