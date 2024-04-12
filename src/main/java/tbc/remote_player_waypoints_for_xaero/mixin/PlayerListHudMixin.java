@@ -34,13 +34,13 @@ public class PlayerListHudMixin {
     // duration in min
     @Unique
     private static String formatDuration(int duration) {
-        var hours = Math.floor((double) duration / 60);
+        int hours = (int) Math.floor((double) duration / 60);
         var minutes = duration % 60;
 
         if (hours == 0) {
             return minutes + " min";
         } else {
-            return hours + " h " + minutes + " min";
+            return hours + " h  " + minutes + " min";
         }
     }
 
@@ -63,7 +63,7 @@ public class PlayerListHudMixin {
         if (RemotePlayerWaypointsForXaero.AfkDic.containsKey(playerNameString)) {
             if (RemotePlayerWaypointsForXaero.AfkDic.get(playerNameString)) {
                 if (RemotePlayerWaypointsForXaero.showAfkTimeInTabList){
-                    cir.setReturnValue(newText.copy().append(Text.literal("  [AFK " + formatDuration(RemotePlayerWaypointsForXaero.AfkTimeDic.get(playerNameString) / 60) + " min]").setStyle(Style.EMPTY.withColor(RemotePlayerWaypointsForXaero.AfkColor))));
+                    cir.setReturnValue(newText.copy().append(Text.literal("  [AFK: " + formatDuration(RemotePlayerWaypointsForXaero.AfkTimeDic.get(playerNameString) / 60) + "]").setStyle(Style.EMPTY.withColor(RemotePlayerWaypointsForXaero.AfkColor))));
                 }
                 else{
                     cir.setReturnValue(newText.copy().append(Text.literal("  [AFK]").setStyle(Style.EMPTY.withColor(RemotePlayerWaypointsForXaero.AfkColor))));
