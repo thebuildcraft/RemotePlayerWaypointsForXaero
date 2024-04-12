@@ -18,6 +18,7 @@ package tbc.remote_player_waypoints_for_xaero;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
@@ -73,8 +74,7 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
 
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("ignore_server")
 				.executes(context -> {
-							IgnoreServer();
-							context.getSource().sendFeedback(Text.literal("You will not receive this warning again!"));
+							IgnoreServer(context);
 							return 1;
 						}
 				)));
@@ -128,8 +128,16 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
 		return RemotePlayerWaypointsForXaero.connection;
 	}
 
-	public static void IgnoreServer(){
-		ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-		config.general.ignoredServers.add(MinecraftClient.getInstance().getCurrentServerEntry().address.toLowerCase(Locale.ROOT));
+	public static void IgnoreServer(CommandContext<net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource> context){
+		var server = MinecraftClient.getInstance().getCurrentServerEntry();
+		if (server != null){
+			ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+			var address = server.address.toLowerCase(Locale.ROOT);
+			if (!config.general.ignoredServers.contains(address)) config.general.ignoredServers.add(address);
+			context.getSource().sendFeedback(Text.literal("You will not receive this warning again!"));
+		}
+		else{
+			context.getSource().sendFeedback(Text.literal("This can only be executed on a server!"));
+		}
 	}
 }
