@@ -16,6 +16,8 @@
 
 package tbc.remote_player_waypoints_for_xaero;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
@@ -76,6 +78,19 @@ public class RemotePlayerWaypointsForXaero implements ModInitializer {
 							return 1;
 						}
 				)));
+
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("set_afk_time")
+				.then(ClientCommandManager.argument("player", StringArgumentType.word())
+				.then(ClientCommandManager.argument("time", IntegerArgumentType.integer(0))
+				.executes(context -> {
+							var playerName = StringArgumentType.getString(context, "player");
+							var time = IntegerArgumentType.getInteger(context, "time");
+							RemotePlayerWaypointsForXaero.AfkTimeDic.put(playerName, time);
+							RemotePlayerWaypointsForXaero.AfkDic.put(playerName, time > 0);
+							context.getSource().sendFeedback(Text.literal("Set AFK time for " + playerName + " to " + time));
+							return 1;
+						}
+				)))));
 
 		LOGGER.info("RemotePlayerWaypointsForXaero started");
 	}
