@@ -53,14 +53,26 @@ public class DynmapConnection extends MapConnection {
     private void generateLink(ModConfig.ServerEntry serverEntry, ModConfig config, boolean useHttps) throws IOException {
         var baseURL = getBaseURL(serverEntry, useHttps);
 
-        // Get the first world name. I know it seems random. Just trust me...
-        var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
-                URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name;
+        try{
+            // Get the first world name. I know it seems random. Just trust me...
+            var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
+                    URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name;
 
-        // Build the url
-        queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
-        // Test the url
-        var a = this.getPlayerPositions(config);
+            // Build the url
+            queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
+            // Test the url
+            var a = this.getPlayerPositions(config);
+        }
+        catch (Exception ignored){
+            // Get the first world name. I know it seems random. Just trust me...
+            var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
+                    URI.create(baseURL + "/standalone/dynmap_config.json?").toURL(), DynmapConfiguration.class)).worlds[0].name;
+
+            // Build the url
+            queryURL = URI.create(baseURL + "/standalone/world/" + firstWorldName + ".json?").toURL();
+            // Test the url
+            var a = this.getPlayerPositions(config);
+        }
 
         RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + queryURL);
         if (config.general.debugMode){

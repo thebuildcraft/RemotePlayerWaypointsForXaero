@@ -54,6 +54,10 @@ public abstract class MapConnection {
             baseURL = baseURL.substring(0, i - 1);
         }
 
+        if (baseURL.endsWith("index.html")){
+            baseURL = baseURL.substring(0, baseURL.length() - 10);
+        }
+
         if (baseURL.endsWith("/")){
             baseURL = baseURL.substring(0, baseURL.length() - 1);
         }
