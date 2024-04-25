@@ -1,10 +1,16 @@
 pluginManagement {
-	repositories {
-		maven {
-			name = 'Fabric'
-			url = 'https://maven.fabricmc.net/'
-		}
-		mavenCentral()
-		gradlePluginPortal()
-	}
+    repositories {
+        maven { url "https://maven.fabricmc.net/" }
+        maven { url "https://maven.architectury.dev/" }
+        maven { url "https://files.minecraftforge.net/maven/" }
+        gradlePluginPortal()
+    }
 }
+
+rootProject.name = 'remote_player_waypoints_for_xaero'
+
+include 'common'
+include 'fabric'
+include 'forge'
+include 'neoforge'
+include 'quilt'

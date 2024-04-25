@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "quilt_loader": {
+    "group": "${group}",
+    "id": "remote_player_waypoints_for_xaero",
+    "version": "${version}",
+    "metadata": {
+      "name": "Remote Player Waypoints For Xaero's Map",
+      "description": "Shows player positions from Dynmap, Bluemap and other online maps in game using Xaeros Minimap and Worldmap.",
+      "contributors": {
+        "the_build_craft": "Owner"
+      },
+      "contact": {
+        "homepage": "https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero",
+        "issues": "https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero/issues",
+        "sources": "https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero"
+      },
+      "icon": "assets/remote_player_waypoints_for_xaero/icon.png"
+    },
+    "intermediate_mappings": "net.fabricmc:intermediary",
+    "entrypoints": {
+      "client_init": [
+        "de.the_build_craft.remote_player_waypoints_for_xaero.quilt.RemotePlayerWaypointsForXaeroQuilt"
+      ],
+      "modmenu": [
+        "de.the_build_craft.remote_player_waypoints_for_xaero.quilt.ModMenuIntegration"
+      ]
+    },
+    "depends": [
+      {
+        "id": "quilt_loader",
+        "version": "*"
+      },
+      {
+        "id": "quilt_base",
+        "version": "*"
+      },
+      {
+        "id": "minecraft",
+        "version": ">=1.20.2 <=1.20.4"
+      },
+      {
+        "id": "cloth-config",
+        "version": ">=12.0.110"
+      }
+    ]
+  },
+  "mixin": [
+    "remote_player_waypoints_for_xaero.mixins.json"
+  ],
+  "minecraft": {
+    "environment": "client"
+  }
+}

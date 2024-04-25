@@ -1,0 +1,37 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+issueTrackerURL = "https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero/issues"
+clientSideOnly = true
+license = "GPL-3.0"
+
+[[mods]]
+modId = "remote_player_waypoints_for_xaero"
+version = "${version}"
+displayName = "Remote Player Waypoints For Xaero's Map"
+authors = "the_build_craft"
+displayURL = "https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero"
+description = '''
+Shows player positions from Dynmap, Bluemap and other online maps in game using Xaeros Minimap and Worldmap.
+'''
+logoFile = "icon.png"
+
+[[dependencies.remote_player_waypoints_for_xaero]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.remote_player_waypoints_for_xaero]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.2,1.20.4]"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.remote_player_waypoints_for_xaero]]
+modId = "cloth_config"
+mandatory = true
+versionRange = "[12.0.110,)"
+ordering = "NONE"
+side = "BOTH"
