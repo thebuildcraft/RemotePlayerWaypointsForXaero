@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "de.the_build_craft.remote_player_waypoints_for_xaero.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.8",
+  "client": [
+    "PlayerListHudMixin"
+  ],
+  "mixins": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

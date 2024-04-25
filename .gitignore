@@ -4,6 +4,8 @@
 build/
 out/
 classes/
+output/
+libs/
 
 # eclipse
 
@@ -19,7 +21,9 @@ classes/
 # vscode
 
 .settings/
+.settings
 .vscode/
+.vscode
 bin/
 .classpath
 .project
@@ -28,7 +32,7 @@ bin/
 
 *.DS_Store
 
-# fabric
+# minecraft
 
 run/
 
@@ -38,3 +42,7 @@ hs_err_*.log
 replay_*.log
 *.hprof
 *.jfr
+
+# others
+
+.metadata
