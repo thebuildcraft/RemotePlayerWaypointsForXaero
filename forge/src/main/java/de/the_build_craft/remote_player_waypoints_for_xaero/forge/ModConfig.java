@@ -14,7 +14,7 @@
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <https://www.gnu.org/licenses/>.*/
 
-package tbc.remote_player_waypoints_for_xaero.forge;
+package de.the_build_craft.remote_player_waypoints_for_xaero.forge;
 
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
