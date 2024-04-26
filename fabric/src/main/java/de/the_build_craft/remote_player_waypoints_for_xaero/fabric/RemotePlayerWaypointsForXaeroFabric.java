@@ -32,9 +32,10 @@ public final class RemotePlayerWaypointsForXaeroFabric implements ClientModIniti
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
 
-        // Run our common setup.
+        RemotePlayerWaypointsForXaero.loaderType = RemotePlayerWaypointsForXaero.LoaderType.Fabric;
         var config = new CommonModConfigFabric();
 
+        // Run our common setup.
         RemotePlayerWaypointsForXaero.init();
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("ignore_server")

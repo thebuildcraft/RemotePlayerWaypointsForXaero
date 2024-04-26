@@ -23,6 +23,7 @@ import net.minecraftforge.fml.common.Mod;
 @Mod(RemotePlayerWaypointsForXaero.MOD_ID)
 public final class RemotePlayerWaypointsForXaeroForge {
     public RemotePlayerWaypointsForXaeroForge() {
+        RemotePlayerWaypointsForXaero.loaderType = RemotePlayerWaypointsForXaero.LoaderType.Forge;
         var config = new CommonModConfigForge();
 
         // Run our common setup.

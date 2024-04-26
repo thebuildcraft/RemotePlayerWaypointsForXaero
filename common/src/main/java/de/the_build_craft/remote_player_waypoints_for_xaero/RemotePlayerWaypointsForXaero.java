@@ -54,6 +54,7 @@ public class RemotePlayerWaypointsForXaero {
 
     public static boolean enabled = true;
     public static boolean mapModInstalled = false;
+    public static LoaderType loaderType;
 
     public static void init() {
         mapModInstalled = IsModInstalled("xaero.minimap.XaeroMinimap") || IsModInstalled("xaero.pvp.BetterPVP");
@@ -118,6 +119,15 @@ public class RemotePlayerWaypointsForXaero {
             return true;
         } catch (ClassNotFoundException ignored) {
             return false;
+        }
+    }
+
+    public enum LoaderType{
+        Fabric,
+        Quilt,
+        Forge,
+        NeoForge;
+        LoaderType(){
         }
     }
 }

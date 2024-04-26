@@ -29,9 +29,10 @@ import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
 public final class RemotePlayerWaypointsForXaeroQuilt implements ClientModInitializer {
     @Override
     public void onInitializeClient(ModContainer mod) {
-        // Run our common setup.
+        RemotePlayerWaypointsForXaero.loaderType = RemotePlayerWaypointsForXaero.LoaderType.Quilt;
         var config = new CommonModConfigQuilt();
 
+        // Run our common setup.
         RemotePlayerWaypointsForXaero.init();
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("ignore_server")
