@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[47,)"
+loaderVersion = "[46,)"
 issueTrackerURL = "https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero/issues"
 clientSideOnly = true
 license = "GPL-3.0"
@@ -18,20 +18,20 @@ logoFile = "icon.png"
 [[dependencies.remote_player_waypoints_for_xaero]]
 modId = "forge"
 mandatory = true
-versionRange = "[47,)"
+versionRange = "[46,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.remote_player_waypoints_for_xaero]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.20.2,1.20.4]"
+versionRange = "[1.20,1.20.1]"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.remote_player_waypoints_for_xaero]]
 modId = "cloth_config"
 mandatory = true
-versionRange = "[12.0.110,)"
+versionRange = "[11.1.118,)"
 ordering = "NONE"
 side = "BOTH"

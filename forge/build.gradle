@@ -41,7 +41,7 @@ dependencies {
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
 
-    modApi "me.shedaniel.cloth:cloth-config-forge:12.0.110"
+    modApi "me.shedaniel.cloth:cloth-config-forge:11.1.118"
 }
 
 processResources {

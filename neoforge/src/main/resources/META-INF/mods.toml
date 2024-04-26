@@ -18,21 +18,21 @@ logoFile = "icon.png"
 [[dependencies.remote_player_waypoints_for_xaero]]
 modId = "neoforge"
 type = "required"
-versionRange = "[20.2,)"
+versionRange = "[20,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.remote_player_waypoints_for_xaero]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.20.2,1.20.4]"
+versionRange = "[1.20,1.20.1]"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.remote_player_waypoints_for_xaero]]
 modId = "cloth_config"
 mandatory = true
-versionRange = "[12.0.110,)"
+versionRange = "[11.1.118,)"
 ordering = "NONE"
 side = "BOTH"
 
