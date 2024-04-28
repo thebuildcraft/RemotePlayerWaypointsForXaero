@@ -57,7 +57,8 @@ public abstract class CommonModConfig {
         public enum Maptype {
             Dynmap,
             Squaremap,
-            Bluemap;
+            Bluemap,
+            Pl3xMap;
 
             Maptype() {
             }

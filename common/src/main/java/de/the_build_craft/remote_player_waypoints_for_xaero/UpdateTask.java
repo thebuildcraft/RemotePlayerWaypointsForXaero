@@ -19,6 +19,7 @@ package de.the_build_craft.remote_player_waypoints_for_xaero;
 
 import de.the_build_craft.remote_player_waypoints_for_xaero.connections.BlueMapConnection;
 import de.the_build_craft.remote_player_waypoints_for_xaero.connections.DynmapConnection;
+import de.the_build_craft.remote_player_waypoints_for_xaero.connections.Pl3xMapConnection;
 import de.the_build_craft.remote_player_waypoints_for_xaero.connections.SquareMapConnection;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.ClickEvent;
@@ -115,6 +116,7 @@ public class UpdateTask extends TimerTask {
                     case Dynmap -> RemotePlayerWaypointsForXaero.setConnection(new DynmapConnection(serverEntry, this));
                     case Squaremap -> RemotePlayerWaypointsForXaero.setConnection(new SquareMapConnection(serverEntry, this));
                     case Bluemap -> RemotePlayerWaypointsForXaero.setConnection(new BlueMapConnection(serverEntry, this));
+                    case Pl3xMap -> RemotePlayerWaypointsForXaero.setConnection(new Pl3xMapConnection(serverEntry, this));
                     default -> throw new IllegalStateException("Unexpected value: " + serverEntry.maptype);
                 }
             } catch (Exception e) {
