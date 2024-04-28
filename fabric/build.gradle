@@ -40,10 +40,10 @@ dependencies {
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 
-    modApi("me.shedaniel.cloth:cloth-config-fabric:12.0.110") {
+    modApi("me.shedaniel.cloth:cloth-config-fabric:14.0.126") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-    modApi "com.terraformersmc:modmenu:8.0.0"
+    modApi "com.terraformersmc:modmenu:10.0.0-beta.1"
 }
 
 processResources {

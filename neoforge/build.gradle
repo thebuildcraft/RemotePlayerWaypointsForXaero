@@ -45,13 +45,13 @@ dependencies {
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 
-    modApi "me.shedaniel.cloth:cloth-config-neoforge:12.0.110"
+    modApi "me.shedaniel.cloth:cloth-config-neoforge:14.0.126"
 }
 
 processResources {
     inputs.property 'version', project.version
 
-    filesMatching('META-INF/mods.toml') {
+    filesMatching('META-INF/neoforge.mods.toml') {
         expand version: project.version
     }
 }

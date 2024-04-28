@@ -15,6 +15,6 @@ dependencies {
     // Architectury API. This is optional, and you can comment it out if you don't need it.
     //modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
 
-    modImplementation "maven.modrinth:xaeros-world-map:1.38.4_Fabric_1.20.2"
-    modImplementation "maven.modrinth:xaeros-minimap:24.1.1_Fabric_1.20.2"
+    modImplementation "maven.modrinth:xaeros-world-map:1.38.5_Fabric_1.20.5"
+    modImplementation "maven.modrinth:xaeros-minimap:24.1.2_Fabric_1.20.5"
 }
