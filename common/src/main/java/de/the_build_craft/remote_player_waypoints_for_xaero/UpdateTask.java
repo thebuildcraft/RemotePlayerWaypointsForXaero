@@ -132,7 +132,7 @@ public class UpdateTask extends TimerTask {
             }
         }
 
-        if (CommonModConfig.Instance.debugMode()) mc.inGameHud.getChatHud().addMessage(Text.literal("=========="));
+//        if (CommonModConfig.Instance.debugMode()) mc.inGameHud.getChatHud().addMessage(Text.literal("=========="));
         // Get a list of all player's positions
         PlayerPosition[] positions;
         try {
@@ -178,32 +178,32 @@ public class UpdateTask extends TimerTask {
         var waypointList = currentWorld.getSets().get(DEFAULT_PLAYER_SET_NAME).getList();
         var clientPlayer = MinecraftClient.getInstance().player;
         if (clientPlayer == null) return;
-        if (CommonModConfig.Instance.debugMode()) {
-            mc.inGameHud.getChatHud().addMessage(Text.literal("before adding waypoints loop"));
-        }
+//        if (CommonModConfig.Instance.debugMode()) {
+//            mc.inGameHud.getChatHud().addMessage(Text.literal("before adding waypoints loop"));
+//        }
         try {
             synchronized (waypointList) {
                 waypointList.clear();
 
                 // Add each player to the map
                 for (PlayerPosition playerPosition : positions) {
-                    if (CommonModConfig.Instance.debugMode()) {
-                        mc.inGameHud.getChatHud().addMessage(Text.literal("before player null check"));
-                    }
+//                    if (CommonModConfig.Instance.debugMode()) {
+//                        mc.inGameHud.getChatHud().addMessage(Text.literal("before player null check"));
+//                    }
                     if (playerPosition == null) {
                         continue;
                     }
 
-                    if (CommonModConfig.Instance.debugMode()) {
-                        mc.inGameHud.getChatHud().addMessage(Text.literal("after player null check"));
-                    }
+//                    if (CommonModConfig.Instance.debugMode()) {
+//                        mc.inGameHud.getChatHud().addMessage(Text.literal("after player null check"));
+//                    }
 
                     var d = clientPlayer.getPos().distanceTo(new Vec3d(playerPosition.x, playerPosition.y, playerPosition.z));
                     if (d < CommonModConfig.Instance.minDistance() || d > CommonModConfig.Instance.maxDistance()) continue;
 
-                    if (CommonModConfig.Instance.debugMode()) {
-                        mc.inGameHud.getChatHud().addMessage(Text.literal("player after other checks"));
-                    }
+//                    if (CommonModConfig.Instance.debugMode()) {
+//                        mc.inGameHud.getChatHud().addMessage(Text.literal("player after other checks"));
+//                    }
                     // Add waypoint for the player
                     try {
                         waypointList.add(new PlayerWaypoint(playerPosition));
