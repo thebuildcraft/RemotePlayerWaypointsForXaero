@@ -15,26 +15,26 @@
         along with this program.  If not, see <https://www.gnu.org/licenses/>.*/
 
 
-package de.the_build_craft.remote_player_waypoints_for_xaero.fabric;
+package de.the_build_craft.remote_player_waypoints_for_xaero.forge;
 
 import com.mojang.brigadier.CommandDispatcher;
 import de.the_build_craft.remote_player_waypoints_for_xaero.RemotePlayerWaypointsForXaero;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Mod;
 
-public final class RemotePlayerWaypointsForXaeroFabric implements ClientModInitializer {
-    @Override
-    public void onInitializeClient() {
-        // This code runs as soon as Minecraft is in a mod-load-ready state.
-        // However, some things (like resources) may still be uninitialized.
-        // Proceed with mild caution.
-
-        RemotePlayerWaypointsForXaero.loaderType = RemotePlayerWaypointsForXaero.LoaderType.Fabric;
-        var config = new CommonModConfigFabric();
+@Mod(RemotePlayerWaypointsForXaero.MOD_ID)
+public final class RemotePlayerWaypointsForXaeroForge {
+    public RemotePlayerWaypointsForXaeroForge() {
+        RemotePlayerWaypointsForXaero.loaderType = RemotePlayerWaypointsForXaero.LoaderType.Forge;
+        var config = new CommonModConfigForge();
 
         // Run our common setup.
         RemotePlayerWaypointsForXaero.init();
 
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> RemotePlayerWaypointsForXaero.register((CommandDispatcher) dispatcher));
+        MinecraftForge.EVENT_BUS.addListener(this::onCommandRegister);
+    }
+    public void onCommandRegister(RegisterClientCommandsEvent event) {
+        RemotePlayerWaypointsForXaero.register((CommandDispatcher) event.getDispatcher());
     }
 }

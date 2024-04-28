@@ -18,12 +18,6 @@ subprojects {
     apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
 
-    /loom {
-        mixin {
-            useLegacyMixinAp = false
-        }
-    }/
-
     base {
         // Set up a suffixed format for the mod jar names, e.g. `example-fabric`.
         archivesName = "$rootProject.archives_name-$project.name"

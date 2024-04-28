@@ -17,15 +17,24 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.neoforge;
 
+import com.mojang.brigadier.CommandDispatcher;
 import de.the_build_craft.remote_player_waypoints_for_xaero.RemotePlayerWaypointsForXaero;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(RemotePlayerWaypointsForXaero.MOD_ID)
 public final class RemotePlayerWaypointsForXaeroNeoForge {
     public RemotePlayerWaypointsForXaeroNeoForge() {
+        RemotePlayerWaypointsForXaero.loaderType = RemotePlayerWaypointsForXaero.LoaderType.NeoForge;
         var config = new CommonModConfigNeoForge();
 
         // Run our common setup.
         RemotePlayerWaypointsForXaero.init();
+
+        NeoForge.EVENT_BUS.addListener(this::onCommandRegister);
+    }
+    public void onCommandRegister(RegisterClientCommandsEvent event) {
+        RemotePlayerWaypointsForXaero.register((CommandDispatcher) event.getDispatcher());
     }
 }

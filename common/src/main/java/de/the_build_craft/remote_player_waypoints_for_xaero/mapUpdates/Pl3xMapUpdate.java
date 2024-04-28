@@ -15,17 +15,18 @@
         along with this program.  If not, see <https://www.gnu.org/licenses/>.*/
 
 
-package tbc.remote_player_waypoints_for_xaero.forge;
+package de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates;
 
-import de.the_build_craft.remote_player_waypoints_for_xaero.RemotePlayerWaypointsForXaero;
-import net.minecraftforge.fml.common.Mod;
-
-@Mod(RemotePlayerWaypointsForXaero.MOD_ID)
-public final class RemotePlayerWaypointsForXaeroForge {
-    public RemotePlayerWaypointsForXaeroForge() {
-        var config = new CommonModConfigForge();
-
-        // Run our common setup.
-        RemotePlayerWaypointsForXaero.init();
+public class Pl3xMapUpdate {
+    public static class Player {
+        public String name;
+        public String world;
+        public Position position;
+        public static class Position{
+            public int x;
+            public int z;
+        }
     }
+
+    public Player[] players;
 }
