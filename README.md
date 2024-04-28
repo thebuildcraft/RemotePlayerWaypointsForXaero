@@ -7,7 +7,7 @@
 
 
 This is a small client mod that allows you to see other players from further away on servers.
-It does this by getting the position data from Dynmap, Bluemap and other online maps running on the server and displaying it with waypoints in [Xaero's Minimap](https://modrinth.com/mod/xaeros-minimap) and [Worldmap](https://modrinth.com/mod/xaeros-world-map).
+It does this by getting the position data from Dynmap, Bluemap, Squaremap or Pl3xMap running on the server and displaying it with waypoints in [Xaero's Minimap](https://modrinth.com/mod/xaeros-minimap) and [Worldmap](https://modrinth.com/mod/xaeros-world-map).
 
 The AFK display feature can be uses without having a map mod installed.
 
@@ -21,7 +21,7 @@ The AFK display feature can be uses without having a map mod installed.
 - Dynmap
 - Bluemap
 - Squaremap
-- ...more planned
+- Pl3xMap
 
 ### How to use
 You just have to add the server you want to use this mod on to the list in the config:<br>
@@ -36,4 +36,4 @@ And make sure to set the "map-type" correctly!
 
 The mod is originally based on [RemotePlayers](https://github.com/ewpratten/remoteplayers) from ewpratten.
 
-_This mod is not officially affiliated with Dynmap, Bluemap, Squaremap or Xaero in any way._
+_This mod is not officially affiliated with Dynmap, Bluemap, Squaremap, Pl3xMap or Xaero in any way._
