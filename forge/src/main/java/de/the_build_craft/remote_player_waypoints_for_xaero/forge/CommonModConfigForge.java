@@ -15,7 +15,7 @@
         along with this program.  If not, see <https://www.gnu.org/licenses/>.*/
 
 
-package tbc.remote_player_waypoints_for_xaero.forge;
+package de.the_build_craft.remote_player_waypoints_for_xaero.forge;
 
 import de.the_build_craft.remote_player_waypoints_for_xaero.CommonModConfig;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -34,6 +34,11 @@ public class CommonModConfigForge extends CommonModConfig {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> {
             return AutoConfig.getConfigScreen(ModConfig.class, parent).get();
         }));
+    }
+
+    @Override
+    public void saveConfig(){
+        AutoConfig.getConfigHolder(ModConfig.class).save();
     }
 
     @Override

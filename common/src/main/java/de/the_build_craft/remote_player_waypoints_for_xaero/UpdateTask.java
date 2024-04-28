@@ -19,6 +19,7 @@ package de.the_build_craft.remote_player_waypoints_for_xaero;
 
 import de.the_build_craft.remote_player_waypoints_for_xaero.connections.BlueMapConnection;
 import de.the_build_craft.remote_player_waypoints_for_xaero.connections.DynmapConnection;
+import de.the_build_craft.remote_player_waypoints_for_xaero.connections.Pl3xMapConnection;
 import de.the_build_craft.remote_player_waypoints_for_xaero.connections.SquareMapConnection;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.ClickEvent;
@@ -87,24 +88,43 @@ public class UpdateTask extends TimerTask {
                         serverEntry = server;
                     }
                 }
-                if (Objects.equals(serverEntry, null)){
+                if (Objects.equals(serverEntry, null)) {
                     if (!(CommonModConfig.Instance.ignoredServers().contains(serverIP) || cantFindServerErrorWasShown)) {
-                        mc.inGameHud.getChatHud().addMessage(Text.literal("[" + RemotePlayerWaypointsForXaero.MOD_NAME + "]: Could not find an online map link for this server. Make sure to add it to the config. (this server ip was detected: " + serverIP + ") ").setStyle(Style.EMPTY.withColor(Formatting.GOLD)).append(Text.literal("[ignore this server]").setStyle(Style.EMPTY.withColor(Formatting.GREEN).withBold(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ignore_server")))));
+                        if ((RemotePlayerWaypointsForXaero.loaderType == RemotePlayerWaypointsForXaero.LoaderType.Fabric)
+                                || (RemotePlayerWaypointsForXaero.loaderType == RemotePlayerWaypointsForXaero.LoaderType.Quilt)) {
+                            mc.inGameHud.getChatHud().addMessage(Text.literal("[" + RemotePlayerWaypointsForXaero.MOD_NAME + "]: " +
+                                            "Could not find an online map link for this server. " +
+                                            "Make sure to add it to the config. (this server ip was detected: " + serverIP + ") ")
+                                    .setStyle(Style.EMPTY.withColor(Formatting.GOLD)).append(Text.literal("[ignore this server]")
+                                            .setStyle(Style.EMPTY.withColor(Formatting.GREEN).withBold(true)
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ignore_server")))));
+                        } else {
+                            mc.inGameHud.getChatHud().addMessage(Text.literal("[" + RemotePlayerWaypointsForXaero.MOD_NAME + "]: " +
+                                            "Could not find an online map link for this server. " +
+                                            "Make sure to add it to the config. (this server ip was detected: " + serverIP + ") ")
+                                    .setStyle(Style.EMPTY.withColor(Formatting.GOLD)).append(Text.literal("[ignore this server]")
+                                            .setStyle(Style.EMPTY.withColor(Formatting.GREEN).withBold(true)
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/ignore_server")))));
+                        }//                                                        RUN_COMMAND doesn't seem to work on Forge and NeoForge...
+
                         cantFindServerErrorWasShown = true;
                     }
                     RemotePlayerWaypointsForXaero.connected = false;
                     return;
                 }
-                switch (serverEntry.maptype){
+                switch (serverEntry.maptype) {
                     case Dynmap -> RemotePlayerWaypointsForXaero.setConnection(new DynmapConnection(serverEntry, this));
                     case Squaremap -> RemotePlayerWaypointsForXaero.setConnection(new SquareMapConnection(serverEntry, this));
                     case Bluemap -> RemotePlayerWaypointsForXaero.setConnection(new BlueMapConnection(serverEntry, this));
+                    case Pl3xMap -> RemotePlayerWaypointsForXaero.setConnection(new Pl3xMapConnection(serverEntry, this));
                     default -> throw new IllegalStateException("Unexpected value: " + serverEntry.maptype);
                 }
             } catch (Exception e) {
                 if (!connectionErrorWasShown){
                     connectionErrorWasShown = true;
-                    mc.inGameHud.getChatHud().addMessage(Text.literal("[" + RemotePlayerWaypointsForXaero.MOD_NAME + "]: Error while connecting to the online map. Please check you config or report a bug.").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+                    mc.inGameHud.getChatHud().addMessage(Text.literal("[" + RemotePlayerWaypointsForXaero.MOD_NAME + "]: " +
+                            "Error while connecting to the online map. " +
+                            "Please check you config or report a bug.").setStyle(Style.EMPTY.withColor(Formatting.RED)));
                     e.printStackTrace();
                 }
                 RemotePlayerWaypointsForXaero.connected = false;
@@ -112,7 +132,7 @@ public class UpdateTask extends TimerTask {
             }
         }
 
-        if (CommonModConfig.Instance.debugMode()) mc.inGameHud.getChatHud().addMessage(Text.literal("=========="));
+//        if (CommonModConfig.Instance.debugMode()) mc.inGameHud.getChatHud().addMessage(Text.literal("=========="));
         // Get a list of all player's positions
         PlayerPosition[] positions;
         try {
@@ -120,7 +140,9 @@ public class UpdateTask extends TimerTask {
         } catch (IOException e) {
             if (!cantGetPlayerPositionsErrorWasShown){
                 cantGetPlayerPositionsErrorWasShown = true;
-                mc.inGameHud.getChatHud().addMessage(Text.literal("[" + RemotePlayerWaypointsForXaero.MOD_NAME + "]: Failed to make online map request. Please check your config (probably your link...) or report a bug.").setStyle(Style.EMPTY.withColor(Formatting.RED)));
+                mc.inGameHud.getChatHud().addMessage(Text.literal("[" + RemotePlayerWaypointsForXaero.MOD_NAME + "]: " +
+                        "Failed to make online map request. Please check your config (probably your link...) or report a bug.")
+                        .setStyle(Style.EMPTY.withColor(Formatting.RED)));
             }
             e.printStackTrace();
             RemotePlayerWaypointsForXaero.setConnection(null);
@@ -156,32 +178,32 @@ public class UpdateTask extends TimerTask {
         var waypointList = currentWorld.getSets().get(DEFAULT_PLAYER_SET_NAME).getList();
         var clientPlayer = MinecraftClient.getInstance().player;
         if (clientPlayer == null) return;
-        if (CommonModConfig.Instance.debugMode()) {
-            mc.inGameHud.getChatHud().addMessage(Text.literal("before adding waypoints loop"));
-        }
+//        if (CommonModConfig.Instance.debugMode()) {
+//            mc.inGameHud.getChatHud().addMessage(Text.literal("before adding waypoints loop"));
+//        }
         try {
             synchronized (waypointList) {
                 waypointList.clear();
 
                 // Add each player to the map
                 for (PlayerPosition playerPosition : positions) {
-                    if (CommonModConfig.Instance.debugMode()) {
-                        mc.inGameHud.getChatHud().addMessage(Text.literal("before player null check"));
-                    }
+//                    if (CommonModConfig.Instance.debugMode()) {
+//                        mc.inGameHud.getChatHud().addMessage(Text.literal("before player null check"));
+//                    }
                     if (playerPosition == null) {
                         continue;
                     }
 
-                    if (CommonModConfig.Instance.debugMode()) {
-                        mc.inGameHud.getChatHud().addMessage(Text.literal("after player null check"));
-                    }
+//                    if (CommonModConfig.Instance.debugMode()) {
+//                        mc.inGameHud.getChatHud().addMessage(Text.literal("after player null check"));
+//                    }
 
                     var d = clientPlayer.getPos().distanceTo(new Vec3d(playerPosition.x, playerPosition.y, playerPosition.z));
                     if (d < CommonModConfig.Instance.minDistance() || d > CommonModConfig.Instance.maxDistance()) continue;
 
-                    if (CommonModConfig.Instance.debugMode()) {
-                        mc.inGameHud.getChatHud().addMessage(Text.literal("player after other checks"));
-                    }
+//                    if (CommonModConfig.Instance.debugMode()) {
+//                        mc.inGameHud.getChatHud().addMessage(Text.literal("player after other checks"));
+//                    }
                     // Add waypoint for the player
                     try {
                         waypointList.add(new PlayerWaypoint(playerPosition));

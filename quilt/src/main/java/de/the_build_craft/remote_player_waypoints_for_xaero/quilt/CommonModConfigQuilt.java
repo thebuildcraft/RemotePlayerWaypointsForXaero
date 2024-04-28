@@ -32,6 +32,11 @@ public class CommonModConfigQuilt extends CommonModConfig {
     }
 
     @Override
+    public void saveConfig(){
+        AutoConfig.getConfigHolder(ModConfig.class).save();
+    }
+
+    @Override
     public boolean enabled() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.enabled;
     }

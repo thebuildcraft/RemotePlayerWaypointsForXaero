@@ -18,8 +18,15 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import de.the_build_craft.remote_player_waypoints_for_xaero.connections.MapConnection;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.command.suggestion.SuggestionProviders;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -54,6 +61,7 @@ public class RemotePlayerWaypointsForXaero {
 
     public static boolean enabled = true;
     public static boolean mapModInstalled = false;
+    public static LoaderType loaderType;
 
     public static void init() {
         mapModInstalled = IsModInstalled("xaero.minimap.XaeroMinimap") || IsModInstalled("xaero.pvp.BetterPVP");
@@ -105,6 +113,8 @@ public class RemotePlayerWaypointsForXaero {
         if (server != null){
             var address = server.address.toLowerCase(Locale.ROOT);
             if (!CommonModConfig.Instance.ignoredServers().contains(address)) CommonModConfig.Instance.ignoredServers().add(address);
+            CommonModConfig.Instance.saveConfig();
+
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("You will not receive this warning again!"));
         }
         else{
@@ -119,5 +129,41 @@ public class RemotePlayerWaypointsForXaero {
         } catch (ClassNotFoundException ignored) {
             return false;
         }
+    }
+
+    public enum LoaderType{
+        Fabric,
+        Quilt,
+        Forge,
+        NeoForge;
+        LoaderType(){
+        }
+    }
+
+    public static void register(CommandDispatcher<SuggestionProviders> dispatcher){
+        LiteralArgumentBuilder<SuggestionProviders> ignoreCommand = literal("ignore_server")
+                .executes(context -> {IgnoreServer(); return 1;});
+
+        dispatcher.register(ignoreCommand);
+
+        LiteralArgumentBuilder<SuggestionProviders> setAfkTimeCommand = literal("set_afk_time")
+                .then(argument("player", StringArgumentType.word())
+                        .then(argument("time", IntegerArgumentType.integer(0))
+                                .executes(context -> {
+                                    var playerName = StringArgumentType.getString(context, "player");
+                                    var time = IntegerArgumentType.getInteger(context, "time");
+                                    RemotePlayerWaypointsForXaero.AfkTimeDic.put(playerName, time);
+                                    RemotePlayerWaypointsForXaero.AfkDic.put(playerName, time > 0);
+                                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal("Set AFK time for " + playerName + " to " + time));
+                                    return 1;
+                                })));
+
+        dispatcher.register(setAfkTimeCommand);
+    }
+    private static LiteralArgumentBuilder<SuggestionProviders> literal(String string) {
+        return LiteralArgumentBuilder.literal(string);
+    }
+    public static <T> RequiredArgumentBuilder<SuggestionProviders, T> argument(String name, ArgumentType<T> type) {
+        return RequiredArgumentBuilder.argument(name, type);
     }
 }
