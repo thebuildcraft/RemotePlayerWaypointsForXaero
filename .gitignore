@@ -46,3 +46,4 @@ replay_*.log
 # others
 
 .metadata
+.architectury-transformer/
