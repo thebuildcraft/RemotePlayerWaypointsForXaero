@@ -1,6 +1,6 @@
 /*      Remote player waypoints for Xaero's Map
         Copyright (C) 2024  Leander Knüttel
-        (this file is originally from "RemotePlayers" by ewpratten)
+        (some parts of this file are originally from "RemotePlayers" by ewpratten)
 
         This program is free software: you can redistribute it and/or modify
         it under the terms of the GNU General Public License as published by
@@ -40,9 +40,14 @@ public class HTTP {
      * @throws IOException
      */
     public static <T> T makeJSONHTTPRequest(URL endpoint, Class clazz) throws IOException {
+        // Turn to a Java object
+        Gson gson = new Gson();
+        return (T) gson.fromJson(makeTextHttpRequest(endpoint), clazz);
+    }
 
+    public static String makeTextHttpRequest(URL url) throws IOException{
         // Open an HTTP request
-        HttpURLConnection request = (HttpURLConnection) endpoint.openConnection();
+        HttpURLConnection request = (HttpURLConnection) url.openConnection();
         request.setRequestMethod("GET");
         request.setRequestProperty("Content-Type", "application/json");
         request.setInstanceFollowRedirects(true);
@@ -55,10 +60,6 @@ public class HTTP {
             response.append(output);
         }
 
-        // Turn to a Java object
-        Gson gson = new Gson();
-        return (T) gson.fromJson(response.toString(), clazz);
-
+        return response.toString();
     }
-
 }
