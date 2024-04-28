@@ -16,12 +16,9 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.quilt;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.CommandDispatcher;
 import de.the_build_craft.remote_player_waypoints_for_xaero.RemotePlayerWaypointsForXaero;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.minecraft.text.Text;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
 //import org.quiltmc.qsl.command.api.client.*;
@@ -35,24 +32,6 @@ public final class RemotePlayerWaypointsForXaeroQuilt implements ClientModInitia
         // Run our common setup.
         RemotePlayerWaypointsForXaero.init();
 
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("ignore_server")
-                .executes(context -> {
-                            RemotePlayerWaypointsForXaero.IgnoreServer();
-                            return 1;
-                        }
-                )));
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("set_afk_time")
-                .then(ClientCommandManager.argument("player", StringArgumentType.word())
-                        .then(ClientCommandManager.argument("time", IntegerArgumentType.integer(0))
-                                .executes(context -> {
-                                            var playerName = StringArgumentType.getString(context, "player");
-                                            var time = IntegerArgumentType.getInteger(context, "time");
-                                            RemotePlayerWaypointsForXaero.AfkTimeDic.put(playerName, time);
-                                            RemotePlayerWaypointsForXaero.AfkDic.put(playerName, time > 0);
-                                            context.getSource().sendFeedback(Text.literal("Set AFK time for " + playerName + " to " + time));
-                                            return 1;
-                                        }
-                                )))));
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> RemotePlayerWaypointsForXaero.register((CommandDispatcher) dispatcher));
     }
 }

@@ -100,10 +100,11 @@ public class UpdateTask extends TimerTask {
                         } else {
                             mc.inGameHud.getChatHud().addMessage(Text.literal("[" + RemotePlayerWaypointsForXaero.MOD_NAME + "]: " +
                                             "Could not find an online map link for this server. " +
-                                            "Make sure to add it to the config. (this server ip was detected: " + serverIP + ") " +
-                                            "You can also add the server ip to the ignore list in the config.")
-                                    .setStyle(Style.EMPTY.withColor(Formatting.GOLD)));
-                        }
+                                            "Make sure to add it to the config. (this server ip was detected: " + serverIP + ") ")
+                                    .setStyle(Style.EMPTY.withColor(Formatting.GOLD)).append(Text.literal("[ignore this server]")
+                                            .setStyle(Style.EMPTY.withColor(Formatting.GREEN).withBold(true)
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/ignore_server")))));
+                        }//                                                        RUN_COMMAND doesn't seem to work on Forge and NeoForge...
 
                         cantFindServerErrorWasShown = true;
                     }

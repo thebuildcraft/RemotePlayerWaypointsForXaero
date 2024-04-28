@@ -24,6 +24,7 @@ public abstract class CommonModConfig {
         Instance = this;
     }
     public static CommonModConfig Instance;
+    public abstract void saveConfig();
 
     public abstract boolean enabled();
     public abstract int updateDelay();

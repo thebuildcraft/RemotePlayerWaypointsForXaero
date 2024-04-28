@@ -17,7 +17,10 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.forge;
 
+import com.mojang.brigadier.CommandDispatcher;
 import de.the_build_craft.remote_player_waypoints_for_xaero.RemotePlayerWaypointsForXaero;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod(RemotePlayerWaypointsForXaero.MOD_ID)
@@ -28,5 +31,10 @@ public final class RemotePlayerWaypointsForXaeroForge {
 
         // Run our common setup.
         RemotePlayerWaypointsForXaero.init();
+
+        MinecraftForge.EVENT_BUS.addListener(this::onCommandRegister);
+    }
+    public void onCommandRegister(RegisterClientCommandsEvent event) {
+        RemotePlayerWaypointsForXaero.register((CommandDispatcher) event.getDispatcher());
     }
 }
