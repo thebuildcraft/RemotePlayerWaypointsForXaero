@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -43,6 +44,21 @@ public class HTTP {
         // Turn to a Java object
         Gson gson = new Gson();
         return (T) gson.fromJson(makeTextHttpRequest(endpoint), clazz);
+    }
+
+    /**
+     * Make an HTTP request, and deserialize
+     *
+     * @param <T>      Type
+     * @param endpoint URL to request from
+     * @param apiResponseType Type class
+     * @return Deserialized object
+     * @throws IOException
+     */
+    public static <T> T makeJSONHTTPRequest(URL endpoint, Type apiResponseType) throws IOException {
+        // Turn to a Java object
+        Gson gson = new Gson();
+        return (T) gson.fromJson(makeTextHttpRequest(endpoint), apiResponseType);
     }
 
     public static String makeTextHttpRequest(URL url) throws IOException{

@@ -20,6 +20,7 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.CommonModConfig;
 import de.the_build_craft.remote_player_waypoints_for_xaero.PlayerPosition;
 import de.the_build_craft.remote_player_waypoints_for_xaero.RemotePlayerWaypointsForXaero;
 import de.the_build_craft.remote_player_waypoints_for_xaero.UpdateTask;
+import de.the_build_craft.remote_player_waypoints_for_xaero.WaypointPosition;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +33,7 @@ import java.util.Objects;
 public abstract class MapConnection {
     public URL queryURL;
     public final MinecraftClient mc;
+    protected String currentDimension;
 
     public MapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) {
         this.mc = MinecraftClient.getInstance();
@@ -68,7 +70,7 @@ public abstract class MapConnection {
 
     public PlayerPosition[] HandlePlayerPositions(PlayerPosition[] playerPositions){
         String clientName = mc.player.getName().getString();
-        String currentDimension = "";
+        currentDimension = "";
         for (var p : playerPositions){
             if (Objects.equals(p.player, clientName)) {
                 currentDimension = p.world;
@@ -84,6 +86,16 @@ public abstract class MapConnection {
         }
 
         return playerPositions;
+    }
+
+    public WaypointPosition[] HandleWaypointPositions(WaypointPosition[] waypointPositions){
+        for (int i = 0; i < waypointPositions.length; i++) {
+            if (!CommonModConfig.Instance.debugMode() && (!Objects.equals(waypointPositions[i].world, currentDimension))) {
+                waypointPositions[i] = null;
+            }
+        }
+
+        return waypointPositions;
     }
 
     public void UpdateAfkInfo(PlayerPosition playerPosition){
@@ -107,4 +119,6 @@ public abstract class MapConnection {
         }
         RemotePlayerWaypointsForXaero.lastPlayerDataDic.put(playerPosition.player, playerPosition);
     }
+
+    public abstract WaypointPosition[] getWaypointPositions() throws IOException;
 }

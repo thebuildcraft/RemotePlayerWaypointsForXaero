@@ -30,6 +30,7 @@ import java.net.URI;
  * Represents a connection to a dynmap server
  */
 public class DynmapConnection extends MapConnection {
+    private String markerURL;
     public DynmapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         super(serverEntry, updateTask);
         try {
@@ -169,4 +170,8 @@ public class DynmapConnection extends MapConnection {
         return HandlePlayerPositions(positions);
     }
 
+    @Override
+    public WaypointPosition[] getWaypointPositions() throws IOException {
+        return new WaypointPosition[0];
+    }
 }

@@ -1,3 +1,4 @@
+
 /*      Remote player waypoints for Xaero's Map
         Copyright (C) 2024  Leander Knüttel
 
@@ -17,16 +18,25 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates;
 
-public class BlueMapUpdate {
-    public Player[] players;
-    public static class Player{
-        public String name;
-        public boolean foreign;
+import java.util.Map;
+
+
+public class BlueMapMarkerSet {
+    public static class Marker {
+        public String type;
+        public String label;
         public Position position;
-        public static class Position{
-            public float x;
-            public float y;
-            public float z;
-        }
+        public int sorting;
+        public boolean listed;
     }
+    public static class Position {
+        public float x;
+        public float y;
+        public float z;
+    }
+    public String label;
+    public boolean toggleable;
+    public boolean defaultHidden;
+    public int sorting;
+    public Map<String, Marker> markers;
 }
