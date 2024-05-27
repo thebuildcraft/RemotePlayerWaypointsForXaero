@@ -90,7 +90,7 @@ public abstract class MapConnection {
 
     public WaypointPosition[] HandleWaypointPositions(WaypointPosition[] waypointPositions){
         for (int i = 0; i < waypointPositions.length; i++) {
-            if (!CommonModConfig.Instance.debugMode() && (!Objects.equals(waypointPositions[i].world, currentDimension))) {
+            if (!CommonModConfig.Instance.debugMode() && (!waypointPositions[i].world.toLowerCase().equals(currentDimension.toLowerCase()))) {
                 waypointPositions[i] = null;
             }
         }

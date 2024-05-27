@@ -29,5 +29,12 @@ public class FixedWaypoint extends Waypoint {
 
     public FixedWaypoint(int x, int y, int z, String name) {
         super(x, y, z, name, "SVR", 0, 0, true);
+        String abbrivation = "";
+        String[] words = name.split("[ _\\-,:;.]");
+        for (String word : words) {
+            abbrivation += word.substring(0,1).toUpperCase();
+        }
+
+        this.setSymbol(abbrivation);
     }
 }

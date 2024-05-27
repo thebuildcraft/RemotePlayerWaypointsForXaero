@@ -92,8 +92,9 @@ public class BlueMapConnection extends MapConnection {
     @Override
     public WaypointPosition[] getWaypointPositions() throws IOException {
         Type apiResponseType = new TypeToken<Map<String, BlueMapMarkerSet>>() {}.getType();
-        Map<String, BlueMapMarkerSet> markerSets = HTTP.makeJSONHTTPRequest(markerUrls.get(lastWorldIndex), apiResponseType);
-        String currentWorld = mc.world.getRegistryKey().getValue().toString();
+        URL reqUrl = markerUrls.get(lastWorldIndex);
+        Map<String, BlueMapMarkerSet> markerSets = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
+        String playerWorld = this.currentDimension;
 
         ArrayList<WaypointPosition> positions = new ArrayList<WaypointPosition>();
 
@@ -103,13 +104,13 @@ public class BlueMapConnection extends MapConnection {
                 mc.inGameHud.getChatHud().addMessage(Text.literal("===================================="));
                 mc.inGameHud.getChatHud().addMessage(Text.literal("markerSet: " + m.getKey()));
                 mc.inGameHud.getChatHud().addMessage(Text.literal("dimension: " + dimension));
-                mc.inGameHud.getChatHud().addMessage(Text.literal("currentWorld: " + currentWorld));
+                mc.inGameHud.getChatHud().addMessage(Text.literal("currentWorld: " + playerWorld));
             }
 
-            if (currentWorld.toLowerCase().endsWith(dimension.toLowerCase())){
+            if (playerWorld.toLowerCase().endsWith(dimension.toLowerCase())){
                 for(BlueMapMarkerSet.Marker marker : m.getValue().markers.values()){
                     BlueMapMarkerSet.Position pos = marker.position;
-                    positions.add(new WaypointPosition(marker.label, Math.round(pos.x), Math.round(pos.y), Math.round(pos.z), "thisWorld"));
+                    positions.add(new WaypointPosition(marker.label, Math.round(pos.x), Math.round(pos.y), Math.round(pos.z), dimension));
                 }
             } else {
                 for(BlueMapMarkerSet.Marker marker : m.getValue().markers.values()){
@@ -124,7 +125,8 @@ public class BlueMapConnection extends MapConnection {
 
     @Override
     public PlayerPosition[] getPlayerPositions() throws IOException {
-        BlueMapPlayerUpdate update = HTTP.makeJSONHTTPRequest(playerUrls.get(lastWorldIndex), BlueMapPlayerUpdate.class);
+        URL reqUrl = playerUrls.get(lastWorldIndex);
+        BlueMapPlayerUpdate update = HTTP.makeJSONHTTPRequest(reqUrl, BlueMapPlayerUpdate.class);
         String clientName = mc.player.getName().getString();
         boolean correctWorld = false;
 
@@ -154,8 +156,11 @@ public class BlueMapConnection extends MapConnection {
         PlayerPosition[] positions = new PlayerPosition[update.players.length];
         if (correctWorld){
             for (int i = 0; i < update.players.length; i++) {
+                // url format: https://example.com/maps/worldName/live/players.json
+                String worldName = reqUrl.getPath().split("/")[2];
+
                 BlueMapPlayerUpdate.Player player = update.players[i];
-                positions[i] = new PlayerPosition(player.name, Math.round(player.position.x), Math.round(player.position.y), Math.round(player.position.z), player.foreign ? "foreign" : "thisWorld");
+                positions[i] = new PlayerPosition(player.name, Math.round(player.position.x), Math.round(player.position.y), Math.round(player.position.z), player.foreign ? "foreign" : worldName);
             }
         }
         else {
