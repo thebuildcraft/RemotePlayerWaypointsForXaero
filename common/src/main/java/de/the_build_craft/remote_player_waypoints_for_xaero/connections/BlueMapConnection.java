@@ -94,33 +94,24 @@ public class BlueMapConnection extends MapConnection {
         Type apiResponseType = new TypeToken<Map<String, BlueMapMarkerSet>>() {}.getType();
         URL reqUrl = markerUrls.get(lastWorldIndex);
         Map<String, BlueMapMarkerSet> markerSets = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
-        String playerWorld = this.currentDimension;
 
-        ArrayList<WaypointPosition> positions = new ArrayList<WaypointPosition>();
+        ArrayList<WaypointPosition> positions = new ArrayList<>();
 
         for (var m : markerSets.entrySet()){
-            String dimension = m.getKey().split("_")[1];
             if (CommonModConfig.Instance.debugMode()){
                 mc.inGameHud.getChatHud().addMessage(Text.literal("===================================="));
                 mc.inGameHud.getChatHud().addMessage(Text.literal("markerSet: " + m.getKey()));
-                mc.inGameHud.getChatHud().addMessage(Text.literal("dimension: " + dimension));
-                mc.inGameHud.getChatHud().addMessage(Text.literal("currentWorld: " + playerWorld));
             }
 
-            if (playerWorld.toLowerCase().endsWith(dimension.toLowerCase())){
-                for(BlueMapMarkerSet.Marker marker : m.getValue().markers.values()){
+            for(BlueMapMarkerSet.Marker marker : m.getValue().markers.values()){
+                if (Objects.equals(marker.type, "poi") || Objects.equals(marker.type, "html")){
                     BlueMapMarkerSet.Position pos = marker.position;
-                    positions.add(new WaypointPosition(marker.label, Math.round(pos.x), Math.round(pos.y), Math.round(pos.z), dimension));
-                }
-            } else {
-                for(BlueMapMarkerSet.Marker marker : m.getValue().markers.values()){
-                    BlueMapMarkerSet.Position pos = marker.position;
-                    positions.add(new WaypointPosition(marker.label, Math.round(pos.x), Math.round(pos.y), Math.round(pos.z), "foreign"));
+                    positions.add(new WaypointPosition(marker.label, Math.round(pos.x), Math.round(pos.y), Math.round(pos.z)));
                 }
             }
         }
 
-        return HandleWaypointPositions(positions.toArray(new WaypointPosition[0]));
+        return positions.toArray(new WaypointPosition[0]);
     }
 
     @Override
@@ -156,11 +147,8 @@ public class BlueMapConnection extends MapConnection {
         PlayerPosition[] positions = new PlayerPosition[update.players.length];
         if (correctWorld){
             for (int i = 0; i < update.players.length; i++) {
-                // url format: https://example.com/maps/worldName/live/players.json
-                String worldName = reqUrl.getPath().split("/")[2];
-
                 BlueMapPlayerUpdate.Player player = update.players[i];
-                positions[i] = new PlayerPosition(player.name, Math.round(player.position.x), Math.round(player.position.y), Math.round(player.position.z), player.foreign ? "foreign" : worldName);
+                positions[i] = new PlayerPosition(player.name, Math.round(player.position.x), Math.round(player.position.y), Math.round(player.position.z), player.foreign ? "foreign" : "thisWorld");
             }
         }
         else {

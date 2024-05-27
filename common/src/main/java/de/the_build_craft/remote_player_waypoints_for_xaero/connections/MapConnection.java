@@ -88,16 +88,6 @@ public abstract class MapConnection {
         return playerPositions;
     }
 
-    public WaypointPosition[] HandleWaypointPositions(WaypointPosition[] waypointPositions){
-        for (int i = 0; i < waypointPositions.length; i++) {
-            if (!CommonModConfig.Instance.debugMode() && (!waypointPositions[i].world.toLowerCase().equals(currentDimension.toLowerCase()))) {
-                waypointPositions[i] = null;
-            }
-        }
-
-        return waypointPositions;
-    }
-
     public void UpdateAfkInfo(PlayerPosition playerPosition){
         if (RemotePlayerWaypointsForXaero.lastPlayerDataDic.containsKey(playerPosition.player)) {
             if (RemotePlayerWaypointsForXaero.lastPlayerDataDic.get(playerPosition.player).CompareCords(playerPosition)) {

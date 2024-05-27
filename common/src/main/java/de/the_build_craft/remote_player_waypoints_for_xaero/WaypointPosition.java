@@ -18,21 +18,19 @@
 package de.the_build_craft.remote_player_waypoints_for_xaero;
 
 /**
- * A player's auth profile and position
+ * A marker's name and position
  */
 public class WaypointPosition {
     public final String name;
     public final int x;
     public final int y;
     public final int z;
-    public final String world;
 
-    public WaypointPosition(String name, int x, int y, int z, String world) {
+    public WaypointPosition(String name, int x, int y, int z) {
         this.name = name;
         this.x = x;
         this.y = y;
         this.z = z;
-        this.world = world;
     }
 
     public boolean CompareCords(WaypointPosition otherPosition){

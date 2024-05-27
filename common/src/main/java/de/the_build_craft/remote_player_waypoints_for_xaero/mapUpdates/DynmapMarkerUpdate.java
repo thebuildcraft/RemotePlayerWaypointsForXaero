@@ -23,23 +23,21 @@ import java.util.Map;
  * JSON object from dynmap API. Send in update requests
  */
 public class DynmapMarkerUpdate {
-    public static class Sets {
-        public static class OuterMarkers {
-            public static class Marker {
-                public boolean markup;
-                public float x;
-                public String icon;
-                public float y;
-                public String dim;
-                public float z;
-                public String label;
-            }
-            public boolean hide;
+    public static class Set {
+        public static class Marker {
+            public boolean markup;
+            public float x;
+            public String icon;
+            public float y;
+            public String dim;
+            public float z;
             public String label;
-            public Map<String, Marker> markers;
         }
-        public OuterMarkers markers;
+
+        public boolean hide;
+        public String label;
+        public Map<String, Marker> markers;
     }
 
-    public Sets sets;
+    public Map<String, Set> sets;
 }

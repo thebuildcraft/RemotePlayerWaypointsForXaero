@@ -33,7 +33,8 @@ import java.util.ArrayList;
  * Represents a connection to a dynmap server
  */
 public class DynmapConnection extends MapConnection {
-    private URL markerURL;
+    //private URL markerURL;
+    private String markerStringTemplate = "";
     public DynmapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         super(serverEntry, updateTask);
         try {
@@ -59,7 +60,7 @@ public class DynmapConnection extends MapConnection {
         try{
             // test if the link is already the correct get-request
             queryURL = URI.create(serverEntry.link).toURL();
-            markerURL = null; // TODO: implement markers for method 1
+            // TODO: implement markers for method 1
             // Test the url
             var a = this.getPlayerPositions();
 
@@ -104,13 +105,13 @@ public class DynmapConnection extends MapConnection {
                 RemotePlayerWaypointsForXaero.LOGGER.info("updateStringTemplate: " + updateStringTemplate);
 
                 i = mapConfig.indexOf("markers: ");
-                j = mapConfig.indexOf("\n", i);
-                var markerStringTemplate = mapConfig.substring(i + "markers: ".length() + 1, j - 1) + "_markers_/marker_{world}.json";
-
+                int l = "markers: ".length() + 1;
+                j = mapConfig.indexOf("'", i + l + 1);
+                markerStringTemplate = baseURL + "/" + mapConfig.substring(i + l, j) + "_markers_/marker_{world}.json";
+                //TODO: check if this works with every online map
 
                 // Build the url
                 queryURL = URI.create(baseURL + updateStringTemplate.replace("{world}", firstWorldName)).toURL();
-                markerURL = URI.create(baseURL + markerStringTemplate.replace("{world}", firstWorldName)).toURL();
 
                 RemotePlayerWaypointsForXaero.LOGGER.info("url: " + queryURL);
 
@@ -129,7 +130,7 @@ public class DynmapConnection extends MapConnection {
 
                     // Build the url
                     queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
-                    markerURL = null; // TODO: implement markers for method 3
+                    // TODO: implement markers for method 3
                     // Test the url
                     var c = this.getPlayerPositions();
 
@@ -144,7 +145,7 @@ public class DynmapConnection extends MapConnection {
 
                     // Build the url
                     queryURL = URI.create(baseURL + "/standalone/world/" + firstWorldName + ".json?").toURL();
-                    markerURL = null; // TODO: implement markers for method 4
+                    // TODO: implement markers for method 4
                     // Test the url
                     var c = this.getPlayerPositions();
 
@@ -184,19 +185,19 @@ public class DynmapConnection extends MapConnection {
 
     @Override
     public WaypointPosition[] getWaypointPositions() throws IOException {
-        if (markerURL == null) {
+        if (markerStringTemplate.isEmpty() || currentDimension.isEmpty()) {
             return new WaypointPosition[0];
         }
 
-        DynmapMarkerUpdate update = HTTP.makeJSONHTTPRequest(markerURL, DynmapMarkerUpdate.class);
-        ArrayList<WaypointPosition> positions = new ArrayList<WaypointPosition>();
+        DynmapMarkerUpdate update = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", currentDimension)).toURL(), DynmapMarkerUpdate.class);
+        ArrayList<WaypointPosition> positions = new ArrayList<>();
 
-        for (var m : update.sets.markers.markers.values()){
-            // Get world name
-            String world = markerURL.toString().split("_")[markerURL.toString().split("_").length - 1].split("\\.")[0];
-            positions.add(new WaypointPosition(m.label, Math.round(m.x), Math.round(m.y), Math.round(m.z), world));
+        for (var set : update.sets.values()){
+            for (var m : set.markers.values()){
+                positions.add(new WaypointPosition(m.label, Math.round(m.x), Math.round(m.y), Math.round(m.z)));
+            }
         }
 
-        return HandleWaypointPositions(positions.toArray(new WaypointPosition[0]));
+        return positions.toArray(new WaypointPosition[0]);
     }
 }
