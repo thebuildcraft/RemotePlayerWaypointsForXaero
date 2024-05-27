@@ -1,4 +1,3 @@
-
 /*      Remote player waypoints for Xaero's Map
         Copyright (C) 2024  Leander Knüttel
 

@@ -20,7 +20,7 @@ package de.the_build_craft.remote_player_waypoints_for_xaero;
 import xaero.common.minimap.waypoints.Waypoint;
 
 /**
- * A wrapper to improve creating temp waypoints for players
+ * A wrapper to improve creating temp waypoints for markers
  */
 public class FixedWaypoint extends Waypoint {
     public FixedWaypoint(WaypointPosition wp) {
