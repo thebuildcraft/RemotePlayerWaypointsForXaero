@@ -18,19 +18,22 @@
 package de.the_build_craft.remote_player_waypoints_for_xaero.connections;
 
 import de.the_build_craft.remote_player_waypoints_for_xaero.*;
-import de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates.DynmapUpdate;
+import de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates.DynmapMarkerUpdate;
+import de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates.DynmapPlayerUpdate;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * Represents a connection to a dynmap server
  */
 public class DynmapConnection extends MapConnection {
-    private String markerURL;
+    private URL markerURL;
     public DynmapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         super(serverEntry, updateTask);
         try {
@@ -56,6 +59,7 @@ public class DynmapConnection extends MapConnection {
         try{
             // test if the link is already the correct get-request
             queryURL = URI.create(serverEntry.link).toURL();
+            markerURL = null; // TODO: implement markers for method 1
             // Test the url
             var a = this.getPlayerPositions();
 
@@ -99,8 +103,14 @@ public class DynmapConnection extends MapConnection {
 
                 RemotePlayerWaypointsForXaero.LOGGER.info("updateStringTemplate: " + updateStringTemplate);
 
+                i = mapConfig.indexOf("markers: ");
+                j = mapConfig.indexOf("\n", i);
+                var markerStringTemplate = mapConfig.substring(i + "markers: ".length() + 1, j - 1) + "_markers_/marker_{world}.json";
+
+
                 // Build the url
                 queryURL = URI.create(baseURL + updateStringTemplate.replace("{world}", firstWorldName)).toURL();
+                markerURL = URI.create(baseURL + markerStringTemplate.replace("{world}", firstWorldName)).toURL();
 
                 RemotePlayerWaypointsForXaero.LOGGER.info("url: " + queryURL);
 
@@ -119,6 +129,7 @@ public class DynmapConnection extends MapConnection {
 
                     // Build the url
                     queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
+                    markerURL = null; // TODO: implement markers for method 3
                     // Test the url
                     var c = this.getPlayerPositions();
 
@@ -133,6 +144,7 @@ public class DynmapConnection extends MapConnection {
 
                     // Build the url
                     queryURL = URI.create(baseURL + "/standalone/world/" + firstWorldName + ".json?").toURL();
+                    markerURL = null; // TODO: implement markers for method 4
                     // Test the url
                     var c = this.getPlayerPositions();
 
@@ -158,12 +170,12 @@ public class DynmapConnection extends MapConnection {
     @Override
     public PlayerPosition[] getPlayerPositions() throws IOException {
         // Make request for all players
-        DynmapUpdate update = HTTP.makeJSONHTTPRequest(queryURL, DynmapUpdate.class);
+        DynmapPlayerUpdate update = HTTP.makeJSONHTTPRequest(queryURL, DynmapPlayerUpdate.class);
 
         // Build a list of positions
         PlayerPosition[] positions = new PlayerPosition[update.players.length];
         for (int i = 0; i < update.players.length; i++){
-            DynmapUpdate.Player player = update.players[i];
+            DynmapPlayerUpdate.Player player = update.players[i];
             positions[i] = new PlayerPosition(player.account, Math.round(player.x), Math.round(player.y), Math.round(player.z), player.world);
         }
 
@@ -172,6 +184,19 @@ public class DynmapConnection extends MapConnection {
 
     @Override
     public WaypointPosition[] getWaypointPositions() throws IOException {
-        return new WaypointPosition[0];
+        if (markerURL == null) {
+            return new WaypointPosition[0];
+        }
+
+        DynmapMarkerUpdate update = HTTP.makeJSONHTTPRequest(markerURL, DynmapMarkerUpdate.class);
+        ArrayList<WaypointPosition> positions = new ArrayList<WaypointPosition>();
+
+        for (var m : update.sets.markers.markers.values()){
+            // Get world name
+            String world = markerURL.toString().split("_")[markerURL.toString().split("_").length - 1].split("\\.")[0];
+            positions.add(new WaypointPosition(m.label, Math.round(m.x), Math.round(m.y), Math.round(m.z), world));
+        }
+
+        return HandleWaypointPositions(positions.toArray(new WaypointPosition[0]));
     }
 }

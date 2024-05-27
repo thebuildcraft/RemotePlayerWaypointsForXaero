@@ -20,7 +20,7 @@ package de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates;
 /**
  * JSON object from dynmap API. Send in update requests
  */
-public class DynmapUpdate {
+public class DynmapPlayerUpdate {
     public static class Player {
         public String account;
         public String world;
