@@ -26,14 +26,12 @@ import net.minecraft.util.Formatting;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 
 /**
  * Represents a connection to a dynmap server
  */
 public class DynmapConnection extends MapConnection {
-    //private URL markerURL;
     private String markerStringTemplate = "";
     public DynmapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         super(serverEntry, updateTask);
