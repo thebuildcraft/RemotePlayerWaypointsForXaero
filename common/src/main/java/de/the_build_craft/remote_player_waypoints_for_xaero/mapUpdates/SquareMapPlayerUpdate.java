@@ -16,7 +16,7 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates;
 
-public class SquareMapUpdate {
+public class SquareMapPlayerUpdate {
     public static class Player {
         public String name;
         public String world;

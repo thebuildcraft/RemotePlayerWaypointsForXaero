@@ -16,16 +16,23 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.connections;
 
+import com.google.common.reflect.TypeToken;
 import de.the_build_craft.remote_player_waypoints_for_xaero.*;
-import de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates.SquareMapUpdate;
+import de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates.SquareMapMarkerUpdate;
+import de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates.SquareMapPlayerUpdate;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class SquareMapConnection extends MapConnection {
+    private String markerStringTemplate = "";
     public SquareMapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         super(serverEntry, updateTask);
         try {
@@ -50,6 +57,7 @@ public class SquareMapConnection extends MapConnection {
 
         // Build the url
         queryURL = URI.create(baseURL + "/tiles/players.json").toURL();
+        markerStringTemplate = baseURL + "/tiles/{world}/markers.json";
         // Test the url
         var a = this.getPlayerPositions();
 
@@ -62,12 +70,12 @@ public class SquareMapConnection extends MapConnection {
     @Override
     public PlayerPosition[] getPlayerPositions() throws IOException {
         // Make request for all players
-        SquareMapUpdate update = HTTP.makeJSONHTTPRequest(queryURL, SquareMapUpdate.class);
+        SquareMapPlayerUpdate update = HTTP.makeJSONHTTPRequest(queryURL, SquareMapPlayerUpdate.class);
 
         // Build a list of positions
         PlayerPosition[] positions = new PlayerPosition[update.players.length];
         for (int i = 0; i < update.players.length; i++){
-            SquareMapUpdate.Player player = update.players[i];
+            SquareMapPlayerUpdate.Player player = update.players[i];
             positions[i] = new PlayerPosition(player.name, player.x, CommonModConfig.Instance.defaultY(), player.z, player.world);
         }
 
@@ -76,6 +84,24 @@ public class SquareMapConnection extends MapConnection {
 
     @Override
     public WaypointPosition[] getWaypointPositions() throws IOException {
-        return new WaypointPosition[0];
+        if (markerStringTemplate.isEmpty() || currentDimension.isEmpty()) {
+            return new WaypointPosition[0];
+        }
+
+        Type apiResponseType = new TypeToken<SquareMapMarkerUpdate[]>() {}.getType();
+        URL reqUrl = URI.create(markerStringTemplate.replace("{world}", currentDimension)).toURL();
+        SquareMapMarkerUpdate[] markersLayers = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
+
+        ArrayList<WaypointPosition> positions = new ArrayList<>();
+
+        for (var markerLayer : markersLayers){
+            for (var marker : markerLayer.markers){
+                if (Objects.equals(marker.type, "icon")) {
+                    positions.add(new WaypointPosition(marker.tooltip, marker.point.x, CommonModConfig.Instance.defaultY(), marker.point.z));
+                }
+            }
+        }
+
+        return positions.toArray(new WaypointPosition[0]);
     }
 }
