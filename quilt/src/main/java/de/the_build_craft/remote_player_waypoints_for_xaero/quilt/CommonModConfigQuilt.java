@@ -42,6 +42,16 @@ public class CommonModConfigQuilt extends CommonModConfig {
     }
 
     @Override
+    public boolean enablePlayerWaypoints() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.enablePlayerWaypoints;
+    }
+
+    @Override
+    public boolean enableMarkerWaypoints() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.enableMarkerWaypoints;
+    }
+
+    @Override
     public int updateDelay() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.updateDelay;
     }

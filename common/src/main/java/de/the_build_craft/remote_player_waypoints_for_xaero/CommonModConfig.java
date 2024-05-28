@@ -27,6 +27,8 @@ public abstract class CommonModConfig {
     public abstract void saveConfig();
 
     public abstract boolean enabled();
+    public abstract boolean enablePlayerWaypoints();
+    public abstract boolean enableMarkerWaypoints();
     public abstract int updateDelay();
     public abstract int minDistance();
     public abstract int maxDistance();

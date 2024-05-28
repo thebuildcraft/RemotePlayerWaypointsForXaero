@@ -137,8 +137,14 @@ public class UpdateTask extends TimerTask {
         PlayerPosition[] playerPositions;
         WaypointPosition[] waypointPositions;
         try {
+            // this must be run no matter if it's activated in the config, to get the "currentDimension" and AFK info
             playerPositions = RemotePlayerWaypointsForXaero.getConnection().getPlayerPositions();
-            waypointPositions = RemotePlayerWaypointsForXaero.getConnection().getWaypointPositions();
+            if (CommonModConfig.Instance.enableMarkerWaypoints()){
+                waypointPositions = RemotePlayerWaypointsForXaero.getConnection().getWaypointPositions();
+            }
+            else {
+                waypointPositions = new WaypointPosition[0];
+            }
         } catch (IOException e) {
             if (!cantGetPlayerPositionsErrorWasShown){
                 cantGetPlayerPositionsErrorWasShown = true;
@@ -187,31 +193,33 @@ public class UpdateTask extends TimerTask {
             synchronized (waypointList) {
                 waypointList.clear();
 
-                // Add each player to the map
-                for (PlayerPosition playerPosition : playerPositions) {
+                if (CommonModConfig.Instance.enablePlayerWaypoints()){
+                    // Add each player to the map
+                    for (PlayerPosition playerPosition : playerPositions) {
 //                    if (CommonModConfig.Instance.debugMode()) {
 //                        mc.inGameHud.getChatHud().addMessage(Text.literal("before player null check"));
 //                    }
-                    if (playerPosition == null) {
-                        continue;
-                    }
+                        if (playerPosition == null) {
+                            continue;
+                        }
 
 //                    if (CommonModConfig.Instance.debugMode()) {
 //                        mc.inGameHud.getChatHud().addMessage(Text.literal("after player null check"));
 //                    }
 
-                    var d = clientPlayer.getPos().distanceTo(new Vec3d(playerPosition.x, playerPosition.y, playerPosition.z));
-                    if (d < CommonModConfig.Instance.minDistance() || d > CommonModConfig.Instance.maxDistance()) continue;
+                        var d = clientPlayer.getPos().distanceTo(new Vec3d(playerPosition.x, playerPosition.y, playerPosition.z));
+                        if (d < CommonModConfig.Instance.minDistance() || d > CommonModConfig.Instance.maxDistance()) continue;
 
 //                    if (CommonModConfig.Instance.debugMode()) {
 //                        mc.inGameHud.getChatHud().addMessage(Text.literal("player after other checks"));
 //                    }
-                    // Add waypoint for the player
-                    try {
-                        waypointList.add(new PlayerWaypoint(playerPosition));
-                    } catch (NullPointerException e) {
-                        RemotePlayerWaypointsForXaero.LOGGER.warn("cant add waypoint");
-                        e.printStackTrace();
+                        // Add waypoint for the player
+                        try {
+                            waypointList.add(new PlayerWaypoint(playerPosition));
+                        } catch (NullPointerException e) {
+                            RemotePlayerWaypointsForXaero.LOGGER.warn("cant add waypoint");
+                            e.printStackTrace();
+                        }
                     }
                 }
 

@@ -44,6 +44,8 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
     )
     public static class ModuleA implements ConfigData {
         public boolean enabled = true;
+        public boolean enablePlayerWaypoints = true;
+        public boolean enableMarkerWaypoints = true;
         @Comment("in ms")
         @ConfigEntry.BoundedDiscrete(min = 2000, max = 10000)
         public int updateDelay = 2000;
