@@ -32,6 +32,7 @@ public class FixedWaypoint extends Waypoint {
         String abbrivation = "";
         String[] words = name.split("[ _\\-,:;.]");
         for (String word : words) {
+            if (word.isEmpty()) continue;
             abbrivation += word.substring(0,1).toUpperCase();
         }
 
