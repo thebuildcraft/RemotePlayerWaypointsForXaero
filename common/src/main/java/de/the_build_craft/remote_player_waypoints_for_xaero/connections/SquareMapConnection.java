@@ -73,4 +73,9 @@ public class SquareMapConnection extends MapConnection {
 
         return HandlePlayerPositions(positions);
     }
+
+    @Override
+    public WaypointPosition[] getWaypointPositions() throws IOException {
+        return new WaypointPosition[0];
+    }
 }

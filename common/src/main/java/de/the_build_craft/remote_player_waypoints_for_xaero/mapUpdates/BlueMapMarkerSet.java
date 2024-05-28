@@ -1,6 +1,5 @@
 /*      Remote player waypoints for Xaero's Map
         Copyright (C) 2024  Leander Knüttel
-        (some parts of this file are originally from "RemotePlayers" by ewpratten)
 
         This program is free software: you can redistribute it and/or modify
         it under the terms of the GNU General Public License as published by
@@ -15,19 +14,28 @@
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <https://www.gnu.org/licenses/>.*/
 
+
 package de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates;
 
-/**
- * JSON object from dynmap API. Send in update requests
- */
-public class DynmapUpdate {
-    public static class Player {
-        public String account;
-        public String world;
+import java.util.Map;
+
+
+public class BlueMapMarkerSet {
+    public static class Marker {
+        public String type;
+        public String label;
+        public Position position;
+        public int sorting;
+        public boolean listed;
+    }
+    public static class Position {
         public float x;
         public float y;
         public float z;
     }
-
-    public Player[] players;
+    public String label;
+    public boolean toggleable;
+    public boolean defaultHidden;
+    public int sorting;
+    public Map<String, Marker> markers;
 }
