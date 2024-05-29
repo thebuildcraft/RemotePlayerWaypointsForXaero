@@ -37,8 +37,8 @@ And make sure to set the "map-type" correctly!
 - Xaero's Worldmap
 
 ### Massive thanks to
-- @ewpratten for making [RemotePlayers](https://github.com/ewpratten/remoteplayers) which this mod was originally based on
-- @MeerBiene for having the idea and helping with the AFK-time formatting
-- @eatmyvenom for having the idea and helping with implementing the marker support
+- [ewpratten](https://github.com/ewpratten) for making [RemotePlayers](https://github.com/ewpratten/remoteplayers) which this mod was originally based on
+- [MeerBiene](https://github.com/MeerBiene) for having the idea and helping with the AFK-time formatting
+- [eatmyvenom](https://github.com/eatmyvenom) for having the idea and helping with implementing the marker support
 
 _This mod is not officially affiliated with Dynmap, Bluemap, Squaremap, Pl3xMap or Xaero in any way._
