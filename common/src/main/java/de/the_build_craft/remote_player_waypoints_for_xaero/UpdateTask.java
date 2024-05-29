@@ -226,7 +226,7 @@ public class UpdateTask extends TimerTask {
                 for( WaypointPosition waypointPosition : waypointPositions){
                     if (waypointPosition == null) continue;
                     var d = clientPlayer.getPos().distanceTo(new Vec3d(waypointPosition.x, waypointPosition.y, waypointPosition.z));
-                    if (d < CommonModConfig.Instance.minDistance() || d > CommonModConfig.Instance.maxDistance()) continue;
+                    if (d < CommonModConfig.Instance.minDistanceMarker() || d > CommonModConfig.Instance.maxDistanceMarker()) continue;
                     try {
                         waypointList.add(new FixedWaypoint(waypointPosition));
                     } catch (NullPointerException e) {

@@ -56,6 +56,12 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         @Comment("in m")
         @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
         int maxDistance = 100000;
+        @Comment("in m")
+        @ConfigEntry.BoundedDiscrete(min = 0, max = 20)
+        int minDistanceMarker = 0;
+        @Comment("in m")
+        @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
+        int maxDistanceMarker = 100000;
         public List<ServerEntry> serverEntries = new ArrayList<>();
         @Comment("default Y coordinate for maps that don't provide Y coordinates")
         @ConfigEntry.BoundedDiscrete(min = -100, max = 400)

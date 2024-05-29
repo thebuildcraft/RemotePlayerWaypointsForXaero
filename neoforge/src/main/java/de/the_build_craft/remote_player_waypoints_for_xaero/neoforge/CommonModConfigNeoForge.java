@@ -72,6 +72,16 @@ public class CommonModConfigNeoForge extends CommonModConfig {
     }
 
     @Override
+    public int minDistanceMarker() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.minDistanceMarker;
+    }
+
+    @Override
+    public int maxDistanceMarker() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.maxDistanceMarker;
+    }
+
+    @Override
     public int defaultY() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.defaultY;
     }

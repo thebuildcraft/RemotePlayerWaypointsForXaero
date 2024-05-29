@@ -32,6 +32,8 @@ public abstract class CommonModConfig {
     public abstract int updateDelay();
     public abstract int minDistance();
     public abstract int maxDistance();
+    public abstract int minDistanceMarker();
+    public abstract int maxDistanceMarker();
     public abstract int defaultY();
     public abstract int timeUntilAfk();
     public abstract int unknownAfkStateColor();
