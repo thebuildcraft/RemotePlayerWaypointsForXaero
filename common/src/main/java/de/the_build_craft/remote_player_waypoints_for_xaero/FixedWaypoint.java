@@ -28,14 +28,14 @@ public class FixedWaypoint extends Waypoint {
     }
 
     public FixedWaypoint(int x, int y, int z, String name) {
-        super(x, y, z, name, "SVR", 0, 0, true);
-        String abbrivation = "";
+        super(x, y, z, name, "SVR", CommonModConfig.Instance.markerWaypointColor(), 0, true);
+        StringBuilder abbreviation = new StringBuilder();
         String[] words = name.split("[ _\\-,:;.]");
         for (String word : words) {
             if (word.isEmpty()) continue;
-            abbrivation += word.substring(0,1).toUpperCase();
+            abbreviation.append(word.substring(0, 1).toUpperCase());
         }
 
-        this.setSymbol(abbrivation);
+        this.setSymbol(abbreviation.toString());
     }
 }

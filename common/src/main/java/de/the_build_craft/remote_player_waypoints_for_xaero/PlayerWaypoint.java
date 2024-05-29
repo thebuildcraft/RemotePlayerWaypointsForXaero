@@ -28,6 +28,6 @@ public class PlayerWaypoint extends Waypoint {
     }
 
     public PlayerWaypoint(int x, int y, int z, String name) {
-        super(x, y, z, name, "P", 0, 0, true);
+        super(x, y, z, name, "P", CommonModConfig.Instance.playerWaypointColor(), 0, true);
     }
 }

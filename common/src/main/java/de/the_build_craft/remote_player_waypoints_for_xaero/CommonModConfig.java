@@ -36,6 +36,8 @@ public abstract class CommonModConfig {
     public abstract int timeUntilAfk();
     public abstract int unknownAfkStateColor();
     public abstract int AfkColor();
+    public abstract int playerWaypointColor();
+    public abstract int markerWaypointColor();
     public abstract boolean showAfkTimeInTabList();
     public abstract boolean debugMode();
     public abstract List<String> ignoredServers();
@@ -64,6 +66,28 @@ public abstract class CommonModConfig {
 
             Maptype() {
             }
+        }
+    }
+
+    public enum WaypointColor {
+        Black,
+        DarkBlue,
+        DarkGreen,
+        DarkAqua,
+        DarkRed,
+        DarkPurple,
+        Gold,
+        Gray,
+        DarkGray,
+        Blue,
+        Green,
+        Aqua,
+        Red,
+        LightPurple,
+        Yellow,
+        White;
+
+        WaypointColor(){
         }
     }
 }

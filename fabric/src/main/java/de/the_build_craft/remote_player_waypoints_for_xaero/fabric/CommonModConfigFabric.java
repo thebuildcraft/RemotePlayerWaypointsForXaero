@@ -87,6 +87,16 @@ public class CommonModConfigFabric extends CommonModConfig {
     }
 
     @Override
+    public int playerWaypointColor() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.playerWaypointColor.ordinal();
+    }
+
+    @Override
+    public int markerWaypointColor() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.markerWaypointColor.ordinal();
+    }
+
+    @Override
     public boolean showAfkTimeInTabList() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.showAfkTimeInTabList;
     }

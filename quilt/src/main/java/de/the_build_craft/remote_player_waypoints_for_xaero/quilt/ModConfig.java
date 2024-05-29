@@ -16,6 +16,7 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.quilt;
 
+import de.the_build_craft.remote_player_waypoints_for_xaero.CommonModConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
@@ -66,6 +67,14 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         public int unknownAfkStateColor = 0x606060;
         @ConfigEntry.ColorPicker
         public int AfkColor = 0xFF5500;
+        @ConfigEntry.Gui.EnumHandler(
+                option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON
+        )
+        public CommonModConfig.WaypointColor playerWaypointColor = CommonModConfig.WaypointColor.Black;
+        @ConfigEntry.Gui.EnumHandler(
+                option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON
+        )
+        public CommonModConfig.WaypointColor markerWaypointColor = CommonModConfig.WaypointColor.Gray;
         public boolean showAfkTimeInTabList = true;
         public boolean debugMode = false;
 
