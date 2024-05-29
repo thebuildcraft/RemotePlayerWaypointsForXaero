@@ -29,6 +29,16 @@ public class FixedWaypoint extends Waypoint {
 
     public FixedWaypoint(int x, int y, int z, String name) {
         super(x, y, z, name, "SVR", CommonModConfig.Instance.markerWaypointColor(), 0, true);
+
+        if (name.startsWith("<")) {
+            int i = name.indexOf(">");
+            if (i != (name.length() - 1)) {
+                int j = name.indexOf("<", i);
+                name = name.substring(i + 1, j);
+            }
+        }
+        this.setName(name);
+
         StringBuilder abbreviation = new StringBuilder();
         String[] words = name.split("[ _\\-,:;.]");
         for (String word : words) {
