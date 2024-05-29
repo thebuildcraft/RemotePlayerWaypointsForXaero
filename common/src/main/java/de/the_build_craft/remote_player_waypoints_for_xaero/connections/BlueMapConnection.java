@@ -116,32 +116,53 @@ public class BlueMapConnection extends MapConnection {
 
     @Override
     public PlayerPosition[] getPlayerPositions() throws IOException {
-        URL reqUrl = playerUrls.get(lastWorldIndex);
-        BlueMapPlayerUpdate update = HTTP.makeJSONHTTPRequest(reqUrl, BlueMapPlayerUpdate.class);
         String clientName = mc.player.getName().getString();
         boolean correctWorld = false;
+        BlueMapPlayerUpdate update = null;
 
-        for (var p : update.players){
-            if (Objects.equals(p.name, clientName)){
-                correctWorld = !p.foreign;
-                break;
+        try{
+            update = HTTP.makeJSONHTTPRequest(playerUrls.get(lastWorldIndex), BlueMapPlayerUpdate.class);
+            for (var p : update.players){
+                if (Objects.equals(p.name, clientName)){
+                    correctWorld = !p.foreign;
+                    break;
+                }
             }
+        }
+        catch (Exception ignored){
+            if (CommonModConfig.Instance.debugMode()){
+                mc.inGameHud.getChatHud().addMessage(Text.literal("removed broken link: " + playerUrls.get(lastWorldIndex)));
+            }
+            playerUrls.remove(lastWorldIndex);
+            markerUrls.remove(lastWorldIndex);
         }
         if (!correctWorld){
             for (int i = 0; i < playerUrls.size(); i++) {
-                var u = playerUrls.get(i);
-                update = HTTP.makeJSONHTTPRequest(playerUrls.get(i), BlueMapPlayerUpdate.class);
-                for (var p : update.players){
-                    if (Objects.equals(p.name, clientName)){
-                        correctWorld = !p.foreign;
-                        break;
+                try{
+                    update = HTTP.makeJSONHTTPRequest(playerUrls.get(i), BlueMapPlayerUpdate.class);
+                    for (var p : update.players){
+                        if (Objects.equals(p.name, clientName)){
+                            correctWorld = !p.foreign;
+                            break;
+                        }
                     }
                 }
+                catch (Exception ignored){
+                    if (CommonModConfig.Instance.debugMode()){
+                        mc.inGameHud.getChatHud().addMessage(Text.literal("removed broken link: " + playerUrls.get(i)));
+                    }
+                    playerUrls.remove(i);
+                    markerUrls.remove(i);
+                }
+
                 if (correctWorld) {
                     lastWorldIndex = i;
                     break;
                 }
             }
+        }
+        if ((update == null) || playerUrls.isEmpty()){
+            throw new IllegalStateException("Can't get player positions. All Bluemap links are broken!");
         }
         // Build a list of positions
         PlayerPosition[] positions = new PlayerPosition[update.players.length];
