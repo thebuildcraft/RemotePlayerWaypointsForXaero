@@ -69,6 +69,9 @@ public abstract class MapConnection {
     public abstract PlayerPosition[] getPlayerPositions() throws IOException;
 
     public PlayerPosition[] HandlePlayerPositions(PlayerPosition[] playerPositions){
+        if (mc.player == null) {
+            return new PlayerPosition[0];
+        }
         String clientName = mc.player.getName().getString();
         currentDimension = "";
         for (var p : playerPositions){
