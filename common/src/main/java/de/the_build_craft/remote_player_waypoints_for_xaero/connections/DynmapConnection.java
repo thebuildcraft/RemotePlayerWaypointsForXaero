@@ -33,6 +33,7 @@ import java.util.ArrayList;
  */
 public class DynmapConnection extends MapConnection {
     private String markerStringTemplate = "";
+    public String firstWorldName = "";
     public DynmapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         super(serverEntry, updateTask);
         try {
@@ -78,10 +79,14 @@ public class DynmapConnection extends MapConnection {
                 if (!substring.startsWith("/")){
                     substring = "/" + substring;
                 }
+                if (substring.contains("?")){
+                    int k  = substring.indexOf("?");
+                    substring = substring.substring(0, k);
+                }
                 RemotePlayerWaypointsForXaero.LOGGER.info("configuration link: " + baseURL + substring);
 
                 // Get the first world name. I know it seems random. Just trust me...
-                var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
+                firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
                         URI.create(baseURL + substring).toURL(), DynmapConfiguration.class)).worlds[0].name;
 
                 RemotePlayerWaypointsForXaero.LOGGER.info("firstWorldName: " + firstWorldName);
@@ -123,12 +128,13 @@ public class DynmapConnection extends MapConnection {
             catch (Exception b){
                 try{
                     // Get the first world name. I know it seems random. Just trust me...
-                    var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
+                    firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
                             URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name;
 
                     // Build the url
                     queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
-                    // TODO: implement markers for method 3
+                    markerStringTemplate = baseURL + "/tiles/_markers_/marker_{world}.json";
+
                     // Test the url
                     var c = this.getPlayerPositions();
 
@@ -138,12 +144,13 @@ public class DynmapConnection extends MapConnection {
                 }
                 catch (Exception ignored){
                     // Get the first world name. I know it seems random. Just trust me...
-                    var firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
+                    firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
                             URI.create(baseURL + "/standalone/dynmap_config.json?").toURL(), DynmapConfiguration.class)).worlds[0].name;
 
                     // Build the url
                     queryURL = URI.create(baseURL + "/standalone/world/" + firstWorldName + ".json?").toURL();
-                    // TODO: implement markers for method 4
+                    markerStringTemplate = baseURL + "/tiles/_markers_/marker_{world}.json";
+
                     // Test the url
                     var c = this.getPlayerPositions();
 
@@ -183,11 +190,18 @@ public class DynmapConnection extends MapConnection {
 
     @Override
     public WaypointPosition[] getWaypointPositions() throws IOException {
-        if (markerStringTemplate.isEmpty() || currentDimension.isEmpty()) {
+        String dimension;
+        if (CommonModConfig.Instance.debugMode()){
+            dimension = firstWorldName;
+        }
+        else {
+            dimension = currentDimension;
+        }
+        if (markerStringTemplate.isEmpty() || dimension.isEmpty()) {
             return new WaypointPosition[0];
         }
 
-        DynmapMarkerUpdate update = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", currentDimension)).toURL(), DynmapMarkerUpdate.class);
+        DynmapMarkerUpdate update = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", dimension)).toURL(), DynmapMarkerUpdate.class);
         ArrayList<WaypointPosition> positions = new ArrayList<>();
 
         for (var set : update.sets.values()){
