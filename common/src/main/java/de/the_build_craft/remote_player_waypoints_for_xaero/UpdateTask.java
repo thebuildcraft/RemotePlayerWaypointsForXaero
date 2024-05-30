@@ -132,7 +132,6 @@ public class UpdateTask extends TimerTask {
             }
         }
 
-//        if (CommonModConfig.Instance.debugMode()) mc.inGameHud.getChatHud().addMessage(Text.literal("=========="));
         // Get a list of all player's positions
         PlayerPosition[] playerPositions;
         WaypointPosition[] waypointPositions;
@@ -174,7 +173,7 @@ public class UpdateTask extends TimerTask {
 
         // Skip if the world is null
         if (currentWorld == null) {
-            RemotePlayerWaypointsForXaero.LOGGER.info("WaypointWorld is null, disconnecting from dynmap");
+            RemotePlayerWaypointsForXaero.LOGGER.info("WaypointWorld is null, disconnecting from online map");
             Reset();
             return;
         }
@@ -186,9 +185,7 @@ public class UpdateTask extends TimerTask {
         var waypointList = currentWorld.getSets().get(DEFAULT_PLAYER_SET_NAME).getList();
         var clientPlayer = MinecraftClient.getInstance().player;
         if (clientPlayer == null) return;
-//        if (CommonModConfig.Instance.debugMode()) {
-//            mc.inGameHud.getChatHud().addMessage(Text.literal("before adding waypoints loop"));
-//        }
+
         try {
             synchronized (waypointList) {
                 waypointList.clear();
@@ -196,28 +193,15 @@ public class UpdateTask extends TimerTask {
                 if (CommonModConfig.Instance.enablePlayerWaypoints()){
                     // Add each player to the map
                     for (PlayerPosition playerPosition : playerPositions) {
-//                    if (CommonModConfig.Instance.debugMode()) {
-//                        mc.inGameHud.getChatHud().addMessage(Text.literal("before player null check"));
-//                    }
-                        if (playerPosition == null) {
-                            continue;
-                        }
-
-//                    if (CommonModConfig.Instance.debugMode()) {
-//                        mc.inGameHud.getChatHud().addMessage(Text.literal("after player null check"));
-//                    }
+                        if (playerPosition == null) continue;
 
                         var d = clientPlayer.getPos().distanceTo(new Vec3d(playerPosition.x, playerPosition.y, playerPosition.z));
                         if (d < CommonModConfig.Instance.minDistance() || d > CommonModConfig.Instance.maxDistance()) continue;
-
-//                    if (CommonModConfig.Instance.debugMode()) {
-//                        mc.inGameHud.getChatHud().addMessage(Text.literal("player after other checks"));
-//                    }
                         // Add waypoint for the player
                         try {
                             waypointList.add(new PlayerWaypoint(playerPosition));
                         } catch (NullPointerException e) {
-                            RemotePlayerWaypointsForXaero.LOGGER.warn("cant add waypoint");
+                            RemotePlayerWaypointsForXaero.LOGGER.warn("can't add player waypoint");
                             e.printStackTrace();
                         }
                     }
@@ -225,12 +209,14 @@ public class UpdateTask extends TimerTask {
 
                 for( WaypointPosition waypointPosition : waypointPositions){
                     if (waypointPosition == null) continue;
+
                     var d = clientPlayer.getPos().distanceTo(new Vec3d(waypointPosition.x, waypointPosition.y, waypointPosition.z));
                     if (d < CommonModConfig.Instance.minDistanceMarker() || d > CommonModConfig.Instance.maxDistanceMarker()) continue;
+                    // Add waypoint for the marker
                     try {
                         waypointList.add(new FixedWaypoint(waypointPosition));
                     } catch (NullPointerException e) {
-                        RemotePlayerWaypointsForXaero.LOGGER.warn("cant add waypoint");
+                        RemotePlayerWaypointsForXaero.LOGGER.warn("can't add marker waypoint");
                         e.printStackTrace();
                     }
                 }
