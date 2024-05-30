@@ -18,7 +18,8 @@
 package de.the_build_craft.remote_player_waypoints_for_xaero.connections;
 
 import de.the_build_craft.remote_player_waypoints_for_xaero.*;
-import de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates.BlueMapUpdate;
+import de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates.BlueMapMarkerSet;
+import de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates.BlueMapPlayerUpdate;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -28,15 +29,21 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+
+import com.google.common.reflect.TypeToken;
+import java.lang.reflect.Type;
 
 public class BlueMapConnection extends MapConnection {
     public int lastWorldIndex;
-    public List<URL> urls;
+    public List<URL> playerUrls;
+    public List<URL> markerUrls;
 
     public BlueMapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         super(serverEntry, updateTask);
-        urls = new ArrayList<>();
+        playerUrls = new ArrayList<>();
+        markerUrls = new ArrayList<>();
         try {
             generateLinks(serverEntry, false);
         }
@@ -60,13 +67,21 @@ public class BlueMapConnection extends MapConnection {
         // Get config and build the urls
         for (var w : ((BlueMapConfiguration) HTTP.makeJSONHTTPRequest(
                 URI.create(baseURL + "/settings.json?").toURL(), BlueMapConfiguration.class)).maps){
-            urls.add(URI.create(baseURL + "/maps/" + w + "/live/players.json?").toURL());
+            playerUrls.add(URI.create(baseURL + "/maps/" + w + "/live/players.json?").toURL());
+            markerUrls.add(URI.create(baseURL + "/maps/" + w + "/live/markers.json?").toURL());
         }
 
         // Test the urls
         var a = this.getPlayerPositions();
 
-        for (var url : urls){
+        for (var url : playerUrls){
+            RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + url);
+            if (CommonModConfig.Instance.debugMode()){
+                mc.inGameHud.getChatHud().addMessage(Text.literal("new link: " + url));
+            }
+        }
+
+        for (var url : markerUrls){
             RemotePlayerWaypointsForXaero.LOGGER.info("new link: " + url);
             if (CommonModConfig.Instance.debugMode()){
                 mc.inGameHud.getChatHud().addMessage(Text.literal("new link: " + url));
@@ -75,44 +90,91 @@ public class BlueMapConnection extends MapConnection {
     }
 
     @Override
-    public PlayerPosition[] getPlayerPositions() throws IOException {
-        BlueMapUpdate update = HTTP.makeJSONHTTPRequest(urls.get(lastWorldIndex), BlueMapUpdate.class);
-        String clientName = mc.player.getName().getString();
-        boolean correctWorld = false;
+    public WaypointPosition[] getWaypointPositions() throws IOException {
+        Type apiResponseType = new TypeToken<Map<String, BlueMapMarkerSet>>() {}.getType();
+        URL reqUrl = markerUrls.get(lastWorldIndex);
+        Map<String, BlueMapMarkerSet> markerSets = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
 
-        for (var p : update.players){
-            if (Objects.equals(p.name, clientName)){
-                correctWorld = !p.foreign;
-                break;
+        ArrayList<WaypointPosition> positions = new ArrayList<>();
+
+        for (var m : markerSets.entrySet()){
+            if (CommonModConfig.Instance.debugMode()){
+                mc.inGameHud.getChatHud().addMessage(Text.literal("===================================="));
+                mc.inGameHud.getChatHud().addMessage(Text.literal("markerSet: " + m.getKey()));
+            }
+
+            for(BlueMapMarkerSet.Marker marker : m.getValue().markers.values()){
+                if (Objects.equals(marker.type, "poi") || Objects.equals(marker.type, "html")){
+                    BlueMapMarkerSet.Position pos = marker.position;
+                    positions.add(new WaypointPosition(marker.label, Math.round(pos.x), Math.round(pos.y), Math.round(pos.z)));
+                }
             }
         }
+
+        return positions.toArray(new WaypointPosition[0]);
+    }
+
+    @Override
+    public PlayerPosition[] getPlayerPositions() throws IOException {
+        String clientName = mc.player.getName().getString();
+        boolean correctWorld = false;
+        BlueMapPlayerUpdate update = null;
+
+        try{
+            update = HTTP.makeJSONHTTPRequest(playerUrls.get(lastWorldIndex), BlueMapPlayerUpdate.class);
+            for (var p : update.players){
+                if (Objects.equals(p.name, clientName)){
+                    correctWorld = !p.foreign;
+                    break;
+                }
+            }
+        }
+        catch (Exception ignored){
+            if (CommonModConfig.Instance.debugMode()){
+                mc.inGameHud.getChatHud().addMessage(Text.literal("removed broken link: " + playerUrls.get(lastWorldIndex)));
+            }
+            playerUrls.remove(lastWorldIndex);
+            markerUrls.remove(lastWorldIndex);
+        }
         if (!correctWorld){
-            for (int i = 0; i < urls.size(); i++) {
-                var u = urls.get(i);
-                update = HTTP.makeJSONHTTPRequest(urls.get(i), BlueMapUpdate.class);
-                for (var p : update.players){
-                    if (Objects.equals(p.name, clientName)){
-                        correctWorld = !p.foreign;
-                        break;
+            for (int i = 0; i < playerUrls.size(); i++) {
+                try{
+                    update = HTTP.makeJSONHTTPRequest(playerUrls.get(i), BlueMapPlayerUpdate.class);
+                    for (var p : update.players){
+                        if (Objects.equals(p.name, clientName)){
+                            correctWorld = !p.foreign;
+                            break;
+                        }
                     }
                 }
+                catch (Exception ignored){
+                    if (CommonModConfig.Instance.debugMode()){
+                        mc.inGameHud.getChatHud().addMessage(Text.literal("removed broken link: " + playerUrls.get(i)));
+                    }
+                    playerUrls.remove(i);
+                    markerUrls.remove(i);
+                }
+
                 if (correctWorld) {
                     lastWorldIndex = i;
                     break;
                 }
             }
         }
+        if ((update == null) || playerUrls.isEmpty()){
+            throw new IllegalStateException("Can't get player positions. All Bluemap links are broken!");
+        }
         // Build a list of positions
         PlayerPosition[] positions = new PlayerPosition[update.players.length];
         if (correctWorld){
             for (int i = 0; i < update.players.length; i++) {
-                BlueMapUpdate.Player player = update.players[i];
+                BlueMapPlayerUpdate.Player player = update.players[i];
                 positions[i] = new PlayerPosition(player.name, Math.round(player.position.x), Math.round(player.position.y), Math.round(player.position.z), player.foreign ? "foreign" : "thisWorld");
             }
         }
         else {
             for (int i = 0; i < update.players.length; i++) {
-                BlueMapUpdate.Player player = update.players[i];
+                BlueMapPlayerUpdate.Player player = update.players[i];
                 positions[i] = new PlayerPosition(player.name, Math.round(player.position.x), Math.round(player.position.y), Math.round(player.position.z), "unknown");
             }
         }

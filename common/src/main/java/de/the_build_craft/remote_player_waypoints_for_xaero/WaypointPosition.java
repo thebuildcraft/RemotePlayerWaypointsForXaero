@@ -1,6 +1,6 @@
 /*      Remote player waypoints for Xaero's Map
         Copyright (C) 2024  Leander Knüttel
-        (this file is originally from "RemotePlayers" by ewpratten)
+        (some parts of this file are originally from "RemotePlayers" by ewpratten)
 
         This program is free software: you can redistribute it and/or modify
         it under the terms of the GNU General Public License as published by
@@ -17,17 +17,23 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero;
 
-import xaero.common.minimap.waypoints.Waypoint;
-
 /**
- * A wrapper to improve creating temp waypoints for players
+ * A marker's name and position
  */
-public class PlayerWaypoint extends Waypoint {
-    public PlayerWaypoint(PlayerPosition player) {
-        this(player.x, player.y, player.z, player.player);
+public class WaypointPosition {
+    public final String name;
+    public final int x;
+    public final int y;
+    public final int z;
+
+    public WaypointPosition(String name, int x, int y, int z) {
+        this.name = name;
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
-    public PlayerWaypoint(int x, int y, int z, String name) {
-        super(x, y, z, name, "P", CommonModConfig.Instance.playerWaypointColor(), 0, true);
+    public boolean CompareCords(WaypointPosition otherPosition){
+        return (this.x == otherPosition.x) && (this.y == otherPosition.y) && (this.z == otherPosition.z);
     }
 }

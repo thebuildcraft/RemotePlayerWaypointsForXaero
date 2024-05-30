@@ -17,17 +17,27 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates;
 
+import java.util.Map;
+
 /**
  * JSON object from dynmap API. Send in update requests
  */
-public class DynmapUpdate {
-    public static class Player {
-        public String account;
-        public String world;
-        public float x;
-        public float y;
-        public float z;
+public class DynmapMarkerUpdate {
+    public static class Set {
+        public static class Marker {
+            public boolean markup;
+            public float x;
+            public String icon;
+            public float y;
+            public String dim;
+            public float z;
+            public String label;
+        }
+
+        public boolean hide;
+        public String label;
+        public Map<String, Marker> markers;
     }
 
-    public Player[] players;
+    public Map<String, Set> sets;
 }
