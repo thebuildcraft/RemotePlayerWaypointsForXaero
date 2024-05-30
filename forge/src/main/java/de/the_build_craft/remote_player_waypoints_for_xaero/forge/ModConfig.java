@@ -16,6 +16,7 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.forge;
 
+import de.the_build_craft.remote_player_waypoints_for_xaero.CommonModConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
@@ -44,6 +45,8 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
     )
     public static class ModuleA implements ConfigData {
         public boolean enabled = true;
+        public boolean enablePlayerWaypoints = true;
+        public boolean enableMarkerWaypoints = true;
         @Comment("in ms")
         @ConfigEntry.BoundedDiscrete(min = 2000, max = 10000)
         public int updateDelay = 2000;
@@ -53,6 +56,12 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         @Comment("in m")
         @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
         int maxDistance = 100000;
+        @Comment("in m")
+        @ConfigEntry.BoundedDiscrete(min = 0, max = 20)
+        int minDistanceMarker = 0;
+        @Comment("in m")
+        @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
+        int maxDistanceMarker = 100000;
         public List<ServerEntry> serverEntries = new ArrayList<>();
         @Comment("default Y coordinate for maps that don't provide Y coordinates")
         @ConfigEntry.BoundedDiscrete(min = -100, max = 400)
@@ -64,6 +73,14 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         public int unknownAfkStateColor = 0x606060;
         @ConfigEntry.ColorPicker
         public int AfkColor = 0xFF5500;
+        @ConfigEntry.Gui.EnumHandler(
+                option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON
+        )
+        public CommonModConfig.WaypointColor playerWaypointColor = CommonModConfig.WaypointColor.Black;
+        @ConfigEntry.Gui.EnumHandler(
+                option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON
+        )
+        public CommonModConfig.WaypointColor markerWaypointColor = CommonModConfig.WaypointColor.Gray;
         public boolean showAfkTimeInTabList = true;
         public boolean debugMode = false;
 

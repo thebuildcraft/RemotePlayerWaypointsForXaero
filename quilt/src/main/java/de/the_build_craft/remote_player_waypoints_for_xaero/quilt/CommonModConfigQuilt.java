@@ -42,6 +42,16 @@ public class CommonModConfigQuilt extends CommonModConfig {
     }
 
     @Override
+    public boolean enablePlayerWaypoints() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.enablePlayerWaypoints;
+    }
+
+    @Override
+    public boolean enableMarkerWaypoints() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.enableMarkerWaypoints;
+    }
+
+    @Override
     public int updateDelay() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.updateDelay;
     }
@@ -54,6 +64,16 @@ public class CommonModConfigQuilt extends CommonModConfig {
     @Override
     public int maxDistance() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.maxDistance;
+    }
+
+    @Override
+    public int minDistanceMarker() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.minDistanceMarker;
+    }
+
+    @Override
+    public int maxDistanceMarker() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.maxDistanceMarker;
     }
 
     @Override
@@ -74,6 +94,16 @@ public class CommonModConfigQuilt extends CommonModConfig {
     @Override
     public int AfkColor() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.AfkColor;
+    }
+
+    @Override
+    public int playerWaypointColor() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.playerWaypointColor.ordinal();
+    }
+
+    @Override
+    public int markerWaypointColor() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.markerWaypointColor.ordinal();
     }
 
     @Override

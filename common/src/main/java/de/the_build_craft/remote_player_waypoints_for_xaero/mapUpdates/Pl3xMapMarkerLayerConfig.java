@@ -17,16 +17,6 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.mapUpdates;
 
-public class BlueMapUpdate {
-    public Player[] players;
-    public static class Player{
-        public String name;
-        public boolean foreign;
-        public Position position;
-        public static class Position{
-            public float x;
-            public float y;
-            public float z;
-        }
-    }
+public class Pl3xMapMarkerLayerConfig {
+    public String key;
 }
