@@ -33,10 +33,7 @@ import xaero.common.minimap.waypoints.WaypointWorld;
 import xaero.common.minimap.waypoints.WaypointsManager;
 
 import java.io.IOException;
-import java.util.ConcurrentModificationException;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * Threaded task that is run once every few seconds to fetch data from the online map
@@ -54,6 +51,8 @@ public class UpdateTask extends TimerTask {
     private boolean cantFindServerErrorWasShown = false;
     private boolean cantGetPlayerPositionsErrorWasShown = false;
     public boolean linkBrokenErrorWasShown = false;
+
+    private String currentServerIP = "";
 
     @Override
     public void run() {
@@ -79,6 +78,12 @@ public class UpdateTask extends TimerTask {
 
         // Get the IP of this server
         String serverIP = mc.getCurrentServerEntry().address.toLowerCase(Locale.ROOT);
+
+        if (!Objects.equals(currentServerIP, serverIP)){
+            currentServerIP = "";
+            Reset();
+            RemotePlayerWaypointsForXaero.LOGGER.info("Server ip has changed!");
+        }
 
         if (RemotePlayerWaypointsForXaero.getConnection() == null){
             try {
@@ -131,6 +136,7 @@ public class UpdateTask extends TimerTask {
                 return;
             }
         }
+        currentServerIP = serverIP;
 
         // Get a list of all player's positions
         PlayerPosition[] playerPositions;
@@ -168,8 +174,13 @@ public class UpdateTask extends TimerTask {
             return;
         }
 
-        // Access the current waypoint world
-        WaypointWorld currentWorld = XaeroMinimapSession.getCurrentSession().getWaypointsManager().getCurrentWorld();
+        WaypointWorld currentWorld = null;
+        try{
+            // Access the current waypoint world
+            currentWorld = XaeroMinimapSession.getCurrentSession().getWaypointsManager().getCurrentWorld();
+        }
+        catch (Exception ignored){
+        }
 
         // Skip if the world is null
         if (currentWorld == null) {
