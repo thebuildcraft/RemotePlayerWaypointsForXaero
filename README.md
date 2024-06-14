@@ -1,4 +1,4 @@
-<img src="fabric/src/main/resources/assets/remote_player_waypoints_for_xaero/icon.png" alt="icon" style="float: none; margin-right: 10px;" width="200" height="auto" />
+<img src="common/src/main/resources/assets/remote_player_waypoints_for_xaero/icon.png" alt="icon" style="float: none; margin-right: 10px;" width="200" height="auto" />
 
 # Remote player waypoints for Xaero's Map
 
@@ -40,5 +40,6 @@ And make sure to set the "map-type" correctly!
 - [ewpratten](https://github.com/ewpratten) for making [RemotePlayers](https://github.com/ewpratten/remoteplayers) which this mod was originally based on
 - [MeerBiene](https://github.com/MeerBiene) for having the idea and helping with the AFK-time formatting
 - [eatmyvenom](https://github.com/eatmyvenom) for having the idea and helping with implementing the marker support
+- [James Seibel](https://gitlab.com/jeseibel) for making Distance Horizons: I used a lot of the multi-version build scripts from there.
 
 _This mod is not officially affiliated with Dynmap, Bluemap, Squaremap, Pl3xMap or Xaero in any way._

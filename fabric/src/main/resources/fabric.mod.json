@@ -1,36 +1,47 @@
 {
-  "schemaVersion": 1,
-  "id": "remote_player_waypoints_for_xaero",
-  "version": "${version}",
-  "name": "Remote Player Waypoints For Xaero's Map",
-  "description": "Shows player positions from Dynmap, Bluemap and other online maps in game using Xaeros Minimap and Worldmap.",
-  "authors": [
-    "the_build_craft"
-  ],
-  "contact": {
-    "homepage": "https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero",
-    "issues": "https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero/issues",
-    "sources": "https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero"
-  },
-  "license": "GPL-3.0",
-  "icon": "assets/remote_player_waypoints_for_xaero/icon.png",
-  "environment": "client",
-  "entrypoints": {
-    "client": [
-      "de.the_build_craft.remote_player_waypoints_for_xaero.fabric.RemotePlayerWaypointsForXaeroFabric"
+    "schemaVersion": 1,
+    "id": "${mod_id}",
+    "version": "${version}",
+    
+    "name": "${mod_name}",
+    "description": "${description}",
+    "authors": $authors,
+    
+    "contact": {
+        "homepage": "${homepage}",
+        "sources": "${source}",
+        "issues": "${issues}"
+    },
+    
+    "license": "${mod_license}",
+    "icon": "assets/${mod_id}/icon.png",
+    
+    "accessWidener": "${mod_id}.accesswidener",
+    
+    "environment": "*",
+    "entrypoints": {
+        "client": [
+            "${group}.fabric.FabricMain"
+        ],
+        "server": [
+            "${group}.fabric.FabricMain"
+        ],
+        "modmenu": [
+            "${group}.fabric.wrappers.ModMenuIntegration"
+        ]
+    },
+    
+    "mixins": [
+        "${mod_id}.fabric.mixins.json"
     ],
-    "modmenu": [
-      "de.the_build_craft.remote_player_waypoints_for_xaero.fabric.ModMenuIntegration"
-    ]
-  },
-  "mixins": [
-    "remote_player_waypoints_for_xaero.mixins.json"
-  ],
-  "depends": {
-    "fabricloader": ">=0.15.0",
-    "minecraft": ">=1.20.2 <=1.20.4",
-    "java": ">=17",
-    "fabric-api": "*",
-    "cloth-config": ">=12.0.110"
-  }
+    
+    "depends": {
+        "fabricloader": "*",
+        "minecraft": $compatible_minecraft_versions,
+        "java": ">=${java_version}",
+        "cloth-config": "*"
+    },
+    
+    "breaks": $fabric_incompatibility_list,
+    "recommends": $fabric_recommend_list
 }

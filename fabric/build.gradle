@@ -1,62 +1,306 @@
-plugins {
-    id 'com.github.johnrengelman.shadow'
-}
+/*
+ *    This file is part of the Remote player waypoints for Xaero's Map mod
+ *    licensed under the GNU GPL v3 License.
+ *    (some parts of this file are originally from the Distant Horizons mod by James Seibel)
+ *
+ *    Copyright (C) 2024  Leander Knüttel
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * file changed by: Leander Knüttel
+ * date: 14.06.2024
+ */
 
-architectury {
-    platformSetupLoomIde()
-    fabric()
+plugins {
+    id "fabric-loom" version "1.6-SNAPSHOT"
 }
 
 loom {
-    accessWidenerPath = project(":common").loom.accessWidenerPath
+    accessWidenerPath = project(":common").file("src/main/resources/${accessWidenerVersion}.${mod_id}.accesswidener")
+
+    mixin {
+        useLegacyMixinAp = false
+    }
+    // "runs" isn't required, but when we do need it then it can be useful
+    runs {
+        client {
+            client()
+            setConfigName("Fabric Client")
+            ideConfigGenerated(true)
+            runDir("../run")
+        }
+        server {
+            server()
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("../run")
+        }
+    }
+}
+
+remapJar {
+    inputFile = shadowJar.archiveFile
+    dependsOn shadowJar
 }
 
 configurations {
-    common {
-        canBeResolved = true
-        canBeConsumed = false
-    }
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
-    developmentFabric.extendsFrom common
+    // The addModJar basically embeds the mod to the built jar
+    addModJar
+    include.extendsFrom addModJar
+    modImplementation.extendsFrom addModJar
+}
 
-    // Files in this configuration will be bundled into your mod using the Shadow plugin.
-    // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
-    shadowBundle {
-        canBeResolved = true
-        canBeConsumed = false
-    }
+def addMod(path, enabled) {
+    if (enabled == "2")
+        dependencies { modImplementation(path) }
+    else if (enabled == "1")
+        dependencies { modCompileOnly(path) }
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+    mappings loom.layered() {
+        // Mojmap mappings
+        officialMojangMappings()
+        // Parchment mappings (it adds parameter mappings & javadoc)
+        parchment("org.parchmentmc.data:parchment-${rootProject.parchment_version}@zip")
+    }
+    // Fabric loader
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 
-    common(project(path: ':common', configuration: 'namedElements')) { transitive false }
-    shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
+    // Mod Menu
+    if (rootProject.modmenu_version != "") {
+        modImplementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}")
+    }
 
-    modApi("me.shedaniel.cloth:cloth-config-fabric:12.0.110") {
+    modApi("me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_config_api_fabric_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-    modApi "com.terraformersmc:modmenu:8.0.0"
+
+    modImplementation "maven.modrinth:xaeros-world-map:${rootProject.xaeros_world_map_fabric_version}"
+    modImplementation "maven.modrinth:xaeros-minimap:${rootProject.xaeros_minimap_fabric_version}"
+
+    //use addModJar() to include a library
+    //addModJar(fabricApi.module("fabric-lifecycle-events-v1", rootProject.fabric_api_version))
+
+    //addMod can be used, to control it via the version.property
+    //addMod("example.maven:some_mod:${rootProject.some_mod_version}", rootProject.enable_some_mod)
+}
+
+task deleteResources(type: Delete) {
+    delete file("build/resources/main")
 }
 
 processResources {
-    inputs.property 'version', project.version
+    dependsOn(copyCoreResources)
+    dependsOn(copyCommonLoaderResources)
+}
 
-    filesMatching('fabric.mod.json') {
-        expand version: project.version
+runClient {
+    dependsOn(copyCoreResources)
+    dependsOn(copyCommonLoaderResources)
+//    jvmArgs([ "-XX:-OmitStackTraceInFastThrow", minecraftMemoryJavaArg ])
+    finalizedBy(deleteResources)
+}
+
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+publisher {
+    // Setup the required API keys. You only need to define the keys for
+    // the platforms you plan on uploading to
+    apiKeys {
+        // Modrinth Token
+        modrinth System.getenv("MODRINTH_TOKEN")
+        // Curseforge Token
+        curseforge System.getenv("CURSE_TOKEN")
+        // GitHub Token
+        //github System.getenv("GITHUB_TOKEN") TODO: useless right now, because one would rather upload all the jars into one release
     }
-}
 
-shadowJar {
-    configurations = [project.configurations.shadowBundle]
-    archiveClassifier = 'dev-shadow'
-}
+    // Enable Debug mode. When enabled, no files will actually be uploaded
+    setDebug(publish_debug_mode.toBoolean())
 
-remapJar {
-    //input.set shadowJar.archiveFile
-    inputFile.set shadowJar.archiveFile
+    // Modrinth Project ID
+    setModrinthID(modrinth_id)
+
+    // Curseforge Project ID
+    setCurseID(curseforge_id)
+
+    // Type of release. beta, alpha or release
+    // You can also use VersionType.BETA, VersionType.ALPHA or VersionType.RELEASE
+    setVersionType(release_type)
+
+    // Changelog. This can be a file, string, OR, gist/github url
+    // For example: markdown.md, or "This is my changelog"
+    // Or: https://raw.githubusercontent.com/hypherionmc/changelogs/changelog.md
+    // Or https://gist.githubusercontent.com/hypherionmc/92f825d3c9337964cc77c9c8c9bf65e6/raw/ceeaaee5b98c688a23398864fe480b84796a1651/test_gist.md
+    setChangelog(file("$rootDir/docs/changelogs/${mod_version}.md").text.trim())
+
+    // Required for Modrinth/GitHub
+    setProjectVersion(mod_version)
+
+    boolean quiltCompatible
+    if (rootProject.hasProperty("fabric_is_quilt_compatible")){
+        quiltCompatible = rootProject.fabric_is_quilt_compatible.toBoolean()
+    }
+    else {
+        quiltCompatible = default_quilt_compatibility.toBoolean()
+    }
+
+    // Fancy display name for the upload.
+    // Will default to the project version if not set
+    String DisplayName
+    if (quiltCompatible) {
+        DisplayName = "[Fabric & Quilt | ${rootProject.file_name}] ${mod_version}"
+    }
+    else {
+        DisplayName = "[Fabric | ${rootProject.file_name}] ${mod_version}"
+    }
+    setDisplayName(DisplayName)
+
+    String gameVersionsString = rootProject.compatible_minecraft_versions
+    def gameVersions = gameVersionsString.replace("[", "").replace("]", "").replaceAll(" ", "").replaceAll("\"", "").split(",")
+    // The supported game versions
+    setGameVersions(gameVersions)
+
+    // The modloaders your upload supports.
+    // This can also be an Enum from ModLoader,
+    // like setLoaders(ModLoader.FABRIC, ModLoader.FORGE)
+    if (quiltCompatible) {
+        setLoaders("fabric", "quilt")
+    }
+    else {
+        setLoaders("fabric")
+    }
+
+    // The new Curseforge Environment tag. Optional
+    // Valid values are "server", "client" or "both"
+    // You can also use CurseEnvironment.BOTH, or CurseEnvironment.SERVER or CurseEnvironment.CLIENT
+    setCurseEnvironment(curse_environment)
+
+    // The file to be uploaded. This can be a file, task, or string.
+    // setArtifact("build/libs/mymod.jar")
+    // setArtifact(jar.getArchiveFile().get())
+    // If this is a task, the task specified will be executed before publishing
+    //setArtifact(remapJar)
+    setArtifact("build/libs/${mod_id}-fabric-${rootProject.versionStr}.jar")
+
+    // Override the artifact uploaded to modrinth
+    // setPlatformArtifact(Platform.Modrinth, "build/libs/mymod.jar")
+    // setPlatformArtifact(Platform.Modrinth, jar.getArchiveFile().get())
+    // If this is a task, the task specified will be executed before publishing
+    // Valid platforms are modrinth, curseforge and github
+    //setPlatformArtifact("modrinth", modrinthJar)
+
+    // Disable the built in Fractureizer scanner
+    setDisableMalwareScanner(false)
+
+    // Add supported java versions. Currently only used by CurseForge
+    // Supports anything that can be parsed using JavaVersion.toVersion()
+    setJavaVersions(new Integer[]{rootProject.java_version as Integer})
+
+    // Safety check to check if the artifact contains a valid mod metadata entry,
+    // which could possibly mean that the jar is empty
+    setDisableEmptyJarCheck(false)
+
+    // Additional files to upload. Same as artifact, this can be a task, file or string
+    addAdditionalFile("build/libs/${mod_id}-fabric-${rootProject.versionStr}-sources.jar")
+
+    // Additional files to upload with a custom display name and changelog.
+    // Currently only supported on Curseforge
+    //addAdditionalFile {
+    //    // File, Task or String
+    //    artifact jar
+    //    displayName "Some Name"
+    //    changelog "Hello Changelog"
+    //}
+
+    // GitHub options
+    github {
+        // GitHub repo to publish to. Overrides githubRepo
+        repo(mod_source)
+
+        // Tag to use for GitHub release. Defaults to version
+        tag("v${mod_version}") //FIXME: doesn't work!
+
+        // Whether to create a tag for the GitHub release, if one doesn't exist yet. Defaults to true
+        createTag(true)
+
+        // Whether to create the GitHub release if it doesn't exist yet. Defaults to true
+        createRelease(true)
+
+        // Whether to update the GitHub release if it already exists. Defaults to true
+        updateRelease(true)
+
+        // Whether the release should be left as an unpublished draft.
+        //
+        // If enabled, newly created releases and existing drafts will not be published.
+        // Instead, a draft release is used.
+        //
+        // If disabled, the release will be published.
+        // This option does not allow converting a published release to a draft.
+        //
+        // Defaults to false
+        draft(github_draft.toBoolean())
+
+        // The commitish ref the tag should target (ignored when tag already exists)
+        target(github_target)
+
+        displayName(DisplayName)
+    }
+
+// Modrinth Dependencies.
+// Accepts a slug or id
+    modrinthDepends {
+        // Multiple required dependencies
+        //required "fabric-api", "craterlib"
+
+        // Single dependency
+        required "fabric-api"
+
+        // Optional dependency
+        //optional 'optional-dep'
+
+        // Your mod is not compatible with this mod
+        //incompatible 'breaks-with'
+
+        // Your mod embeds this dependency
+        //embedded 'fabric-api'
+    }
+
+// Curse Dependencies
+    curseDepends {
+        // Multiple required dependencies
+        //required "fabric-api", "craterlib"
+
+        // Single dependency
+        required "fabric-api"
+
+        // Optional dependency
+        //optional 'optional-dep'
+
+        // Your mod is not compatible with this mod
+        //incompatible 'breaks-with'
+
+        // Your mod embeds this dependency
+        //embedded 'fabric-api'
+    }
 }

@@ -1,0 +1,13 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "de.the_build_craft.remote_player_waypoints_for_xaero.mixins",
+    "mixins": [
+    ],
+    "client": [
+        "common.client.PlayerListHudMixin"
+    ],
+    "server": [
+    ],
+    "plugin": "de.the_build_craft.remote_player_waypoints_for_xaero.mixins.neoforge.NeoforgeMixinPlugin"
+}

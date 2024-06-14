@@ -1,17 +1,55 @@
-architectury {
-    common rootProject.enabled_platforms.split(',')
+/*
+ *    This file is part of the Remote player waypoints for Xaero's Map mod
+ *    licensed under the GNU GPL v3 License.
+ *    (some parts of this file are originally from the Distant Horizons mod by James Seibel)
+ *
+ *    Copyright (C) 2024  Leander Knüttel
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * file changed by: Leander Knüttel
+ * date: 14.06.2024
+ */
+
+plugins {
+    id "org.spongepowered.gradle.vanilla" version "0.2.1-SNAPSHOT"
 }
 
-loom {
-    accessWidenerPath = file("src/main/resources/remote_player_waypoints_for_xaero.accesswidener")
+minecraft {
+    accessWideners(project(":common").file("src/main/resources/${accessWidenerVersion}.${rootProject.mod_id}.accesswidener"))
+    version(rootProject.minecraft_version)
 }
 
 dependencies {
-    // We depend on Fabric Loader here to use the Fabric @Environment annotations,
-    // which get remapped to the correct annotations on each platform.
-    // Do NOT use other classes from Fabric Loader.
-    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    // So mixins can be written in common
+    compileOnly group:'org.spongepowered', name:'mixin', version:'0.8.5'
 
-    modImplementation "maven.modrinth:xaeros-world-map:1.38.4_Fabric_1.20.2"
-    modImplementation "maven.modrinth:xaeros-minimap:24.1.1_Fabric_1.20.2"
+    compileOnly "maven.modrinth:xaeros-world-map:${rootProject.xaeros_world_map_fabric_version}"
+    compileOnly "maven.modrinth:xaeros-minimap:${rootProject.xaeros_minimap_fabric_version}"
 }
+
+publishing {
+    publications {
+        mavenCommon(MavenPublication) {
+            artifactId = rootProject.mod_id
+            from components.java
+        }
+    }
+
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        // Add repositories to publish to here.
+    }
+}
+

@@ -1,16 +1,124 @@
+/*
+ *    This file is part of the Remote player waypoints for Xaero's Map mod
+ *    licensed under the GNU GPL v3 License.
+ *    (some parts of this file are originally from the Distant Horizons mod by James Seibel)
+ *
+ *    Copyright (C) 2024  Leander Knüttel
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * file changed by: Leander Knüttel
+ * date: 09.06.2024
+ */
+
 pluginManagement {
     repositories {
-        maven { url "https://maven.fabricmc.net/" }
-        maven { url "https://maven.architectury.dev/" }
-        maven { url "https://files.minecraftforge.net/maven/" }
+        maven {
+            name "Fabric"
+            url "https://maven.fabricmc.net/"
+        }
+        maven {
+            name "Forge"
+            url "https://maven.minecraftforge.net/"
+        }
+        maven {
+            name "NeoForge Releases"
+            url "https://maven.neoforged.net/releases/"
+        }
+        maven {
+            name "NeoForge Snapshot"
+            url "https://maven.neoforged.net/snapshots/"
+        }
+        maven {
+            name "Architectury (Better Forge because regular Forge is annoying)"
+            url "https://maven.architectury.dev/"
+        }
+        maven {
+            name "Quilt"
+            url "https://maven.quiltmc.org/repository/release"
+        }
+        maven { // Used for Vanilla Minecraft's libraries
+            name "Sponge"
+            url "https://repo.spongepowered.org/repository/maven-public/"
+        }
+        maven {
+            name "ParchmentMC"
+            url "https://maven.parchmentmc.org"
+        }
+        maven {
+            name "Spigot"
+            url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+        }
+        maven { // Used for ModPublisher
+            name "Firstdark"
+            url "https://maven.firstdark.dev/releases"
+        }
+        mavenCentral()
         gradlePluginPortal()
+        
+        // Not needed, but useful for debugging gradle plugins
+        mavenLocal()
     }
 }
 
-rootProject.name = 'remote_player_waypoints_for_xaero'
+/** Loads the VersionProperties field for the currently selected Minecraft version. */
+def loadProperties() {
+    def defaultMcVersion = "1.20.4"
 
-include 'common'
-include 'fabric'
-include 'forge'
-include 'neoforge'
-include 'quilt'
+    def mcVersion = ""
+    def mcVers = fileTree("versionProperties").files.name // Get all the files in "versionProperties"
+    mcVers.addAll(fileTree("versionProperties_disabled").files.name) //also include the disabled version properties (they will not be built)
+    for (int i = 0; i < mcVers.size(); i++) {
+        mcVers[i] = mcVers[i].replaceAll("\\.properties", "") // As we are getting the file names, we should remove the ".properties" at the end to get the versions
+    }
+
+    mcVers.sort() // Sort so it always goes from oldest to newest
+
+    int mcIndex = -1
+    println "Avalible MC versions: ${mcVers}"
+    if (hasProperty("mcVer")) {
+        mcVersion = mcVer
+        mcIndex = mcVers.indexOf(mcVer)
+    }
+    if (mcIndex == -1) {
+        println "No mcVer set or the set mcVer is invalid! Defaulting to ${defaultMcVersion}."
+        println "Tip: Use -PmcVer=\"${defaultMcVersion}\" in cmd arg to set mcVer."
+        mcVersion = defaultMcVersion
+        mcIndex = mcVers.indexOf(defaultMcVersion)
+        assert mcIndex != -1
+    }
+
+    println "Loading properties file at " + mcVersion + ".properties"
+    def props = new Properties()
+    props.load(new FileInputStream("$rootDir/versionProperties/"+"$mcVersion"+".properties"))
+
+    props.each { prop ->
+        gradle.ext.set(prop.key, prop.value)
+        // println "Added prop [key:" + prop.key + ", value:" + prop.value + "]"
+    }
+    gradle.ext.mcVers = mcVers
+    gradle.ext.mcIndex = mcIndex
+}
+loadProperties()
+
+// sub-projects
+include("common")
+// Enables or disables the subprojects depending on whats in the versionProperties/mcVer.properties
+for (loader in ((String) gradle.builds_for).split(",")) {
+    def loaderName = loader.strip() // Strip it in case a space is added before or after the comma
+    println "Adding loader " + loaderName
+    include(loaderName)
+}
+
+rootProject.name = "remote_player_waypoints_for_xaero"

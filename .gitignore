@@ -1,49 +1,42 @@
-# gradle
-
-.gradle/
 build/
-out/
-classes/
-output/
-libs/
-
-# eclipse
-
-*.launch
-
-# idea
-
-.idea/
-*.iml
 *.ipr
+run/
 *.iws
-
-# vscode
-
-.settings/
-.settings
-.vscode/
-.vscode
+out/
+*.iml
+.gradle/
+.gradle-cache/
+output/
 bin/
+libs/
+.architectury-transformer/
+
 .classpath
 .project
-
-# macos
-
-*.DS_Store
-
-# minecraft
-
-run/
-
-# java
-
-hs_err_*.log
-replay_*.log
-*.hprof
-*.jfr
-
-# others
-
+.idea/
+classes/
 .metadata
-.architectury-transformer/
+.vscode
+.settings
+*.launch
+hs_err_pid*
+
+**/src/generated/
+Merged/
+# Folder created by the buildAll scripts
+buildAllJars/
+
+# file from notepad++
+*.bak
+
+# file genearated via MC version switching using preprocessor
+build.properties
+
+# Sqlite databases
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+
+# Don't add access transformers to git as they're dynamically generated
+accesstransformer.cfg

@@ -1,64 +1,323 @@
+/*
+ *    This file is part of the Remote player waypoints for Xaero's Map mod
+ *    licensed under the GNU GPL v3 License.
+ *    (some parts of this file are originally from the Distant Horizons mod by James Seibel)
+ *
+ *    Copyright (C) 2024  Leander Knüttel
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * file changed by: Leander Knüttel
+ * date: 14.06.2024
+ */
+
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    // Note: This is only needed for multi-loader projects
+    // The main architectury loom version is set at the start of the root build.gradle
+    id "architectury-plugin" version "3.4-SNAPSHOT"
 }
+
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
 
 architectury {
     platformSetupLoomIde()
     neoForge()
 }
 
-loom {
-    accessWidenerPath = project(":common").loom.accessWidenerPath
-}
-
-
-configurations {
-    common {
-        canBeResolved = true
-        canBeConsumed = false
-    }
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
-    developmentNeoForge.extendsFrom common
-
-    // Files in this configuration will be bundled into your mod using the Shadow plugin.
-    // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
-    shadowBundle {
-        canBeResolved = true
-        canBeConsumed = false
-    }
-}
-
+// TODO this is already defined in the main settings.gradle file, why doesn't it work unless also defined here?
+//  (If compiling does work without this block feel free to remove)
 repositories {
     maven {
-        name = 'NeoForged'
-        url = 'https://maven.neoforged.net/releases'
+        name "Neoforge"
+        url "https://maven.neoforged.net/releases/"
     }
 }
 
-dependencies {
-    neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
+loom {
+    silentMojangMappingsLicense() // Shut the licencing warning
+    accessWidenerPath = project(":common").file("src/main/resources/${accessWidenerVersion}.${mod_id}.accesswidener")
 
-    common(project(path: ':common', configuration: 'namedElements')) { transitive false }
-    shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
-
-    modApi "me.shedaniel.cloth:cloth-config-neoforge:12.0.110"
-}
-
-processResources {
-    inputs.property 'version', project.version
-
-    filesMatching('META-INF/mods.toml') {
-        expand version: project.version
+    mixin {
+        useLegacyMixinAp = false
     }
-}
+    neoForge {
+        //TODO can this all be removed ?????
 
-shadowJar {
-    configurations = [project.configurations.shadowBundle]
-    archiveClassifier = 'dev-shadow'
+        // Access wideners are now defined in the `remapJar.atAccessWideners`
+//        convertAccessWideners = true
+//        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+
+        // Mixins are now defined in the `mods.toml`
+//        mixinConfigs = [
+//                "remote_player_waypoints_for_xaero.mixins.json"
+//        ]
+    }
+    mixin {
+        // Mixins are now defined in the `mods.toml`
+//        mixinConfigs = [
+//                "remote_player_waypoints_for_xaero.mixins.json"
+//        ]
+    }
+
+    // "runs" isn't required, but when we do need it then it can be useful
+    runs {
+        client {
+            client()
+            setConfigName("NeoForge Client")
+            ideConfigGenerated(true)
+            runDir("../run")
+//            vmArgs("-XX:-OmitStackTraceInFastThrow", minecraftMemoryJavaArg)
+        }
+        server {
+            server()
+            setConfigName("NeoForge Server")
+            ideConfigGenerated(true)
+            runDir("../run")
+        }
+    }
 }
 
 remapJar {
-    //input.set shadowJar.archiveFile
-    inputFile.set shadowJar.archiveFile
+    inputFile = shadowJar.archiveFile
+    dependsOn shadowJar
+//    classifier null
+
+    atAccessWideners.add("${rootProject.mod_id}.accesswidener")
+}
+
+configurations {
+    // The addModJar basically embeds the mod to the built jar
+    addModJar
+    include.extendsFrom addModJar
+    modImplementation.extendsFrom addModJar
+}
+
+def addMod(path, enabled) {
+    if (enabled == "2")
+        dependencies { implementation(path) }
+    else if (enabled == "1")
+        dependencies { modCompileOnly(path) }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+    mappings loom.layered() {
+        // Mojmap mappings
+        officialMojangMappings()
+        // Parchment mappings (it adds parameter mappings & javadoc)
+        parchment("org.parchmentmc.data:parchment-${rootProject.parchment_version}@zip")
+    }
+
+    // Neoforge
+    neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
+
+    modApi "me.shedaniel.cloth:cloth-config-neoforge:${rootProject.cloth_config_api_neoforge_version}"
+
+    implementation "maven.modrinth:xaeros-world-map:${rootProject.xaeros_world_map_neoforge_version}"
+    implementation "maven.modrinth:xaeros-minimap:${rootProject.xaeros_minimap_neoforge_version}"
+
+    //use addModJar() to include a library, some_api_version should be in version.property
+    //addModJar(someApi.module("moduleName", rootProject.some_api_version))
+
+    //addMod can be used, to control it via the version.property
+    //addMod("example.maven:some_mod:${rootProject.some_mod_version}", rootProject.enable_some_mod)
+}
+
+task deleteResources(type: Delete) {
+    delete file("build/resources/main")
+}
+
+tasks.register('copyAllResources') {
+    dependsOn(copyCoreResources)
+    dependsOn(copyCommonLoaderResources)
+}
+
+processResources {
+    dependsOn(tasks.named('copyAllResources'))
+}
+
+tasks.named('runClient') {
+    dependsOn(tasks.named('copyAllResources'))
+    finalizedBy(deleteResources)
+}
+
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+publisher {
+    // Setup the required API keys. You only need to define the keys for
+    // the platforms you plan on uploading to
+    apiKeys {
+        // Modrinth Token
+        modrinth System.getenv("MODRINTH_TOKEN")
+        // Curseforge Token
+        curseforge System.getenv("CURSE_TOKEN")
+        // GitHub Token
+        //github System.getenv("GITHUB_TOKEN") TODO: useless right now, because one would rather upload all the jars into one release
+    }
+
+    // Enable Debug mode. When enabled, no files will actually be uploaded
+    setDebug(publish_debug_mode.toBoolean())
+
+    // Modrinth Project ID
+    setModrinthID(modrinth_id)
+
+    // Curseforge Project ID
+    setCurseID(curseforge_id)
+
+    // Type of release. beta, alpha or release
+    // You can also use VersionType.BETA, VersionType.ALPHA or VersionType.RELEASE
+    setVersionType(release_type)
+
+    // Changelog. This can be a file, string, OR, gist/github url
+    // For example: markdown.md, or "This is my changelog"
+    // Or: https://raw.githubusercontent.com/hypherionmc/changelogs/changelog.md
+    // Or https://gist.githubusercontent.com/hypherionmc/92f825d3c9337964cc77c9c8c9bf65e6/raw/ceeaaee5b98c688a23398864fe480b84796a1651/test_gist.md
+    setChangelog(file("$rootDir/docs/changelogs/${mod_version}.md").text.trim())
+
+    // Required for Modrinth/GitHub
+    setProjectVersion(mod_version)
+
+    // DisplayName is also used for github below
+    String DisplayName = "[NeoForge | ${rootProject.file_name}] ${mod_version}"
+    // Fancy display name for the upload.
+    // Will default to the project version if not set
+    setDisplayName(DisplayName)
+
+    String gameVersionsString = rootProject.compatible_minecraft_versions
+    def gameVersions = gameVersionsString.replace("[", "").replace("]", "").replaceAll(" ", "").replaceAll("\"", "").split(",")
+    // The supported game versions
+    setGameVersions(gameVersions)
+
+    // The modloaders your upload supports.
+    // This can also be an Enum from ModLoader,
+    // like setLoaders(ModLoader.FABRIC, ModLoader.FORGE)
+    setLoaders("neoforge")
+
+    // The new Curseforge Environment tag. Optional
+    // Valid values are "server", "client" or "both"
+    // You can also use CurseEnvironment.BOTH, or CurseEnvironment.SERVER or CurseEnvironment.CLIENT
+    setCurseEnvironment(curse_environment)
+
+    // The file to be uploaded. This can be a file, task, or string.
+    // setArtifact("build/libs/mymod.jar")
+    // setArtifact(jar.getArchiveFile().get())
+    // If this is a task, the task specified will be executed before publishing
+    //setArtifact(remapJar)
+    setArtifact("build/libs/${mod_id}-neoforge-${rootProject.versionStr}.jar")
+
+    // Override the artifact uploaded to modrinth
+    // setPlatformArtifact(Platform.Modrinth, "build/libs/mymod.jar")
+    // setPlatformArtifact(Platform.Modrinth, jar.getArchiveFile().get())
+    // If this is a task, the task specified will be executed before publishing
+    // Valid platforms are modrinth, curseforge and github
+    //setPlatformArtifact("modrinth", modrinthJar)
+
+    // Disable the built in Fractureizer scanner
+    setDisableMalwareScanner(false)
+
+    // Add supported java versions. Currently only used by CurseForge
+    // Supports anything that can be parsed using JavaVersion.toVersion()
+    setJavaVersions(new Integer[]{rootProject.java_version as Integer})
+
+    // Safety check to check if the artifact contains a valid mod metadata entry,
+    // which could possibly mean that the jar is empty
+    setDisableEmptyJarCheck(false)
+
+    // Additional files to upload. Same as artifact, this can be a task, file or string
+    addAdditionalFile("build/libs/${mod_id}-neoforge-${rootProject.versionStr}-sources.jar")
+
+    // Additional files to upload with a custom display name and changelog.
+    // Currently only supported on Curseforge
+    //addAdditionalFile {
+    //    // File, Task or String
+    //    artifact jar
+    //    displayName "Some Name"
+    //    changelog "Hello Changelog"
+    //}
+
+    // GitHub options
+    github {
+        // GitHub repo to publish to. Overrides githubRepo
+        repo(mod_source)
+
+        // Tag to use for GitHub release. Defaults to version
+        tag("v${mod_version}") //FIXME: doesn't work!
+
+        // Whether to create a tag for the GitHub release, if one doesn't exist yet. Defaults to true
+        createTag(true)
+
+        // Whether to create the GitHub release if it doesn't exist yet. Defaults to true
+        createRelease(true)
+
+        // Whether to update the GitHub release if it already exists. Defaults to true
+        updateRelease(true)
+
+        // Whether the release should be left as an unpublished draft.
+        //
+        // If enabled, newly created releases and existing drafts will not be published.
+        // Instead, a draft release is used.
+        //
+        // If disabled, the release will be published.
+        // This option does not allow converting a published release to a draft.
+        //
+        // Defaults to false
+        draft(github_draft.toBoolean())
+
+        // The commitish ref the tag should target (ignored when tag already exists)
+        target(github_target)
+
+        displayName(DisplayName)
+    }
+
+// Modrinth Dependencies.
+// Accepts a slug or id
+    modrinthDepends {
+        // Multiple required dependencies
+        //required "fabric-api", "craterlib"
+
+        // Single dependency
+        //required "fabric-api"
+
+        // Optional dependency
+        //optional 'optional-dep'
+
+        // Your mod is not compatible with this mod
+        //incompatible 'breaks-with'
+
+        // Your mod embeds this dependency
+        //embedded 'fabric-api'
+    }
+
+// Curse Dependencies
+    curseDepends {
+        // Multiple required dependencies
+        //required "fabric-api", "craterlib"
+
+        // Single dependency
+        //required "fabric-api"
+
+        // Optional dependency
+        //optional 'optional-dep'
+
+        // Your mod is not compatible with this mod
+        //incompatible 'breaks-with'
+
+        // Your mod embeds this dependency
+        //embedded 'fabric-api'
+    }
 }
