@@ -271,13 +271,13 @@ publisher {
 // Accepts a slug or id
     modrinthDepends {
         // Multiple required dependencies
-        //required "fabric-api", "craterlib"
+        required "fabric-api", "cloth-config"
 
         // Single dependency
-        required "fabric-api"
+        //required "fabric-api"
 
         // Optional dependency
-        //optional 'optional-dep'
+        optional "modmenu", "xaeros-minimap", "xaeros-minimap-fair", "xaeros-world-map"
 
         // Your mod is not compatible with this mod
         //incompatible 'breaks-with'
@@ -289,13 +289,13 @@ publisher {
 // Curse Dependencies
     curseDepends {
         // Multiple required dependencies
-        //required "fabric-api", "craterlib"
+        required "fabric-api", "cloth-config"
 
         // Single dependency
-        required "fabric-api"
+        //required "fabric-api"
 
         // Optional dependency
-        //optional 'optional-dep'
+        optional "modmenu", "xaeros-minimap", "xaeros-minimap-fair-play-edition", "xaeros-world-map"
 
         // Your mod is not compatible with this mod
         //incompatible 'breaks-with'

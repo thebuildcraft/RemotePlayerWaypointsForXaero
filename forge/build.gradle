@@ -262,10 +262,10 @@ publisher {
         //required "fabric-api", "craterlib"
 
         // Single dependency
-        //required "fabric-api"
+        required "cloth-config"
 
         // Optional dependency
-        //optional 'optional-dep'
+        optional "xaeros-minimap", "xaeros-minimap-fair", "xaeros-world-map"
 
         // Your mod is not compatible with this mod
         //incompatible 'breaks-with'
@@ -280,10 +280,10 @@ publisher {
         //required "fabric-api", "craterlib"
 
         // Single dependency
-        //required "fabric-api"
+        required "cloth-config"
 
         // Optional dependency
-        //optional 'optional-dep'
+        optional "xaeros-minimap", "xaeros-minimap-fair-play-edition", "xaeros-world-map"
 
         // Your mod is not compatible with this mod
         //incompatible 'breaks-with'
