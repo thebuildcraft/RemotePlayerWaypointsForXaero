@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * @author Leander Knüttel
  * @author MeerBiene
- * @version 14.06.2024
+ * @version 15.06.2024
  */
 @Mixin(PlayerTabOverlay.class)
 public class PlayerListHudMixin {
@@ -44,7 +44,7 @@ public class PlayerListHudMixin {
     @Unique
     private static String formatDuration(int duration) {
         int hours = (int) Math.floor((double) duration / 60);
-        var minutes = duration % 60;
+        int minutes = duration % 60;
 
         if (hours == 0) {
             return minutes + " min";
@@ -57,7 +57,7 @@ public class PlayerListHudMixin {
     @Inject(method = "getNameForDisplay", at = @At("RETURN"), cancellable = true)
     private void injected(PlayerInfo entry, CallbackInfoReturnable<Component> cir){
         Component newText;
-        var playerNameString = entry.getProfile().getName();
+        String playerNameString = entry.getProfile().getName();
         if (entry.getTabListDisplayName() == null) {
             newText = ((PlayerTabOverlay)(Object)this).decorateName(entry, PlayerTeam.formatNameForTeam(entry.getTeam(), Text.literal(playerNameString)));
         } else {

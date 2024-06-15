@@ -29,11 +29,13 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Text
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Utils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.phys.Vec3;
 import xaero.common.HudMod;
 import xaero.common.XaeroMinimapSession;
+import xaero.common.minimap.waypoints.Waypoint;
 import xaero.common.minimap.waypoints.WaypointWorld;
 import xaero.common.minimap.waypoints.WaypointsManager;
 
@@ -47,7 +49,7 @@ import java.util.*;
  * @author ewpratten
  * @author eatmyvenom
  * @author Leander Knüttel
- * @version 14.06.2024
+ * @version 15.06.2024
  */
 public class UpdateTask extends TimerTask {
     private final Minecraft mc;
@@ -67,7 +69,7 @@ public class UpdateTask extends TimerTask {
     @Override
     public void run() {
         if (AbstractModInitializer.mapModInstalled){
-            var cw = WaypointsManager.getCustomWaypoints("AbstractModInitializer");
+            Hashtable<Integer, Waypoint> cw = WaypointsManager.getCustomWaypoints("AbstractModInitializer");
             cw.clear();
         }
 
@@ -98,7 +100,7 @@ public class UpdateTask extends TimerTask {
         if (AbstractModInitializer.getConnection() == null){
             try {
                 CommonModConfig.ServerEntry serverEntry = null;
-                for (var server : CommonModConfig.Instance.serverEntries()){
+                for (CommonModConfig.ServerEntry server : CommonModConfig.Instance.serverEntries()){
                     if (Objects.equals(serverIP, server.ip.toLowerCase(Locale.ROOT))){
                         serverEntry = server;
                     }
@@ -202,8 +204,8 @@ public class UpdateTask extends TimerTask {
         if (!currentWorld.getSets().containsKey(DEFAULT_PLAYER_SET_NAME)){
             currentWorld.addSet(DEFAULT_PLAYER_SET_NAME);
         }
-        var waypointList = currentWorld.getSets().get(DEFAULT_PLAYER_SET_NAME).getList();
-        var clientPlayer = Minecraft.getInstance().player;
+        ArrayList<Waypoint> waypointList = currentWorld.getSets().get(DEFAULT_PLAYER_SET_NAME).getList();
+        LocalPlayer clientPlayer = Minecraft.getInstance().player;
         if (clientPlayer == null) return;
 
         try {
@@ -215,7 +217,7 @@ public class UpdateTask extends TimerTask {
                     for (PlayerPosition playerPosition : playerPositions) {
                         if (playerPosition == null) continue;
 
-                        var d = clientPlayer.position().distanceTo(new Vec3(playerPosition.x, playerPosition.y, playerPosition.z));
+                        double d = clientPlayer.position().distanceTo(new Vec3(playerPosition.x, playerPosition.y, playerPosition.z));
                         if (d < CommonModConfig.Instance.minDistance() || d > CommonModConfig.Instance.maxDistance()) continue;
                         // Add waypoint for the player
                         try {
@@ -230,7 +232,7 @@ public class UpdateTask extends TimerTask {
                 for( WaypointPosition waypointPosition : waypointPositions){
                     if (waypointPosition == null) continue;
 
-                    var d = clientPlayer.position().distanceTo(new Vec3(waypointPosition.x, waypointPosition.y, waypointPosition.z));
+                    double d = clientPlayer.position().distanceTo(new Vec3(waypointPosition.x, waypointPosition.y, waypointPosition.z));
                     if (d < CommonModConfig.Instance.minDistanceMarker() || d > CommonModConfig.Instance.maxDistanceMarker()) continue;
                     // Add waypoint for the marker
                     try {

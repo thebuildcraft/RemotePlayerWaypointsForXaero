@@ -32,14 +32,14 @@ import net.fabricmc.api.DedicatedServerModInitializer;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 26.05.2024
+ * @version 15.06.2024
  */
 public class FabricMain extends AbstractModInitializer implements ClientModInitializer, DedicatedServerModInitializer
 {
 	@Override
 	public void onInitializeClient(){
 		loaderType = LoaderType.Fabric;
-		var config = new CommonModConfigFabric();
+        CommonModConfigFabric config = new CommonModConfigFabric();
 		super.onInitializeClient();
 
 		//Fabric Client init here

@@ -36,7 +36,7 @@ import java.util.ArrayList;
  * @author ewpratten
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 14.06.2024
+ * @version 15.06.2024
  */
 public class DynmapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -61,14 +61,14 @@ public class DynmapConnection extends MapConnection {
     }
 
     private void generateLink(CommonModConfig.ServerEntry serverEntry, boolean useHttps) throws IOException {
-        var baseURL = getBaseURL(serverEntry, useHttps);
+        String baseURL = getBaseURL(serverEntry, useHttps);
 
         try{
             // test if the link is already the correct get-request
             queryURL = URI.create(serverEntry.link).toURL();
             // TODO: implement markers for method 1
             // Test the url
-            var a = this.getPlayerPositions();
+            PlayerPosition[] a = this.getPlayerPositions();
 
             if (CommonModConfig.Instance.debugMode()){
                 Utils.sendToClientChat(("got link with method 1"));
@@ -77,12 +77,12 @@ public class DynmapConnection extends MapConnection {
         catch (Exception a){
             try{
                 // get config.js
-                var mapConfig = HTTP.makeTextHttpRequest(URI.create(baseURL + "/standalone/config.js").toURL());
+                String mapConfig = HTTP.makeTextHttpRequest(URI.create(baseURL + "/standalone/config.js").toURL());
                 int i = mapConfig.indexOf("configuration: ");
                 int j = mapConfig.indexOf(",", i);
 
                 AbstractModInitializer.LOGGER.info("mapConfig: " + mapConfig);
-                var substring = mapConfig.substring(i + 16, j - 1);
+                String substring = mapConfig.substring(i + 16, j - 1);
                 if (!substring.startsWith("/")){
                     substring = "/" + substring;
                 }
@@ -100,7 +100,7 @@ public class DynmapConnection extends MapConnection {
 
                 i = mapConfig.indexOf("update: ");
                 j = mapConfig.indexOf(",", i);
-                var updateStringTemplate = mapConfig.substring(i + 9, j - 1);
+                String updateStringTemplate = mapConfig.substring(i + 9, j - 1);
                 i = updateStringTemplate.indexOf("?");
                 if (i != -1){
                     updateStringTemplate = updateStringTemplate.substring(0, i);
@@ -126,7 +126,7 @@ public class DynmapConnection extends MapConnection {
                 AbstractModInitializer.LOGGER.info("url: " + queryURL);
 
                 // Test the url
-                var b = this.getPlayerPositions();
+                PlayerPosition[] b = this.getPlayerPositions();
 
                 if (CommonModConfig.Instance.debugMode()){
                     Utils.sendToClientChat("got link with method 2");
@@ -143,7 +143,7 @@ public class DynmapConnection extends MapConnection {
                     markerStringTemplate = baseURL + "/tiles/_markers_/marker_{world}.json";
 
                     // Test the url
-                    var c = this.getPlayerPositions();
+                    PlayerPosition[] c = this.getPlayerPositions();
 
                     if (CommonModConfig.Instance.debugMode()){
                         Utils.sendToClientChat("got link with method 3");
@@ -159,7 +159,7 @@ public class DynmapConnection extends MapConnection {
                     markerStringTemplate = baseURL + "/tiles/_markers_/marker_{world}.json";
 
                     // Test the url
-                    var c = this.getPlayerPositions();
+                    PlayerPosition[] c = this.getPlayerPositions();
 
                     if (CommonModConfig.Instance.debugMode()){
                         Utils.sendToClientChat("got link with method 4");
@@ -211,8 +211,8 @@ public class DynmapConnection extends MapConnection {
         DynmapMarkerUpdate update = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", dimension)).toURL(), DynmapMarkerUpdate.class);
         ArrayList<WaypointPosition> positions = new ArrayList<>();
 
-        for (var set : update.sets.values()){
-            for (var m : set.markers.values()){
+        for (DynmapMarkerUpdate.Set set : update.sets.values()){
+            for (DynmapMarkerUpdate.Set.Marker m : set.markers.values()){
                 positions.add(new WaypointPosition(m.label, Math.round(m.x), Math.round(m.y), Math.round(m.z)));
             }
         }

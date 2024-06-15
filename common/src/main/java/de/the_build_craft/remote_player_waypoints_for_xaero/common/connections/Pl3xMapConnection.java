@@ -37,7 +37,7 @@ import java.util.Objects;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 14.06.2024
+ * @version 15.06.2024
  */
 public class Pl3xMapConnection extends MapConnection{
     private String markerLayerStringTemplate = "";
@@ -69,7 +69,7 @@ public class Pl3xMapConnection extends MapConnection{
         markerLayerStringTemplate = baseURL + "/tiles/{world}/markers.json";
         markerStringTemplate = baseURL + "/tiles/{world}/markers/{layerName}.json";
         // Test the url
-        var a = this.getPlayerPositions();
+        PlayerPosition[] a = this.getPlayerPositions();
 
         AbstractModInitializer.LOGGER.info("new link: " + queryURL);
         if (CommonModConfig.Instance.debugMode()){
@@ -106,7 +106,7 @@ public class Pl3xMapConnection extends MapConnection{
                     .replace("{layerName}", layer)).toURL();
             Pl3xMapMarkerUpdate[] markers = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
 
-            for (var marker : markers){
+            for (Pl3xMapMarkerUpdate marker : markers){
                 if (!Objects.equals(marker.type, "icon")) continue;
                 positions.add(new WaypointPosition(marker.options.tooltip.content, marker.data.point.x, CommonModConfig.Instance.defaultY(), marker.data.point.z));
             }
@@ -122,7 +122,7 @@ public class Pl3xMapConnection extends MapConnection{
 
         ArrayList<String> layers = new ArrayList<>();
 
-        for (var layer : markerLayers){
+        for (Pl3xMapMarkerLayerConfig layer : markerLayers){
             if (!Objects.equals(layer.key, "pl3xmap_players")) {
                 layers.add(layer.key);
             }

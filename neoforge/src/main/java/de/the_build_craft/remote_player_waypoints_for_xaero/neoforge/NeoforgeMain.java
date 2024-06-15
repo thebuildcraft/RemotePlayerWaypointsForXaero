@@ -39,7 +39,7 @@ import net.neoforged.neoforge.client.ConfigScreenHandler;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 26.05.2024
+ * @version 15.06.2024
  */
 @Mod(AbstractModInitializer.MOD_ID)
 public class NeoforgeMain extends AbstractModInitializer
@@ -47,7 +47,7 @@ public class NeoforgeMain extends AbstractModInitializer
 	public NeoforgeMain(IEventBus eventBus)
 	{
 		loaderType = LoaderType.NeoForge;
-		var config = new CommonModConfigNeoForge();
+        CommonModConfigNeoForge config = new CommonModConfigNeoForge();
 
 		// Register the mod initializer (Actual event registration is done in the different proxies)
 		eventBus.addListener((FMLClientSetupEvent e) -> this.onInitializeClient());

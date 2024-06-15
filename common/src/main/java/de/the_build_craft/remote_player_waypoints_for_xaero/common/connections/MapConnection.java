@@ -37,7 +37,7 @@ import java.util.Objects;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 14.06.2024
+ * @version 15.06.2024
  */
 public abstract class MapConnection {
     public URL queryURL;
@@ -50,7 +50,7 @@ public abstract class MapConnection {
 
     @NotNull
     protected String getBaseURL(CommonModConfig.ServerEntry serverEntry, boolean useHttps) {
-        var baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
+        String baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
         if (!baseURL.startsWith(useHttps ? "https://" : "http://")){
             baseURL = (useHttps ? "https://" : "http://") + baseURL;
         }
@@ -83,7 +83,7 @@ public abstract class MapConnection {
         }
         String clientName = mc.player.getName().getString();
         currentDimension = "";
-        for (var p : playerPositions){
+        for (PlayerPosition p : playerPositions){
             if (Objects.equals(p.player, clientName)) {
                 currentDimension = p.world;
             }

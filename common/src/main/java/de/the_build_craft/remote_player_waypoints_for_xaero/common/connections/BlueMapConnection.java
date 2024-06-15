@@ -43,7 +43,7 @@ import java.lang.reflect.Type;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 14.06.2024
+ * @version 15.06.2024
  */
 public class BlueMapConnection extends MapConnection {
     public int lastWorldIndex;
@@ -75,23 +75,23 @@ public class BlueMapConnection extends MapConnection {
         String baseURL = getBaseURL(serverEntry, useHttps);
         AbstractModInitializer.LOGGER.info("baseURL " + baseURL);
         // Get config and build the urls
-        for (var w : ((BlueMapConfiguration) HTTP.makeJSONHTTPRequest(
+        for (String w : ((BlueMapConfiguration) HTTP.makeJSONHTTPRequest(
                 URI.create(baseURL + "/settings.json?").toURL(), BlueMapConfiguration.class)).maps){
             playerUrls.add(URI.create(baseURL + "/maps/" + w + "/live/players.json?").toURL());
             markerUrls.add(URI.create(baseURL + "/maps/" + w + "/live/markers.json?").toURL());
         }
 
         // Test the urls
-        var a = this.getPlayerPositions();
+        PlayerPosition[] a = this.getPlayerPositions();
 
-        for (var url : playerUrls){
+        for (URL url : playerUrls){
             AbstractModInitializer.LOGGER.info("new link: " + url);
             if (CommonModConfig.Instance.debugMode()){
                 Utils.sendToClientChat("new link: " + url);
             }
         }
 
-        for (var url : markerUrls){
+        for (URL url : markerUrls){
             AbstractModInitializer.LOGGER.info("new link: " + url);
             if (CommonModConfig.Instance.debugMode()){
                 Utils.sendToClientChat("new link: " + url);
@@ -107,7 +107,7 @@ public class BlueMapConnection extends MapConnection {
 
         ArrayList<WaypointPosition> positions = new ArrayList<>();
 
-        for (var m : markerSets.entrySet()){
+        for (Map.Entry<String, BlueMapMarkerSet> m : markerSets.entrySet()){
             if (CommonModConfig.Instance.debugMode()){
                 Utils.sendToClientChat("====================================");
                 Utils.sendToClientChat("markerSet: " + m.getKey());
@@ -132,7 +132,7 @@ public class BlueMapConnection extends MapConnection {
 
         try{
             update = HTTP.makeJSONHTTPRequest(playerUrls.get(lastWorldIndex), BlueMapPlayerUpdate.class);
-            for (var p : update.players){
+            for (BlueMapPlayerUpdate.Player p : update.players){
                 if (Objects.equals(p.name, clientName)){
                     correctWorld = !p.foreign;
                     break;
@@ -150,7 +150,7 @@ public class BlueMapConnection extends MapConnection {
             for (int i = 0; i < playerUrls.size(); i++) {
                 try{
                     update = HTTP.makeJSONHTTPRequest(playerUrls.get(i), BlueMapPlayerUpdate.class);
-                    for (var p : update.players){
+                    for (BlueMapPlayerUpdate.Player p : update.players){
                         if (Objects.equals(p.name, clientName)){
                             correctWorld = !p.foreign;
                             break;

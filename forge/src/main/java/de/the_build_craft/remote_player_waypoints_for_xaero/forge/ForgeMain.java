@@ -56,7 +56,7 @@ import java.util.Random;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 26.05.2024
+ * @version 15.06.2024
  */
 @Mod(AbstractModInitializer.MOD_ID)
 public class ForgeMain extends AbstractModInitializer
@@ -64,7 +64,7 @@ public class ForgeMain extends AbstractModInitializer
 	public ForgeMain()
 	{
 		loaderType = LoaderType.Forge;
-		var config = new CommonModConfigForge();
+        CommonModConfigForge config = new CommonModConfigForge();
 
 		// Register the mod initializer (Actual event registration is done in the different proxies)
 		FMLJavaModLoadingContext.get().getModEventBus().addListener((FMLClientSetupEvent e) -> this.onInitializeClient());

@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 14.06.2024
+ * @version 15.06.2024
  */
 public class CommonModConfigForge extends CommonModConfig {
     public CommonModConfigForge(){
@@ -135,9 +135,9 @@ public class CommonModConfigForge extends CommonModConfig {
 
     @Override
     public List<ServerEntry> serverEntries() {
-        var se = AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.serverEntries;
-        var seN = new ArrayList<ServerEntry>();
-        for (var s: se){
+        List<ModConfig.ServerEntry> se = AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.serverEntries;
+        ArrayList<ServerEntry> seN = new ArrayList<ServerEntry>();
+        for (ModConfig.ServerEntry s: se){
             seN.add(new ServerEntry(s.ip, s.link, ServerEntry.Maptype.valueOf(s.maptype.toString())));
         }
         return seN;

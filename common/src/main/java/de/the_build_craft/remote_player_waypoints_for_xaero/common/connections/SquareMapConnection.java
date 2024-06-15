@@ -36,7 +36,7 @@ import java.util.Objects;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 14.06.2024
+ * @version 15.06.2024
  */
 public class SquareMapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -66,7 +66,7 @@ public class SquareMapConnection extends MapConnection {
         queryURL = URI.create(baseURL + "/tiles/players.json").toURL();
         markerStringTemplate = baseURL + "/tiles/{world}/markers.json";
         // Test the url
-        var a = this.getPlayerPositions();
+        PlayerPosition[] a = this.getPlayerPositions();
 
         AbstractModInitializer.LOGGER.info("new link: " + queryURL);
         if (CommonModConfig.Instance.debugMode()){
@@ -101,8 +101,8 @@ public class SquareMapConnection extends MapConnection {
 
         ArrayList<WaypointPosition> positions = new ArrayList<>();
 
-        for (var markerLayer : markersLayers){
-            for (var marker : markerLayer.markers){
+        for (SquareMapMarkerUpdate markerLayer : markersLayers){
+            for (SquareMapMarkerUpdate.Marker marker : markerLayer.markers){
                 if (Objects.equals(marker.type, "icon")) {
                     positions.add(new WaypointPosition(marker.tooltip, marker.point.x, CommonModConfig.Instance.defaultY(), marker.point.z));
                 }

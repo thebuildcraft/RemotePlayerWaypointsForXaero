@@ -30,6 +30,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.connections.MapConnection;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Utils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.commands.CommandSourceStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,7 +46,7 @@ import java.util.Timer;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 10.06.2024
+ * @version 15.06.2024
  */
 public abstract class AbstractModInitializer
 {
@@ -188,8 +189,8 @@ public abstract class AbstractModInitializer
 				.then(argument("player", StringArgumentType.word())
 						.then(argument("time", IntegerArgumentType.integer(0))
 								.executes(context -> {
-									var playerName = StringArgumentType.getString(context, "player");
-									var time = IntegerArgumentType.getInteger(context, "time");
+                                    String playerName = StringArgumentType.getString(context, "player");
+                                    int time = IntegerArgumentType.getInteger(context, "time");
 									AbstractModInitializer.AfkTimeDic.put(playerName, time);
 									AbstractModInitializer.AfkDic.put(playerName, time > 0);
 									Utils.sendToClientChat("Set AFK time for " + playerName + " to " + time);
@@ -246,9 +247,9 @@ public abstract class AbstractModInitializer
 	}
 
 	public static void IgnoreServer(){
-		var server = Minecraft.getInstance().getCurrentServer();
+        ServerData server = Minecraft.getInstance().getCurrentServer();
 		if (server != null){
-			var address = server.ip.toLowerCase(Locale.ROOT);
+            String address = server.ip.toLowerCase(Locale.ROOT);
 			if (!CommonModConfig.Instance.ignoredServers().contains(address)) CommonModConfig.Instance.ignoredServers().add(address);
 			CommonModConfig.Instance.saveConfig();
 
