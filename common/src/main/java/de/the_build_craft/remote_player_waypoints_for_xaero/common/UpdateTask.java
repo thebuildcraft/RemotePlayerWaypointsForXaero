@@ -129,12 +129,16 @@ public class UpdateTask extends TimerTask {
                     AbstractModInitializer.connected = false;
                     return;
                 }
-                switch (serverEntry.maptype) {
-                    case Dynmap -> AbstractModInitializer.setConnection(new DynmapConnection(serverEntry, this));
-                    case Squaremap -> AbstractModInitializer.setConnection(new SquareMapConnection(serverEntry, this));
-                    case Bluemap -> AbstractModInitializer.setConnection(new BlueMapConnection(serverEntry, this));
-                    case Pl3xMap -> AbstractModInitializer.setConnection(new Pl3xMapConnection(serverEntry, this));
-                    default -> throw new IllegalStateException("Unexpected value: " + serverEntry.maptype);
+                if (Objects.requireNonNull(serverEntry.maptype) == CommonModConfig.ServerEntry.Maptype.Dynmap) {
+                    AbstractModInitializer.setConnection(new DynmapConnection(serverEntry, this));
+                } else if (serverEntry.maptype == CommonModConfig.ServerEntry.Maptype.Squaremap) {
+                    AbstractModInitializer.setConnection(new SquareMapConnection(serverEntry, this));
+                } else if (serverEntry.maptype == CommonModConfig.ServerEntry.Maptype.Bluemap) {
+                    AbstractModInitializer.setConnection(new BlueMapConnection(serverEntry, this));
+                } else if (serverEntry.maptype == CommonModConfig.ServerEntry.Maptype.Pl3xMap) {
+                    AbstractModInitializer.setConnection(new Pl3xMapConnection(serverEntry, this));
+                } else {
+                    throw new IllegalStateException("Unexpected value: " + serverEntry.maptype);
                 }
             } catch (Exception e) {
                 if (!connectionErrorWasShown){
