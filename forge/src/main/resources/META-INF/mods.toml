@@ -11,7 +11,7 @@ issueTrackerURL = "${issues}"
     #//updateJSONURL="https://change.me.example.invalid/updates.json" # A URL to query for updates for this mod. See the JSON update specification https://mcforge.readthedocs.io/en/latest/gettingstarted/autoupdate/
     displayURL = "${homepage}"
     description = "${description}" #//mandatory. The description text for the mod
-    logoFile = "assets/${mod_id}/icon.png"
+    logoFile = "icon.png"
     catalogueImageIcon = "assets/${mod_id}/icon.png"
     #// if not set defaults to "false"
     clientSideOnly = "false"
