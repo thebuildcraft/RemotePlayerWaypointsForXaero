@@ -37,7 +37,7 @@ issueTrackerURL = "${issues}"
     side = "BOTH"
 
 [[dependencies.${mod_id}]]
-    modId = "cloth_config"
+    modId = "${cloth_config_api_forge_mod_id}"
     mandatory = true
     versionRange = "[0,)"
     ordering = "NONE"

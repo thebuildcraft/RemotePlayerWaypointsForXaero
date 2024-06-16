@@ -28,18 +28,13 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
-#if MC_VER > MC_1_20_4
-import net.neoforged.neoforge.client.gui.ModListScreen;
-#else
-import net.neoforged.neoforge.client.ConfigScreenHandler;
-#endif
 
 /**
  * main entry point on NeoForge
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 15.06.2024
+ * @version 16.06.2024
  */
 @Mod(AbstractModInitializer.MOD_ID)
 public class NeoforgeMain extends AbstractModInitializer
@@ -83,9 +78,7 @@ public class NeoforgeMain extends AbstractModInitializer
 	
 	@Override
 	protected void initializeModCompat()
-	{//FIXME set up NeoForge Config screen
-		/*ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
-				() -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> GetConfigScreen.getScreen(parent)));*/
+	{
 	}
 
 	/*

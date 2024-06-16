@@ -34,14 +34,6 @@ import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 #else
 #endif
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-#if MC_VER < MC_1_17_1
-import net.minecraftforge.fml.ExtensionPoint;
-#elif MC_VER == MC_1_17_1
-import net.minecraftforge.fmlclient.ConfigGuiHandler;
-#elif MC_VER >= MC_1_18_2 && MC_VER < MC_1_19_2
-import net.minecraftforge.client.ConfigGuiHandler;
-#else
-#endif
 
 // these imports change due to forge refactoring classes in 1.19
 #if MC_VER < MC_1_19_2
@@ -56,7 +48,7 @@ import java.util.Random;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 15.06.2024
+ * @version 16.06.2024
  */
 @Mod(AbstractModInitializer.MOD_ID)
 public class ForgeMain extends AbstractModInitializer
@@ -100,17 +92,7 @@ public class ForgeMain extends AbstractModInitializer
 	
 	@Override
 	protected void initializeModCompat()
-	{//FIXME Forge Mod menu integration
-		/*#if MC_VER < MC_1_17_1
-		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
-				() -> (client, parent) -> GetConfigScreen.getScreen(parent));
-		#elif MC_VER >= MC_1_17_1 && MC_VER < MC_1_19_2
-		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
-				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> GetConfigScreen.getScreen(parent)));
-		#else
-		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
-				() -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> GetConfigScreen.getScreen(parent)));
-		#endif*/
+	{
 	}
 	
 	/*@Override

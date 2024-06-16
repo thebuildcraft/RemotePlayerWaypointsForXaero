@@ -32,14 +32,16 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 14.06.2024
+ * @version 16.06.2024
  */
 @Config(name = "remote_player_waypoints_for_xaero")
+#if MC_VER < MC_1_20_6
 @Config.Gui.Background("minecraft:textures/block/acacia_planks.png")
 @Config.Gui.CategoryBackground(
         category = "b",
         background = "minecraft:textures/block/stone.png"
 )
+#endif
 public class ModConfig extends PartitioningSerializer.GlobalData {
     @ConfigEntry.Category("a")
     @ConfigEntry.Gui.TransitiveObject

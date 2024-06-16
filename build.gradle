@@ -19,7 +19,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * file changed by: Leander Knüttel
- * date: 14.06.2024
+ * date: 16.06.2024
  */
 
 plugins {
@@ -410,6 +410,10 @@ subprojects { p ->
                 java_version                 : java_version,
                 quilt_contributors           : "{"+quilt_contributors.join(", ")+"}",
 
+                cloth_config_api_fabric_mod_id: getFabricClothConfigModId(),
+                cloth_config_api_neoforge_mod_id: getNeoForgeClothConfigModId(),
+                cloth_config_api_forge_mod_id: getForgeClothConfigModId(),
+
                 fabric_incompatibility_list  : fabric_incompatibility_list,
                 fabric_recommend_list        : fabric_recommend_list,
 
@@ -596,3 +600,28 @@ task cleanMergedJars() {
 }
 // add cleanMergedJars to the end of the "clean" task
 tasks["clean"].finalizedBy(cleanMergedJars)
+
+def getFabricClothConfigModId(){
+    if (rootProject.hasProperty("cloth_config_api_fabric_mod_id")){
+        return cloth_config_api_fabric_mod_id
+    }
+    else{
+        return "cloth-config"
+    }
+}
+def getNeoForgeClothConfigModId(){
+    if (rootProject.hasProperty("cloth_config_api_neoforge_mod_id")){
+        return cloth_config_api_neoforge_mod_id
+    }
+    else{
+        return "cloth-config"
+    }
+}
+def getForgeClothConfigModId(){
+    if (rootProject.hasProperty("cloth_config_api_forge_mod_id")){
+        return cloth_config_api_forge_mod_id
+    }
+    else{
+        return "cloth-config"
+    }
+}

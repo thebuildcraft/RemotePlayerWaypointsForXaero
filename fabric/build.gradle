@@ -19,7 +19,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * file changed by: Leander Knüttel
- * date: 14.06.2024
+ * date: 16.06.2024
  */
 
 plugins {
@@ -88,7 +88,7 @@ dependencies {
     }
 
     modApi("me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_config_api_fabric_version}") {
-        exclude(group: "net.fabricmc.fabric-api")
+        exclude(group: "net.fabricmc")
     }
 
     modImplementation "maven.modrinth:xaeros-world-map:${rootProject.xaeros_world_map_fabric_version}"

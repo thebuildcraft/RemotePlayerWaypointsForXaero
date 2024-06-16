@@ -25,22 +25,32 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
 import net.neoforged.fml.ModLoadingContext;
+#if MC_VER < MC_1_20_6
 import net.neoforged.neoforge.client.ConfigScreenHandler;
+#else
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+#endif
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 15.06.2024
+ * @version 16.06.2024
  */
 public class CommonModConfigNeoForge extends CommonModConfig {
     public CommonModConfigNeoForge(){
         super();
         AutoConfig.register(ModConfig.class, PartitioningSerializer.wrap(JanksonConfigSerializer::new));
-        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> {
+
+        #if MC_VER < MC_1_20_6
+		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> {
             return AutoConfig.getConfigScreen(ModConfig.class, parent).get();
         }));
+		#else
+        ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class,
+                () -> (client, parent) -> AutoConfig.getConfigScreen(ModConfig.class, parent).get());
+		#endif
     }
 
     @Override

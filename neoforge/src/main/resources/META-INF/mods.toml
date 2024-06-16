@@ -34,7 +34,7 @@ issueTrackerURL = "${issues}"
     side = "BOTH"
 
 [[dependencies.${mod_id}]]
-    modId = "cloth_config"
+    modId = "${cloth_config_api_neoforge_mod_id}"
     mandatory = true  # Forge syntax
     type = "required" # Neoforge syntax
     versionRange = "[0,)"

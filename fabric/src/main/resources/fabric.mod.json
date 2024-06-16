@@ -39,7 +39,7 @@
         "fabricloader": "*",
         "minecraft": $compatible_minecraft_versions,
         "java": ">=${java_version}",
-        "cloth-config": "*"
+        "${cloth_config_api_fabric_mod_id}": "*"
     },
     
     "breaks": $fabric_incompatibility_list,

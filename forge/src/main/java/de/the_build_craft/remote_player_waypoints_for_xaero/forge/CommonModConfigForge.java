@@ -24,7 +24,16 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.common.CommonModConf
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
+#if MC_VER < MC_1_17_1
+import net.minecraftforge.fml.ExtensionPoint;
+#elif MC_VER == MC_1_17_1
+import net.minecraftforge.fmlclient.ConfigGuiHandler;
+#elif MC_VER >= MC_1_18_2 && MC_VER < MC_1_19_2
+import net.minecraftforge.client.ConfigGuiHandler;
+#else
 import net.minecraftforge.client.ConfigScreenHandler;
+#endif
+
 import net.minecraftforge.fml.ModLoadingContext;
 
 import java.util.ArrayList;
@@ -32,15 +41,25 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 15.06.2024
+ * @version 16.06.2024
  */
 public class CommonModConfigForge extends CommonModConfig {
     public CommonModConfigForge(){
         super();
         AutoConfig.register(ModConfig.class, PartitioningSerializer.wrap(JanksonConfigSerializer::new));
+
+        #if MC_VER < MC_1_17_1
+        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, screen) -> {
+            return AutoConfig.getConfigScreen(ModConfig.class, screen).get();
+        });
+        #elif MC_VER >= MC_1_17_1 && MC_VER < MC_1_19_2
+        ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
+                () -> new ConfigGuiHandler.ConfigGuiFactory((mc, screen) -> AutoConfig.getConfigScreen(ModConfig.class, screen).get()));
+        #else
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> {
             return AutoConfig.getConfigScreen(ModConfig.class, parent).get();
         }));
+        #endif
     }
 
     @Override

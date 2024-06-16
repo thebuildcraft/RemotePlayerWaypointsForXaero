@@ -33,7 +33,11 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.phys.Vec3;
+#if MC_VER == MC_1_17_1
+import xaero.common.AXaeroMinimap;
+#else
 import xaero.common.HudMod;
+#endif
 import xaero.common.XaeroMinimapSession;
 import xaero.common.minimap.waypoints.Waypoint;
 import xaero.common.minimap.waypoints.WaypointWorld;
@@ -49,7 +53,7 @@ import java.util.*;
  * @author ewpratten
  * @author eatmyvenom
  * @author Leander Knüttel
- * @version 15.06.2024
+ * @version 16.06.2024
  */
 public class UpdateTask extends TimerTask {
     private final Minecraft mc;
@@ -82,7 +86,9 @@ public class UpdateTask extends TimerTask {
         }
 
         // Skip if not in game
-        if (mc.isSingleplayer() || mc.getCurrentServer() == null || mc.getConnection() == null
+        if ((mc.getSingleplayerServer() != null && !mc.getSingleplayerServer().isPublished())
+                || mc.getCurrentServer() == null
+                || mc.getConnection() == null
                 || !mc.getConnection().getConnection().isConnected()) {
             Reset();
             return;
@@ -203,7 +209,11 @@ public class UpdateTask extends TimerTask {
             Reset();
             return;
         }
+        #if MC_VER == MC_1_17_1
+        AXaeroMinimap.INSTANCE.getSettings().renderAllSets = true;
+        #else
         HudMod.INSTANCE.getSettings().renderAllSets = true;
+        #endif
 
         if (!currentWorld.getSets().containsKey(DEFAULT_PLAYER_SET_NAME)){
             currentWorld.addSet(DEFAULT_PLAYER_SET_NAME);

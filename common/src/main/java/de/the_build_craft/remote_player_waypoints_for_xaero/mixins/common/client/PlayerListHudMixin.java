@@ -24,6 +24,7 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.common.AbstractModIn
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.network.chat.Style;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Text;
@@ -36,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * @author Leander Knüttel
  * @author MeerBiene
- * @version 15.06.2024
+ * @version 16.06.2024
  */
 @Mixin(PlayerTabOverlay.class)
 public class PlayerListHudMixin {
@@ -72,15 +73,15 @@ public class PlayerListHudMixin {
         if (AbstractModInitializer.AfkDic.containsKey(playerNameString)) {
             if (AbstractModInitializer.AfkDic.get(playerNameString)) {
                 if (AbstractModInitializer.showAfkTimeInTabList){
-                    cir.setReturnValue(newText.copy().append(Text.literal("  [AFK: " + formatDuration(AbstractModInitializer.AfkTimeDic.get(playerNameString) / 60) + "]").setStyle(Style.EMPTY.withColor(AbstractModInitializer.AfkColor))));
+                    cir.setReturnValue(newText.copy().append(Text.literal("  [AFK: " + formatDuration(AbstractModInitializer.AfkTimeDic.get(playerNameString) / 60) + "]").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(AbstractModInitializer.AfkColor)))));
                 }
                 else{
-                    cir.setReturnValue(newText.copy().append(Text.literal("  [AFK]").setStyle(Style.EMPTY.withColor(AbstractModInitializer.AfkColor))));
+                    cir.setReturnValue(newText.copy().append(Text.literal("  [AFK]").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(AbstractModInitializer.AfkColor)))));
                 }
                 return;
             }
         } else {
-            cir.setReturnValue(newText.copy().append(Text.literal("  [???]").setStyle(Style.EMPTY.withColor(AbstractModInitializer.unknownAfkStateColor))));
+            cir.setReturnValue(newText.copy().append(Text.literal("  [???]").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(AbstractModInitializer.unknownAfkStateColor)))));
             return;
         }
         cir.setReturnValue(newText);
