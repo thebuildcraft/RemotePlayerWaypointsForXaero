@@ -27,8 +27,9 @@ import xaero.common.minimap.waypoints.Waypoint;
  * A wrapper to improve creating temp waypoints for players
  *
  * @author ewpratten
+ * @author eatmyvenom
  * @author Leander Knüttel
- * @version 14.06.2024
+ * @version 16.06.2024
  */
 public class PlayerWaypoint extends Waypoint {
     public PlayerWaypoint(PlayerPosition player) {
@@ -37,5 +38,23 @@ public class PlayerWaypoint extends Waypoint {
 
     public PlayerWaypoint(int x, int y, int z, String name) {
         super(x, y, z, name, "P", CommonModConfig.Instance.playerWaypointColor(), 0, true);
+
+        if (name.startsWith("<")) {
+            int i = name.indexOf(">");
+            if (i != (name.length() - 1)) {
+                int j = name.indexOf("<", i);
+                name = name.substring(i + 1, j);
+            }
+        }
+        this.setName(name);
+
+        StringBuilder abbreviation = new StringBuilder();
+        String[] words = name.split("[ _\\-,:;.]");
+        for (String word : words) {
+            if (word.isEmpty()) continue;
+            abbreviation.append(word.substring(0, 1).toUpperCase());
+        }
+
+        this.setSymbol(abbreviation.toString());
     }
 }
