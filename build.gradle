@@ -614,7 +614,7 @@ def getNeoForgeClothConfigModId(){
         return cloth_config_api_neoforge_mod_id
     }
     else{
-        return "cloth-config"
+        return "cloth_config"
     }
 }
 def getForgeClothConfigModId(){
@@ -622,6 +622,6 @@ def getForgeClothConfigModId(){
         return cloth_config_api_forge_mod_id
     }
     else{
-        return "cloth-config"
+        return "cloth_config"
     }
 }
