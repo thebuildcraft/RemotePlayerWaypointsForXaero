@@ -53,7 +53,7 @@ import java.util.*;
  * @author ewpratten
  * @author eatmyvenom
  * @author Leander Knüttel
- * @version 16.06.2024
+ * @version 17.06.2024
  */
 public class UpdateTask extends TimerTask {
     private final Minecraft mc;
@@ -250,7 +250,13 @@ public class UpdateTask extends TimerTask {
                     if (d < CommonModConfig.Instance.minDistanceMarker() || d > CommonModConfig.Instance.maxDistanceMarker()) continue;
                     // Add waypoint for the marker
                     try {
-                        waypointList.add(new FixedWaypoint(waypointPosition));
+                        String tempDisplayName = FixedWaypoint.getDisplayName(waypointPosition.name);
+                        if (!tempDisplayName.isEmpty() && !tempDisplayName.isBlank()){
+                            String tempAbbreviation = FixedWaypoint.getAbbreviation(tempDisplayName);
+                            if (!tempAbbreviation.isEmpty() && !tempAbbreviation.isBlank()){
+                                waypointList.add(new FixedWaypoint(waypointPosition));
+                            }
+                        }
                     } catch (NullPointerException e) {
                         AbstractModInitializer.LOGGER.warn("can't add marker waypoint");
                         e.printStackTrace();

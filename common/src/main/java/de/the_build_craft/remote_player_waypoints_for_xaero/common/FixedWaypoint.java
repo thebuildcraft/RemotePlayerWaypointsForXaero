@@ -29,7 +29,7 @@ import xaero.common.minimap.waypoints.Waypoint;
  * @author ewpratten
  * @author eatmyvenom
  * @author Leander Knüttel
- * @version 14.06.2024
+ * @version 17.06.2024
  */
 public class FixedWaypoint extends Waypoint {
     public FixedWaypoint(WaypointPosition wp) {
@@ -37,8 +37,11 @@ public class FixedWaypoint extends Waypoint {
     }
 
     public FixedWaypoint(int x, int y, int z, String name) {
-        super(x, y, z, name, "SVR", CommonModConfig.Instance.markerWaypointColor(), 0, true);
+        super(x, y, z, getDisplayName(name), getAbbreviation(getDisplayName(name)),
+                CommonModConfig.Instance.markerWaypointColor(), 0, true);
+    }
 
+    public static String getDisplayName(String name){
         if (name.startsWith("<")) {
             int i = name.indexOf(">");
             if (i != (name.length() - 1)) {
@@ -46,15 +49,16 @@ public class FixedWaypoint extends Waypoint {
                 name = name.substring(i + 1, j);
             }
         }
-        this.setName(name);
+        return name;
+    }
 
+    public static String getAbbreviation(String name){
         StringBuilder abbreviation = new StringBuilder();
         String[] words = name.split("[ _\\-,:;.]");
         for (String word : words) {
             if (word.isEmpty()) continue;
             abbreviation.append(word.substring(0, 1).toUpperCase());
         }
-
-        this.setSymbol(abbreviation.toString());
+        return abbreviation.toString();
     }
 }
