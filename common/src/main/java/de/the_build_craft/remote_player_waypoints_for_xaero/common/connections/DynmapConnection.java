@@ -36,7 +36,7 @@ import java.util.ArrayList;
  * @author ewpratten
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 15.06.2024
+ * @version 17.06.2024
  */
 public class DynmapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -101,16 +101,10 @@ public class DynmapConnection extends MapConnection {
                 i = mapConfig.indexOf("update: ");
                 j = mapConfig.indexOf(",", i);
                 String updateStringTemplate = mapConfig.substring(i + 9, j - 1);
-                i = updateStringTemplate.indexOf("?");
-                if (i != -1){
-                    updateStringTemplate = updateStringTemplate.substring(0, i);
-                }
-                if (updateStringTemplate.endsWith("{timestamp}")){
-                    updateStringTemplate = updateStringTemplate.substring(0, updateStringTemplate.length() - 11);
-                }
                 if (!updateStringTemplate.startsWith("/")){
                     updateStringTemplate = "/" + updateStringTemplate;
                 }
+                updateStringTemplate = updateStringTemplate.replace("{timestamp}", "1");
 
                 AbstractModInitializer.LOGGER.info("updateStringTemplate: " + updateStringTemplate);
 
