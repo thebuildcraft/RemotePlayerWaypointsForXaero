@@ -68,6 +68,9 @@ public class Pl3xMapConnection extends MapConnection{
         queryURL = URI.create(baseURL + "/tiles/settings.json").toURL();
         markerLayerStringTemplate = baseURL + "/tiles/{world}/markers.json";
         markerStringTemplate = baseURL + "/tiles/{world}/markers/{layerName}.json";
+
+        onlineMapConfigLink = baseURL + "/tiles/settings.json";
+
         // Test the url
         PlayerPosition[] a = this.getPlayerPositions();
 

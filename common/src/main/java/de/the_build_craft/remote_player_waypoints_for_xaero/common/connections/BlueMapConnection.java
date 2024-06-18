@@ -43,12 +43,13 @@ import java.lang.reflect.Type;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 15.06.2024
+ * @version 18.06.2024
  */
 public class BlueMapConnection extends MapConnection {
     public int lastWorldIndex;
     public List<URL> playerUrls;
     public List<URL> markerUrls;
+    public List<String> worlds = new ArrayList<>();
 
     public BlueMapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         super(serverEntry, updateTask);
@@ -79,7 +80,10 @@ public class BlueMapConnection extends MapConnection {
                 URI.create(baseURL + "/settings.json?").toURL(), BlueMapConfiguration.class)).maps){
             playerUrls.add(URI.create(baseURL + "/maps/" + w + "/live/players.json?").toURL());
             markerUrls.add(URI.create(baseURL + "/maps/" + w + "/live/markers.json?").toURL());
+            worlds.add(w);
         }
+
+        onlineMapConfigLink = baseURL + "/settings.json?";
 
         // Test the urls
         PlayerPosition[] a = this.getPlayerPositions();
@@ -102,7 +106,13 @@ public class BlueMapConnection extends MapConnection {
     @Override
     public WaypointPosition[] getWaypointPositions() throws IOException {
         Type apiResponseType = new TypeToken<Map<String, BlueMapMarkerSet>>() {}.getType();
-        URL reqUrl = markerUrls.get(lastWorldIndex);
+        URL reqUrl;
+        if (AbstractModInitializer.overwriteCurrentDimension && !Objects.equals(currentDimension, "")){
+            reqUrl = markerUrls.get(worlds.indexOf(currentDimension));
+        }
+        else{
+            reqUrl = markerUrls.get(lastWorldIndex);
+        }
         Map<String, BlueMapMarkerSet> markerSets = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
 
         ArrayList<WaypointPosition> positions = new ArrayList<>();
@@ -130,47 +140,55 @@ public class BlueMapConnection extends MapConnection {
         boolean correctWorld = false;
         BlueMapPlayerUpdate update = null;
 
-        try{
-            update = HTTP.makeJSONHTTPRequest(playerUrls.get(lastWorldIndex), BlueMapPlayerUpdate.class);
-            for (BlueMapPlayerUpdate.Player p : update.players){
-                if (Objects.equals(p.name, clientName)){
-                    correctWorld = !p.foreign;
-                    break;
+        if (AbstractModInitializer.overwriteCurrentDimension && !Objects.equals(currentDimension, "")){
+            update = HTTP.makeJSONHTTPRequest(playerUrls.get(worlds.indexOf(currentDimension)), BlueMapPlayerUpdate.class);
+        }
+        else{
+            try{
+                update = HTTP.makeJSONHTTPRequest(playerUrls.get(lastWorldIndex), BlueMapPlayerUpdate.class);
+                for (BlueMapPlayerUpdate.Player p : update.players){
+                    if (Objects.equals(p.name, clientName)){
+                        correctWorld = !p.foreign;
+                        break;
+                    }
                 }
             }
-        }
-        catch (Exception ignored){
-            if (CommonModConfig.Instance.debugMode()){
-                Utils.sendToClientChat("removed broken link: " + playerUrls.get(lastWorldIndex));
+            catch (Exception ignored){
+                if (CommonModConfig.Instance.debugMode()){
+                    Utils.sendToClientChat("removed broken link: " + playerUrls.get(lastWorldIndex));
+                }
+                playerUrls.remove(lastWorldIndex);
+                markerUrls.remove(lastWorldIndex);
+                worlds.remove(lastWorldIndex);
             }
-            playerUrls.remove(lastWorldIndex);
-            markerUrls.remove(lastWorldIndex);
-        }
-        if (!correctWorld){
-            for (int i = 0; i < playerUrls.size(); i++) {
-                try{
-                    update = HTTP.makeJSONHTTPRequest(playerUrls.get(i), BlueMapPlayerUpdate.class);
-                    for (BlueMapPlayerUpdate.Player p : update.players){
-                        if (Objects.equals(p.name, clientName)){
-                            correctWorld = !p.foreign;
-                            break;
+            if (!correctWorld){
+                for (int i = 0; i < playerUrls.size(); i++) {
+                    try{
+                        update = HTTP.makeJSONHTTPRequest(playerUrls.get(i), BlueMapPlayerUpdate.class);
+                        for (BlueMapPlayerUpdate.Player p : update.players){
+                            if (Objects.equals(p.name, clientName)){
+                                correctWorld = !p.foreign;
+                                break;
+                            }
                         }
                     }
-                }
-                catch (Exception ignored){
-                    if (CommonModConfig.Instance.debugMode()){
-                        Utils.sendToClientChat("removed broken link: " + playerUrls.get(i));
+                    catch (Exception ignored){
+                        if (CommonModConfig.Instance.debugMode()){
+                            Utils.sendToClientChat("removed broken link: " + playerUrls.get(i));
+                        }
+                        playerUrls.remove(i);
+                        markerUrls.remove(i);
+                        worlds.remove(i);
                     }
-                    playerUrls.remove(i);
-                    markerUrls.remove(i);
-                }
 
-                if (correctWorld) {
-                    lastWorldIndex = i;
-                    break;
+                    if (correctWorld) {
+                        lastWorldIndex = i;
+                        break;
+                    }
                 }
             }
         }
+
         if ((update == null) || playerUrls.isEmpty()){
             throw new IllegalStateException("Can't get player positions. All Bluemap links are broken!");
         }

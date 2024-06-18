@@ -29,6 +29,7 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Util
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Represents a connection to a dynmap server
@@ -91,6 +92,7 @@ public class DynmapConnection extends MapConnection {
                     substring = substring.substring(0, k);
                 }
                 AbstractModInitializer.LOGGER.info("configuration link: " + baseURL + substring);
+                onlineMapConfigLink = baseURL + substring;
 
                 // Get the first world name. I know it seems random. Just trust me...
                 firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
@@ -131,6 +133,8 @@ public class DynmapConnection extends MapConnection {
                     firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
                             URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name;
 
+                    onlineMapConfigLink = baseURL + "/up/configuration";
+
                     // Build the url
                     queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
                     markerStringTemplate = baseURL + "/tiles/_markers_/marker_{world}.json";
@@ -146,6 +150,8 @@ public class DynmapConnection extends MapConnection {
                     // Get the first world name. I know it seems random. Just trust me...
                     firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
                             URI.create(baseURL + "/standalone/dynmap_config.json?").toURL(), DynmapConfiguration.class)).worlds[0].name;
+
+                    onlineMapConfigLink = baseURL + "/standalone/dynmap_config.json?";
 
                     // Build the url
                     queryURL = URI.create(baseURL + "/standalone/world/" + firstWorldName + ".json?").toURL();
@@ -195,6 +201,9 @@ public class DynmapConnection extends MapConnection {
             dimension = firstWorldName;
         }
         else {
+            dimension = currentDimension;
+        }
+        if (AbstractModInitializer.overwriteCurrentDimension && !Objects.equals(currentDimension, "")){
             dimension = currentDimension;
         }
         if (markerStringTemplate.isEmpty() || dimension.isEmpty()) {

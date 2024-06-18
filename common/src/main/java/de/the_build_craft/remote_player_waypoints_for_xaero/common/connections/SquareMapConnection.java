@@ -65,6 +65,9 @@ public class SquareMapConnection extends MapConnection {
         // Build the url
         queryURL = URI.create(baseURL + "/tiles/players.json").toURL();
         markerStringTemplate = baseURL + "/tiles/{world}/markers.json";
+
+        onlineMapConfigLink = baseURL + "/tiles/settings.json";
+
         // Test the url
         PlayerPosition[] a = this.getPlayerPositions();
 

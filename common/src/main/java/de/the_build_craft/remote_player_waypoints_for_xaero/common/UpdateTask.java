@@ -53,7 +53,7 @@ import java.util.*;
  * @author ewpratten
  * @author eatmyvenom
  * @author Leander Knüttel
- * @version 17.06.2024
+ * @version 18.06.2024
  */
 public class UpdateTask extends TimerTask {
     private final Minecraft mc;
@@ -98,7 +98,7 @@ public class UpdateTask extends TimerTask {
         String serverIP = mc.getCurrentServer().ip.toLowerCase(Locale.ROOT);
 
         if (!Objects.equals(currentServerIP, serverIP)){
-            currentServerIP = "";
+            currentServerIP = serverIP;
             Reset();
             AbstractModInitializer.LOGGER.info("Server ip has changed!");
         }
@@ -120,14 +120,14 @@ public class UpdateTask extends TimerTask {
                                             "Make sure to add it to the config. (this server ip was detected: " + serverIP + ") ")
                                     .setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)).append(Text.literal("[ignore this server]")
                                             .setStyle(Style.EMPTY.withColor(ChatFormatting.GREEN).withBold(true)
-                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ignore_server")))));
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + AbstractModInitializer.MOD_ID + " ignore_server")))));
                         } else {
                             Utils.sendToClientChat(Text.literal("[" + AbstractModInitializer.MOD_NAME + "]: " +
                                             "Could not find an online map link for this server. " +
                                             "Make sure to add it to the config. (this server ip was detected: " + serverIP + ") ")
                                     .setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)).append(Text.literal("[ignore this server]")
                                             .setStyle(Style.EMPTY.withColor(ChatFormatting.GREEN).withBold(true)
-                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/ignore_server")))));
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + AbstractModInitializer.MOD_ID + " ignore_server")))));
                         }//                                                        RUN_COMMAND doesn't seem to work on Forge and NeoForge...
 
                         cantFindServerErrorWasShown = true;

@@ -46,7 +46,7 @@ import java.util.Timer;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 15.06.2024
+ * @version 18.06.2024
  */
 public abstract class AbstractModInitializer
 {
@@ -75,6 +75,7 @@ public abstract class AbstractModInitializer
 
 	public static boolean enabled = true;
 	public static boolean mapModInstalled = false;
+	public static boolean overwriteCurrentDimension = false;
 	
 	//==================//
 	// abstract methods //
@@ -180,12 +181,14 @@ public abstract class AbstractModInitializer
 	}*/
 
 	public static void registerClientCommands(CommandDispatcher<CommandSourceStack> dispatcher){
-		LiteralArgumentBuilder<CommandSourceStack> ignoreCommand = literal("ignore_server")
-				.executes(context -> {IgnoreServer(); return 1;});
+		LiteralArgumentBuilder<CommandSourceStack> baseCommand = literal(MOD_ID);
+
+		LiteralArgumentBuilder<CommandSourceStack> ignoreCommand = baseCommand.then(literal("ignore_server")
+				.executes(context -> {IgnoreServer(); return 1;}));
 
 		dispatcher.register(ignoreCommand);
 
-		LiteralArgumentBuilder<CommandSourceStack> setAfkTimeCommand = literal("set_afk_time")
+		LiteralArgumentBuilder<CommandSourceStack> setAfkTimeCommand = baseCommand.then(literal("set_afk_time")
 				.then(argument("player", StringArgumentType.word())
 						.then(argument("time", IntegerArgumentType.integer(0))
 								.executes(context -> {
@@ -195,9 +198,48 @@ public abstract class AbstractModInitializer
 									AbstractModInitializer.AfkDic.put(playerName, time > 0);
 									Utils.sendToClientChat("Set AFK time for " + playerName + " to " + time);
 									return 1;
-								})));
+								}))));
 
 		dispatcher.register(setAfkTimeCommand);
+
+		LiteralArgumentBuilder<CommandSourceStack> setCurrentDimensionCommand = baseCommand.then(literal("set_current_dimension")
+				.then(argument("dimension", StringArgumentType.word())
+						.executes(context -> {
+							if (connection == null){
+								Utils.sendErrorToClientChat("Not connected to a server!");
+							}
+							else{
+								String dimension = StringArgumentType.getString(context, "dimension");
+								connection.currentDimension = dimension;
+								Utils.sendToClientChat("Set current-dimension to: " + dimension);
+							}
+							return 1;
+						})));
+
+		dispatcher.register(setCurrentDimensionCommand);
+
+		LiteralArgumentBuilder<CommandSourceStack> setCurrentDimensionOverwriteCommand = baseCommand.then(literal("set_current_dimension_overwrite")
+				.then(argument("on", StringArgumentType.word())
+						.executes(context -> {
+							overwriteCurrentDimension = Boolean.parseBoolean(StringArgumentType.getString(context, "on"));
+							Utils.sendToClientChat("Set dimension-overwrite to: " + overwriteCurrentDimension);
+							return 1;
+						})));
+
+		dispatcher.register(setCurrentDimensionOverwriteCommand);
+
+		LiteralArgumentBuilder<CommandSourceStack> openOnlineMapConfig = baseCommand.then(literal("open_online_map_config")
+				.executes(context -> {
+					if (connection == null){
+						Utils.sendErrorToClientChat("Not connected to a server!");
+					}
+					else{
+						connection.OpenOnlineMapConfig();
+					}
+					return 1;
+				}));
+
+		dispatcher.register(openOnlineMapConfig);
 
 		//register client commands here
 	}

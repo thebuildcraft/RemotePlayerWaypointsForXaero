@@ -25,8 +25,11 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.common.PlayerPositio
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.AbstractModInitializer;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.UpdateTask;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.WaypointPosition;
+import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Text;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Utils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -37,12 +40,13 @@ import java.util.Objects;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 15.06.2024
+ * @version 18.06.2024
  */
 public abstract class MapConnection {
     public URL queryURL;
     public final Minecraft mc;
-    protected String currentDimension;
+    public String currentDimension;
+    public String onlineMapConfigLink;
 
     public MapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) {
         this.mc = Minecraft.getInstance();
@@ -82,10 +86,12 @@ public abstract class MapConnection {
             return new PlayerPosition[0];
         }
         String clientName = mc.player.getName().getString();
-        currentDimension = "";
-        for (PlayerPosition p : playerPositions){
-            if (Objects.equals(p.player, clientName)) {
-                currentDimension = p.world;
+        if (!AbstractModInitializer.overwriteCurrentDimension) {
+            currentDimension = "";
+            for (PlayerPosition p : playerPositions){
+                if (Objects.equals(p.player, clientName)) {
+                    currentDimension = p.world;
+                }
             }
         }
 
@@ -123,4 +129,8 @@ public abstract class MapConnection {
     }
 
     public abstract WaypointPosition[] getWaypointPositions() throws IOException;
+
+    public void OpenOnlineMapConfig(){
+        Utils.sendToClientChat(Text.literal(onlineMapConfigLink).withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, onlineMapConfigLink))));
+    }
 }
