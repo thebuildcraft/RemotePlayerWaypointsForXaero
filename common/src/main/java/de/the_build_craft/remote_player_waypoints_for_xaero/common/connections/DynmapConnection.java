@@ -36,7 +36,7 @@ import java.util.ArrayList;
  * @author ewpratten
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 17.06.2024
+ * @version 18.06.2024
  */
 public class DynmapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -71,7 +71,7 @@ public class DynmapConnection extends MapConnection {
             PlayerPosition[] a = this.getPlayerPositions();
 
             if (CommonModConfig.Instance.debugMode()){
-                Utils.sendToClientChat(("got link with method 1"));
+                Utils.sendToClientChat(("got link with method 1 | overwrite mode active!"));
             }
         }
         catch (Exception a){
@@ -112,7 +112,6 @@ public class DynmapConnection extends MapConnection {
                 int l = "markers: ".length() + 1;
                 j = mapConfig.indexOf("'", i + l + 1);
                 markerStringTemplate = baseURL + "/" + mapConfig.substring(i + l, j) + "_markers_/marker_{world}.json";
-                //TODO: check if this works with every online map
 
                 // Build the url
                 queryURL = URI.create(baseURL + updateStringTemplate.replace("{world}", firstWorldName)).toURL();
@@ -123,7 +122,7 @@ public class DynmapConnection extends MapConnection {
                 PlayerPosition[] b = this.getPlayerPositions();
 
                 if (CommonModConfig.Instance.debugMode()){
-                    Utils.sendToClientChat("got link with method 2");
+                    Utils.sendToClientChat("got link with method 2 | that is good!");
                 }
             }
             catch (Exception b){
@@ -140,7 +139,7 @@ public class DynmapConnection extends MapConnection {
                     PlayerPosition[] c = this.getPlayerPositions();
 
                     if (CommonModConfig.Instance.debugMode()){
-                        Utils.sendToClientChat("got link with method 3");
+                        Utils.sendErrorToClientChat("got link with method 3 instead of 2 | please report this on github!");
                     }
                 }
                 catch (Exception ignored){
@@ -156,7 +155,7 @@ public class DynmapConnection extends MapConnection {
                     PlayerPosition[] c = this.getPlayerPositions();
 
                     if (CommonModConfig.Instance.debugMode()){
-                        Utils.sendToClientChat("got link with method 4");
+                        Utils.sendErrorToClientChat("got link with method 4 instead of 2 | please report this on github!");
                     }
                 }
             }
