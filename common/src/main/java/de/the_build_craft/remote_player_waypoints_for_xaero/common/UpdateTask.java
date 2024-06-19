@@ -53,7 +53,7 @@ import java.util.*;
  * @author ewpratten
  * @author eatmyvenom
  * @author Leander Knüttel
- * @version 18.06.2024
+ * @version 19.06.2024
  */
 public class UpdateTask extends TimerTask {
     private final Minecraft mc;
@@ -66,9 +66,11 @@ public class UpdateTask extends TimerTask {
     private boolean connectionErrorWasShown = false;
     private boolean cantFindServerErrorWasShown = false;
     private boolean cantGetPlayerPositionsErrorWasShown = false;
+    private boolean markerMessageWasShown = false;
     public boolean linkBrokenErrorWasShown = false;
 
     private String currentServerIP = "";
+    private final int maxMarkerCountBeforeWarning = 25;
 
     @Override
     public void run() {
@@ -243,6 +245,7 @@ public class UpdateTask extends TimerTask {
                     }
                 }
 
+                int markerCount = 0;
                 for( WaypointPosition waypointPosition : waypointPositions){
                     if (waypointPosition == null) continue;
 
@@ -255,12 +258,25 @@ public class UpdateTask extends TimerTask {
                             String tempAbbreviation = FixedWaypoint.getAbbreviation(tempDisplayName);
                             if (!tempAbbreviation.isEmpty() && !tempAbbreviation.isBlank()){
                                 waypointList.add(new FixedWaypoint(waypointPosition));
+                                markerCount++;
                             }
                         }
                     } catch (NullPointerException e) {
                         AbstractModInitializer.LOGGER.warn("can't add marker waypoint");
                         e.printStackTrace();
                     }
+                }
+
+                if (!markerMessageWasShown && markerCount > maxMarkerCountBeforeWarning && !CommonModConfig.Instance.ignoreMarkerMessage()){
+                    markerMessageWasShown = true;
+                    Utils.sendToClientChat(Text.literal("[" + AbstractModInitializer.MOD_NAME + "]: " +
+                            "Looks like you have quite a lot of markers from the server visible! " +
+                            "Did you know that you can decrease their maximum distance or disable marker waypoints entirely? ")
+                            .withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD))
+                            .append(Text.literal("[Don't show this again]")
+                                    .withStyle(Style.EMPTY.withClickEvent(
+                                            new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + AbstractModInitializer.MOD_ID + " ignore_marker_message"))
+                                            .withColor(ChatFormatting.GREEN).withBold(true))));
                 }
             }
         } catch (ConcurrentModificationException e) {
@@ -279,5 +295,6 @@ public class UpdateTask extends TimerTask {
         cantFindServerErrorWasShown = false;
         cantGetPlayerPositionsErrorWasShown = false;
         linkBrokenErrorWasShown = false;
+        markerMessageWasShown = false;
     }
 }

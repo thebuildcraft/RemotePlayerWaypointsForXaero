@@ -21,5 +21,6 @@
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.debugMode": "debugMode - just ignore this",
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.showAfkTimeInTabList": "show AFK time in tab list",
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.ignoredServers": "ignored servers",
-  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.defaultY": "default y"
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.defaultY": "default y",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.ignoreMarkerMessage": "ignore marker message"
 }

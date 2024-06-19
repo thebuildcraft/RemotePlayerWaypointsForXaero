@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 14.06.2024
+ * @version 19.06.2024
  */
 public abstract class CommonModConfig {
     public CommonModConfig() {
@@ -51,6 +51,8 @@ public abstract class CommonModConfig {
     public abstract boolean debugMode();
     public abstract List<String> ignoredServers();
     public abstract List<ServerEntry> serverEntries();
+    public abstract void setIgnoreMarkerMessage(boolean on);
+    public abstract boolean ignoreMarkerMessage();
 
     public static class ServerEntry {
         public Maptype maptype;

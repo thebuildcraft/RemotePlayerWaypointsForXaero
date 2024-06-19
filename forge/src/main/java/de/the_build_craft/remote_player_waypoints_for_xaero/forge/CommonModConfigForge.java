@@ -41,7 +41,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 16.06.2024
+ * @version 19.06.2024
  */
 public class CommonModConfigForge extends CommonModConfig {
     public CommonModConfigForge(){
@@ -160,5 +160,16 @@ public class CommonModConfigForge extends CommonModConfig {
             seN.add(new ServerEntry(s.ip, s.link, ServerEntry.Maptype.valueOf(s.maptype.toString())));
         }
         return seN;
+    }
+
+    @Override
+    public void setIgnoreMarkerMessage(boolean on) {
+        AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.ignoreMarkerMessage = on;
+        saveConfig();
+    }
+
+    @Override
+    public boolean ignoreMarkerMessage() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.ignoreMarkerMessage;
     }
 }

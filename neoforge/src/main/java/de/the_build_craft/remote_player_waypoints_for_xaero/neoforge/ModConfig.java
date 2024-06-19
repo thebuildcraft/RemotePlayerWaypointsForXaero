@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 16.06.2024
+ * @version 19.06.2024
  */
 @Config(name = "remote_player_waypoints_for_xaero")
 #if MC_VER < MC_1_20_6
@@ -95,6 +95,8 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         public boolean debugMode = false;
 
         public List<String> ignoredServers = new ArrayList<>();
+
+        public boolean ignoreMarkerMessage = false;
 
         public ModuleA() {
         }

@@ -46,7 +46,7 @@ import java.util.Timer;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 18.06.2024
+ * @version 19.06.2024
  */
 public abstract class AbstractModInitializer
 {
@@ -240,6 +240,15 @@ public abstract class AbstractModInitializer
 				}));
 
 		dispatcher.register(openOnlineMapConfig);
+
+		LiteralArgumentBuilder<CommandSourceStack> ignoreMarkerMessageCommand = baseCommand.then(literal("ignore_marker_message")
+				.executes(context -> {
+					CommonModConfig.Instance.setIgnoreMarkerMessage(true);
+					Utils.sendToClientChat("You will not receive this warning again!");
+					return 1;
+				}));
+
+		dispatcher.register(ignoreMarkerMessageCommand);
 
 		//register client commands here
 	}
