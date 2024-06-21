@@ -37,7 +37,7 @@ import java.util.Objects;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 15.06.2024
+ * @version 21.06.2024
  */
 public class Pl3xMapConnection extends MapConnection{
     private String markerLayerStringTemplate = "";
@@ -105,7 +105,7 @@ public class Pl3xMapConnection extends MapConnection{
 
         for (String layer : getMarkerLayers()){
             Type apiResponseType = new TypeToken<Pl3xMapMarkerUpdate[]>() {}.getType();
-            URL reqUrl = URI.create(markerStringTemplate.replace("{world}", currentDimension)
+            URL reqUrl = URI.create(markerStringTemplate.replace("{world}", currentDimension.replaceAll(":", "-"))
                     .replace("{layerName}", layer)).toURL();
             Pl3xMapMarkerUpdate[] markers = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
 
@@ -120,7 +120,7 @@ public class Pl3xMapConnection extends MapConnection{
 
     private String[] getMarkerLayers() throws IOException {
         Type apiResponseType = new TypeToken<Pl3xMapMarkerLayerConfig[]>() {}.getType();
-        URL reqUrl = URI.create(markerLayerStringTemplate.replace("{world}", currentDimension)).toURL();
+        URL reqUrl = URI.create(markerLayerStringTemplate.replace("{world}", currentDimension.replaceAll(":", "-"))).toURL();
         Pl3xMapMarkerLayerConfig[] markerLayers = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
 
         ArrayList<String> layers = new ArrayList<>();
