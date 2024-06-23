@@ -21,6 +21,7 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.mixins.fabric;
 
+import de.the_build_craft.remote_player_waypoints_for_xaero.common.AbstractModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -32,6 +33,8 @@ import java.util.Set;
 /**
  * @author coolGi
  * @author cortex
+ * @author Leander Knüttel
+ * @version 23.06.2024
  */
 public class FabricMixinPlugin implements IMixinConfigPlugin
 {
@@ -41,13 +44,17 @@ public class FabricMixinPlugin implements IMixinConfigPlugin
 	{
 		if (mixinClassName.contains(".mods."))
 		{ // If the mixin wants to go into a mod then we check if that mod is loaded or not
-			return FabricLoader.getInstance().isModLoaded(
-					mixinClassName
-							// What these 2 regex's do is get the mod name that we are checking out of the mixinClassName
-							// Eg. "de.the_build_craft.remote_player_waypoints_for_xaero.mixins.mods.sodium.MixinSodiumChunkRenderer" turns into "sodium"
-							.replaceAll("^.*mods.", "") // Replaces everything before the mods
-							.replaceAll("\\..*$", "") // Replaces everything after the mod name
-			);
+			String modId = mixinClassName
+					// What these 2 regex's do is get the mod name that we are checking out of the mixinClassName
+					// Eg. "de.the_build_craft.remote_player_waypoints_for_xaero.mixins.mods.sodium.MixinSodiumChunkRenderer" turns into "sodium"
+					.replaceAll("^.*mods.", "") // Replaces everything before the mods
+					.replaceAll("\\..*$", ""); // Replaces everything after the mod name
+			boolean isModLoaded = false;
+			for (String aliasId : AbstractModInitializer.getModIdAliases(modId)){
+				if (FabricLoader.getInstance().isModLoaded(aliasId)) isModLoaded = true;
+			}
+
+			return isModLoaded;
 		}
 		return true;
 	}

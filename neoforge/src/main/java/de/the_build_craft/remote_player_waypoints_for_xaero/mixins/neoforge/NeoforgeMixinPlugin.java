@@ -21,6 +21,7 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.mixins.neoforge;
 
+import de.the_build_craft.remote_player_waypoints_for_xaero.common.AbstractModInitializer;
 import net.neoforged.fml.ModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -32,6 +33,8 @@ import java.util.Set;
 /**
  * @author coolGi
  * @author cortex
+ * @author Leander Knüttel
+ * @version 23.06.2024
  */
 public class NeoforgeMixinPlugin implements IMixinConfigPlugin
 {
@@ -52,18 +55,21 @@ public class NeoforgeMixinPlugin implements IMixinConfigPlugin
 		}
 		if (!this.isNeoforgeMixinFile)
 			return false;
-		
+
 		if (mixinClassName.contains(".mods."))
 		{ // If the mixin wants to go into a mod then we check if that mod is loaded or not
-			return ModList.get().isLoaded(
-					mixinClassName
-							// What these 2 regex's do is get the mod name that we are checking out of the mixinClassName
-							// Eg. "de.the_build_craft.remote_player_waypoints_for_xaero.mixins.mods.sodium.MixinSodiumChunkRenderer" turns into "sodium"
-							.replaceAll("^.*mods.", "") // Replaces everything before the mods
-							.replaceAll("\\..*$", "") // Replaces everything after the mod name
-			);
+			String modId = mixinClassName
+					// What these 2 regex's do is get the mod name that we are checking out of the mixinClassName
+					// Eg. "de.the_build_craft.remote_player_waypoints_for_xaero.mixins.mods.sodium.MixinSodiumChunkRenderer" turns into "sodium"
+					.replaceAll("^.*mods.", "") // Replaces everything before the mods
+					.replaceAll("\\..*$", ""); // Replaces everything after the mod name
+			boolean isModLoaded = false;
+			for (String aliasId : AbstractModInitializer.getModIdAliases(modId)){
+				if (ModList.get().isLoaded(aliasId)) isModLoaded = true;
+			}
+
+			return isModLoaded;
 		}
-		
 		return true;
 	}
 	

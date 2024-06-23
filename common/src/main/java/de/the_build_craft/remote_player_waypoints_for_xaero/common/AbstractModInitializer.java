@@ -46,7 +46,7 @@ import java.util.Timer;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 19.06.2024
+ * @version 23.06.2024
  */
 public abstract class AbstractModInitializer
 {
@@ -308,6 +308,19 @@ public abstract class AbstractModInitializer
 		}
 		else{
 			Utils.sendToClientChat("This can only be executed on a server!");
+		}
+	}
+
+	public static String[] getModIdAliases(String id){
+		HashMap<String, String[]> modIdAliases = new HashMap<>();
+
+		modIdAliases.put("xaerominimap", new String[]{"xaerominimapfair", "xaerobetterpvp", "xaerobetterpvpfair"});
+
+		if (modIdAliases.containsKey(id)){
+			return modIdAliases.get(id);
+		}
+		else{
+			return new String[]{id};
 		}
 	}
 	
