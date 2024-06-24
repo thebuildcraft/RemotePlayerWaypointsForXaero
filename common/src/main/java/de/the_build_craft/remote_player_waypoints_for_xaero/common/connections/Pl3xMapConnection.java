@@ -32,12 +32,13 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 21.06.2024
+ * @version 24.06.2024
  */
 public class Pl3xMapConnection extends MapConnection{
     private String markerLayerStringTemplate = "";
@@ -72,7 +73,7 @@ public class Pl3xMapConnection extends MapConnection{
         onlineMapConfigLink = baseURL + "/tiles/settings.json";
 
         // Test the url
-        PlayerPosition[] a = this.getPlayerPositions();
+        this.getPlayerPositions();
 
         AbstractModInitializer.LOGGER.info("new link: " + queryURL);
         if (CommonModConfig.Instance.debugMode()){
@@ -81,7 +82,7 @@ public class Pl3xMapConnection extends MapConnection{
     }
 
     @Override
-    public PlayerPosition[] getPlayerPositions() throws IOException {
+    public HashMap<String, PlayerPosition> getPlayerPositions() throws IOException {
         // Make request for all players
         Pl3xMapPlayerUpdate update = HTTP.makeJSONHTTPRequest(queryURL, Pl3xMapPlayerUpdate.class);
 

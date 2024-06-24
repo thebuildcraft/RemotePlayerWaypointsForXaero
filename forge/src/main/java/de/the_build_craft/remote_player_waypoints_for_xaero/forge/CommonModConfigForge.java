@@ -41,7 +41,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 19.06.2024
+ * @version 24.06.2024
  */
 public class CommonModConfigForge extends CommonModConfig {
     public CommonModConfigForge(){
@@ -80,6 +80,11 @@ public class CommonModConfigForge extends CommonModConfig {
     @Override
     public boolean enableMarkerWaypoints() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.enableMarkerWaypoints;
+    }
+
+    @Override
+    public boolean enableEntityRadar() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.enablePlayerIcons;
     }
 
     @Override

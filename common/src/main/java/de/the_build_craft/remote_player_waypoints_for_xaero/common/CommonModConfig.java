@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 19.06.2024
+ * @version 24.06.2024
  */
 public abstract class CommonModConfig {
     public CommonModConfig() {
@@ -36,6 +36,7 @@ public abstract class CommonModConfig {
     public abstract boolean enabled();
     public abstract boolean enablePlayerWaypoints();
     public abstract boolean enableMarkerWaypoints();
+    public abstract boolean enableEntityRadar();
     public abstract int updateDelay();
     public abstract int minDistance();
     public abstract int maxDistance();

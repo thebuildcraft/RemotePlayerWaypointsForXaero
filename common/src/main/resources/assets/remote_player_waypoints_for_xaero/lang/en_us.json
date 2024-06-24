@@ -3,6 +3,7 @@
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.enabled": "enable mod",
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.enablePlayerWaypoints": "enable Player Waypoints",
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.enableMarkerWaypoints": "enable Marker Waypoints",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.enablePlayerIcons": "enable Player Icons",
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.updateDelay": "update delay",
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.minDistance": "min player waypoint distance",
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.maxDistance": "max player waypoint distance",

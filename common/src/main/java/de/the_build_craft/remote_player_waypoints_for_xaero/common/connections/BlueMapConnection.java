@@ -27,23 +27,17 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.common.mapUpdates.Bl
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import com.google.common.reflect.TypeToken;
-import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Text;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Utils;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Style;
 
 import java.lang.reflect.Type;
 
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 18.06.2024
+ * @version 24.06.2024
  */
 public class BlueMapConnection extends MapConnection {
     public int lastWorldIndex;
@@ -86,7 +80,7 @@ public class BlueMapConnection extends MapConnection {
         onlineMapConfigLink = baseURL + "/settings.json?";
 
         // Test the urls
-        PlayerPosition[] a = this.getPlayerPositions();
+        this.getPlayerPositions();
 
         for (URL url : playerUrls){
             AbstractModInitializer.LOGGER.info("new link: " + url);
@@ -135,7 +129,7 @@ public class BlueMapConnection extends MapConnection {
     }
 
     @Override
-    public PlayerPosition[] getPlayerPositions() throws IOException {
+    public HashMap<String, PlayerPosition> getPlayerPositions() throws IOException {
         String clientName = mc.player.getName().getString();
         boolean correctWorld = false;
         BlueMapPlayerUpdate update = null;

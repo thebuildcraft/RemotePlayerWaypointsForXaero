@@ -29,9 +29,12 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Text
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Utils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 #if MC_VER == MC_1_17_1
 import xaero.common.AXaeroMinimap;
@@ -41,7 +44,6 @@ import xaero.common.HudMod;
 import xaero.common.XaeroMinimapSession;
 import xaero.common.minimap.waypoints.Waypoint;
 import xaero.common.minimap.waypoints.WaypointWorld;
-import xaero.common.minimap.waypoints.WaypointsManager;
 
 import java.io.IOException;
 import java.util.*;
@@ -52,8 +54,9 @@ import java.util.*;
  *
  * @author ewpratten
  * @author eatmyvenom
+ * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 19.06.2024
+ * @version 24.06.2024
  */
 public class UpdateTask extends TimerTask {
     private final Minecraft mc;
@@ -61,38 +64,82 @@ public class UpdateTask extends TimerTask {
     public UpdateTask() {
         this.mc = Minecraft.getInstance();
     }
-    private static final String DEFAULT_PLAYER_SET_NAME = "AbstractModInitializer_Temp";
+    private static final String PLAYER_SET_NAME = AbstractModInitializer.MOD_NAME +  "_Player";
+    private static final String MARKER_SET_NAME = AbstractModInitializer.MOD_NAME +  "_Marker";
 
     private boolean connectionErrorWasShown = false;
     private boolean cantFindServerErrorWasShown = false;
     private boolean cantGetPlayerPositionsErrorWasShown = false;
+    private boolean cantGetMarkerPositionsErrorWasShown = false;
     private boolean markerMessageWasShown = false;
     public boolean linkBrokenErrorWasShown = false;
 
     private String currentServerIP = "";
     private final int maxMarkerCountBeforeWarning = 25;
 
+    public static HashMap<String, PlayerPosition> playerPositions;
+    private WaypointPosition[] markerWaypointPositions;
+    private String previousDimensionName;
+    private ArrayList<Waypoint> playerWaypointList = null;
+    private ArrayList<Waypoint> markerWaypointList = null;
+    boolean switchedDimension = false;
+    boolean previousMarkerWaypointVisibility = false;
+    boolean toggledMarkerWaypoints = false;
+
     @Override
     public void run() {
+        try{
+            runUpdate();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void runUpdate() {
+        // Skip if not in game
+        if (mc.level == null
+                || mc.player == null
+                || mc.cameraEntity == null
+                || (mc.getSingleplayerServer() != null && !mc.getSingleplayerServer().isPublished())
+                || mc.getCurrentServer() == null
+                || mc.getConnection() == null
+                || !mc.getConnection().getConnection().isConnected()) {
+            Reset();
+            return;
+        }
+
+        playerWaypointList = null;
+        markerWaypointList = null;
+
         if (AbstractModInitializer.mapModInstalled){
-            Hashtable<Integer, Waypoint> cw = WaypointsManager.getCustomWaypoints("AbstractModInitializer");
-            cw.clear();
+            try{
+                // Access the current waypoint world
+                WaypointWorld currentWorld = XaeroMinimapSession.getCurrentSession().getWaypointsManager().getCurrentWorld();
+                if (!currentWorld.getSets().containsKey(PLAYER_SET_NAME)){
+                    currentWorld.addSet(PLAYER_SET_NAME);
+                }
+                if (!currentWorld.getSets().containsKey(MARKER_SET_NAME)){
+                    currentWorld.addSet(MARKER_SET_NAME);
+                }
+                playerWaypointList = currentWorld.getSets().get(PLAYER_SET_NAME).getList();
+                markerWaypointList = currentWorld.getSets().get(MARKER_SET_NAME).getList();
+            }
+            catch (Exception ignored){
+            }
         }
 
         AbstractModInitializer.enabled = CommonModConfig.Instance.enabled();
 
         // Skip if disabled
-        if (!CommonModConfig.Instance.enabled()) {
+        if (!AbstractModInitializer.enabled) {
             Reset();
-            return;
-        }
-
-        // Skip if not in game
-        if ((mc.getSingleplayerServer() != null && !mc.getSingleplayerServer().isPublished())
-                || mc.getCurrentServer() == null
-                || mc.getConnection() == null
-                || !mc.getConnection().getConnection().isConnected()) {
-            Reset();
+            if (playerWaypointList != null){
+                playerWaypointList.clear();
+            }
+            if (markerWaypointList != null){
+                markerWaypointList.clear();
+            }
             return;
         }
 
@@ -160,29 +207,44 @@ public class UpdateTask extends TimerTask {
                 return;
             }
         }
-        currentServerIP = serverIP;
 
         // Get a list of all player's positions
-        PlayerPosition[] playerPositions;
-        WaypointPosition[] waypointPositions;
         try {
             // this must be run no matter if it's activated in the config, to get the "currentDimension" and AFK info
             playerPositions = AbstractModInitializer.getConnection().getPlayerPositions();
-            if (CommonModConfig.Instance.enableMarkerWaypoints()){
-                waypointPositions = AbstractModInitializer.getConnection().getWaypointPositions();
-            }
-            else {
-                waypointPositions = new WaypointPosition[0];
-            }
         } catch (IOException e) {
             if (!cantGetPlayerPositionsErrorWasShown){
                 cantGetPlayerPositionsErrorWasShown = true;
                 Utils.sendErrorToClientChat("[" + AbstractModInitializer.MOD_NAME + "]: " +
-                        "Failed to make online map request. Please check your config (probably your link...) or report a bug.");
+                        "Failed to make online map request (for player waypoints). Please check your config (probably your link...) or report a bug.");
             }
             e.printStackTrace();
             AbstractModInitializer.setConnection(null);
             return;
+        }
+        switchedDimension = !Objects.equals(AbstractModInitializer.getConnection().currentDimension, previousDimensionName);
+        previousDimensionName = AbstractModInitializer.getConnection().currentDimension;
+
+        toggledMarkerWaypoints = CommonModConfig.Instance.enableMarkerWaypoints() != previousMarkerWaypointVisibility;
+        previousMarkerWaypointVisibility = CommonModConfig.Instance.enableMarkerWaypoints();
+
+        if (CommonModConfig.Instance.enableMarkerWaypoints()){
+            if (switchedDimension || toggledMarkerWaypoints){
+                try {
+                    markerWaypointPositions = AbstractModInitializer.getConnection().getWaypointPositions();
+                } catch (IOException e) {
+                    markerWaypointPositions = new WaypointPosition[0];
+                    if (!cantGetMarkerPositionsErrorWasShown){
+                        cantGetMarkerPositionsErrorWasShown = true;
+                        Utils.sendErrorToClientChat("[" + AbstractModInitializer.MOD_NAME + "]: " +
+                                "Failed to make online map request (for marker waypoints). Please check your config (probably your link...) or report a bug.");
+                    }
+                    e.printStackTrace();
+                }
+            }
+        }
+        else {
+            markerWaypointPositions = new WaypointPosition[0];
         }
 
         AbstractModInitializer.connected = true;
@@ -190,93 +252,150 @@ public class UpdateTask extends TimerTask {
         AbstractModInitializer.unknownAfkStateColor = CommonModConfig.Instance.unknownAfkStateColor();
         AbstractModInitializer.showAfkTimeInTabList = CommonModConfig.Instance.showAfkTimeInTabList();
 
-        if (!AbstractModInitializer.mapModInstalled){
+        if (!AbstractModInitializer.mapModInstalled || playerWaypointList == null || markerWaypointList == null){
             if (CommonModConfig.Instance.updateDelay() != AbstractModInitializer.TimerDelay){
                 AbstractModInitializer.setUpdateDelay(CommonModConfig.Instance.updateDelay());
             }
             return;
         }
 
-        WaypointWorld currentWorld = null;
-        try{
-            // Access the current waypoint world
-            currentWorld = XaeroMinimapSession.getCurrentSession().getWaypointsManager().getCurrentWorld();
-        }
-        catch (Exception ignored){
-        }
-
-        // Skip if the world is null
-        if (currentWorld == null) {
-            AbstractModInitializer.LOGGER.info("WaypointWorld is null, disconnecting from online map");
-            Reset();
-            return;
-        }
         #if MC_VER == MC_1_17_1
         AXaeroMinimap.INSTANCE.getSettings().renderAllSets = true;
         #else
         HudMod.INSTANCE.getSettings().renderAllSets = true;
         #endif
 
-        if (!currentWorld.getSets().containsKey(DEFAULT_PLAYER_SET_NAME)){
-            currentWorld.addSet(DEFAULT_PLAYER_SET_NAME);
+        // Update the player positions obtained from Dynmap with GameProfile data from the actual logged-in players
+        // This is required so that the entity radar properly shows the player's skin on player head icons
+        if(CommonModConfig.Instance.enableEntityRadar()) {
+            Collection<PlayerInfo> playerList = mc.getConnection().getOnlinePlayers();
+            for (PlayerInfo playerListEntity : playerList) {
+                String playerName = playerListEntity.getProfile().getName();
+                if (playerPositions.containsKey(playerName)) {
+                    playerPositions.get(playerName).gameProfile = playerListEntity.getProfile();
+                }
+            }
         }
-        ArrayList<Waypoint> waypointList = currentWorld.getSets().get(DEFAULT_PLAYER_SET_NAME).getList();
-        LocalPlayer clientPlayer = Minecraft.getInstance().player;
-        if (clientPlayer == null) return;
 
         try {
-            synchronized (waypointList) {
-                waypointList.clear();
-
+            synchronized (playerWaypointList) {
                 if (CommonModConfig.Instance.enablePlayerWaypoints()){
-                    // Add each player to the map
-                    for (PlayerPosition playerPosition : playerPositions) {
-                        if (playerPosition == null) continue;
-
-                        double d = clientPlayer.position().distanceTo(new Vec3(playerPosition.x, playerPosition.y, playerPosition.z));
-                        if (d < CommonModConfig.Instance.minDistance() || d > CommonModConfig.Instance.maxDistance()) continue;
-                        // Add waypoint for the player
-                        try {
-                            waypointList.add(new PlayerWaypoint(playerPosition));
-                        } catch (NullPointerException e) {
-                            AbstractModInitializer.LOGGER.warn("can't add player waypoint");
-                            e.printStackTrace();
-                        }
+                    // Create indexes of matching player names to waypoints to update the waypoints by index
+                    HashMap<String, Integer> waypointNamesIndexes = new HashMap<>(playerWaypointList.size());
+                    for (int i = 0; i < playerWaypointList.size(); i++) {
+                        Waypoint waypoint = playerWaypointList.get(i);
+                        waypointNamesIndexes.put(waypoint.getName(), i);
                     }
-                }
 
-                int markerCount = 0;
-                for( WaypointPosition waypointPosition : waypointPositions){
-                    if (waypointPosition == null) continue;
+                    // Create indexes of matching player names to player client entities
+                    // to get distances to each player in range by index
+                    List<AbstractClientPlayer> playerClientEntityList = mc.level.players();
+                    HashMap<String, Integer> playerClientEntityIndexes = new HashMap<>(playerWaypointList.size());
+                    for (int i = 0; i < playerClientEntityList.size(); i++) {
+                        AbstractClientPlayer playerClientEntity = playerClientEntityList.get(i);
+                        playerClientEntityIndexes.put(playerClientEntity.getGameProfile().getName(), i);
+                    }
 
-                    double d = clientPlayer.position().distanceTo(new Vec3(waypointPosition.x, waypointPosition.y, waypointPosition.z));
-                    if (d < CommonModConfig.Instance.minDistanceMarker() || d > CommonModConfig.Instance.maxDistanceMarker()) continue;
-                    // Add waypoint for the marker
-                    try {
-                        String tempDisplayName = FixedWaypoint.getDisplayName(waypointPosition.name);
-                        if (!tempDisplayName.isEmpty() && !tempDisplayName.isBlank()){
-                            String tempAbbreviation = FixedWaypoint.getAbbreviation(tempDisplayName);
-                            if (!tempAbbreviation.isEmpty() && !tempAbbreviation.isBlank()){
-                                waypointList.add(new FixedWaypoint(waypointPosition));
-                                markerCount++;
+                    // Keep track of which waypoints were previously shown
+                    // to remove any that are not to be shown anymore
+                    ArrayList<String> currentPlayerWaypointNames = new ArrayList<>();
+
+                    // Add each player to the map
+                    for (PlayerPosition playerPosition : playerPositions.values()) {
+                        if (playerPosition == null) continue;
+                        String playerName = playerPosition.player;
+
+                        int minimumWaypointDistanceToUse = CommonModConfig.Instance.minDistance();
+                        int maximumWaypointDistanceToUse = CommonModConfig.Instance.maxDistance();
+                        if (minimumWaypointDistanceToUse > maximumWaypointDistanceToUse)
+                            maximumWaypointDistanceToUse = minimumWaypointDistanceToUse;
+
+                        // If closer than the minimum waypoint distance or further away than the maximum waypoint distance,
+                        // don't show waypoint
+                        double d = mc.cameraEntity.position().distanceTo(new Vec3(playerPosition.x, playerPosition.y, playerPosition.z));
+                        if (d < minimumWaypointDistanceToUse || d > maximumWaypointDistanceToUse) continue;
+
+                        // Check if this player is within the server's player entity tracking range
+                        if (playerClientEntityIndexes.containsKey(playerName)) {
+                            AbstractClientPlayer playerClientEntity = playerClientEntityList.get(playerClientEntityIndexes.get(playerName));
+
+                            ClipContext clipContext = new ClipContext(mc.cameraEntity.position(), playerClientEntity.position(), ClipContext.Block.VISUAL, ClipContext.Fluid.ANY, mc.cameraEntity);
+                            // If this player is visible, don't show waypoint
+                            if (mc.level.clip(clipContext).getType() != HitResult.Type.BLOCK) {
+                                continue;
                             }
                         }
-                    } catch (NullPointerException e) {
-                        AbstractModInitializer.LOGGER.warn("can't add marker waypoint");
-                        e.printStackTrace();
+
+                        // If a waypoint for this player already exists, update it
+                        if (waypointNamesIndexes.containsKey(playerName)) {
+                            Waypoint waypoint = playerWaypointList.get(waypointNamesIndexes.get(playerName));
+
+                            waypoint.setX(playerPosition.x);
+                            waypoint.setY(playerPosition.y);
+                            waypoint.setZ(playerPosition.z);
+
+                            currentPlayerWaypointNames.add(waypoint.getName());
+                        }
+                        // Otherwise, add a waypoint for the player
+                        else {
+                            try {
+                                PlayerWaypoint currentPlayerWaypoint = new PlayerWaypoint(playerPosition);
+                                playerWaypointList.add(currentPlayerWaypoint);
+                                currentPlayerWaypointNames.add(currentPlayerWaypoint.getName());
+                            } catch (NullPointerException ignored) {
+                            }
+                        }
+                    }
+                    // Remove any waypoints for players not shown on the map anymore
+                    playerWaypointList.removeIf(waypoint -> !currentPlayerWaypointNames.contains(waypoint.getName()));
+                }
+                else {
+                    playerWaypointList.clear();
+                }
+            }
+
+            synchronized (markerWaypointList) {
+                if (CommonModConfig.Instance.enableMarkerWaypoints()){
+                    if (switchedDimension || toggledMarkerWaypoints){
+                        markerWaypointList.clear();
+
+                        int markerCount = 0;
+                        for(WaypointPosition waypointPosition : markerWaypointPositions){
+                            if (waypointPosition == null) continue;
+
+                            double d = mc.player.position().distanceTo(new Vec3(waypointPosition.x, waypointPosition.y, waypointPosition.z));
+                            if (d < CommonModConfig.Instance.minDistanceMarker() || d > CommonModConfig.Instance.maxDistanceMarker()) continue;
+                            // Add waypoint for the marker
+                            try {
+                                String tempDisplayName = FixedWaypoint.getDisplayName(waypointPosition.name);
+                                if (!tempDisplayName.isEmpty() && !tempDisplayName.isBlank()){
+                                    String tempAbbreviation = FixedWaypoint.getAbbreviation(tempDisplayName);
+                                    if (!tempAbbreviation.isEmpty() && !tempAbbreviation.isBlank()){
+                                        markerWaypointList.add(new FixedWaypoint(waypointPosition));
+                                        markerCount++;
+                                    }
+                                }
+                            } catch (NullPointerException e) {
+                                AbstractModInitializer.LOGGER.warn("can't add marker waypoint");
+                                e.printStackTrace();
+                            }
+                        }
+
+                        if (!markerMessageWasShown && markerCount > maxMarkerCountBeforeWarning && !CommonModConfig.Instance.ignoreMarkerMessage()){
+                            markerMessageWasShown = true;
+                            Utils.sendToClientChat(Text.literal("[" + AbstractModInitializer.MOD_NAME + "]: " +
+                                            "Looks like you have quite a lot of markers from the server visible! " +
+                                            "Did you know that you can decrease their maximum distance or disable marker waypoints entirely? ")
+                                    .withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD))
+                                    .append(Text.literal("[Don't show this again]")
+                                            .withStyle(Style.EMPTY.withClickEvent(
+                                                            new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + AbstractModInitializer.MOD_ID + " ignore_marker_message"))
+                                                    .withColor(ChatFormatting.GREEN).withBold(true))));
+                        }
                     }
                 }
-
-                if (!markerMessageWasShown && markerCount > maxMarkerCountBeforeWarning && !CommonModConfig.Instance.ignoreMarkerMessage()){
-                    markerMessageWasShown = true;
-                    Utils.sendToClientChat(Text.literal("[" + AbstractModInitializer.MOD_NAME + "]: " +
-                            "Looks like you have quite a lot of markers from the server visible! " +
-                            "Did you know that you can decrease their maximum distance or disable marker waypoints entirely? ")
-                            .withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD))
-                            .append(Text.literal("[Don't show this again]")
-                                    .withStyle(Style.EMPTY.withClickEvent(
-                                            new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + AbstractModInitializer.MOD_ID + " ignore_marker_message"))
-                                            .withColor(ChatFormatting.GREEN).withBold(true))));
+                else {
+                    markerWaypointList.clear();
                 }
             }
         } catch (ConcurrentModificationException e) {
@@ -294,6 +413,7 @@ public class UpdateTask extends TimerTask {
         connectionErrorWasShown = false;
         cantFindServerErrorWasShown = false;
         cantGetPlayerPositionsErrorWasShown = false;
+        cantGetMarkerPositionsErrorWasShown = false;
         linkBrokenErrorWasShown = false;
         markerMessageWasShown = false;
     }

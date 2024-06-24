@@ -21,14 +21,17 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.common;
 
+import com.mojang.authlib.GameProfile;
+
 /**
  * A player's auth profile and position
  *
  * @author ewpratten
  * @author Leander Knüttel
- * @version 14.06.2024
+ * @version 24.06.2024
  */
 public class PlayerPosition {
+    public GameProfile gameProfile;
     public final String player;
     public final int x;
     public final int y;

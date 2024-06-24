@@ -34,13 +34,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 18.06.2024
+ * @version 24.06.2024
  */
 public abstract class MapConnection {
     public URL queryURL;
@@ -79,11 +80,12 @@ public abstract class MapConnection {
         return baseURL;
     }
 
-    public abstract PlayerPosition[] getPlayerPositions() throws IOException;
+    public abstract HashMap<String, PlayerPosition> getPlayerPositions() throws IOException;
 
-    public PlayerPosition[] HandlePlayerPositions(PlayerPosition[] playerPositions){
+    public HashMap<String, PlayerPosition> HandlePlayerPositions(PlayerPosition[] playerPositions){
+        HashMap<String, PlayerPosition> newPlayerPositions = new HashMap<>();
         if (mc.player == null) {
-            return new PlayerPosition[0];
+            return newPlayerPositions;
         }
         String clientName = mc.player.getName().getString();
         if (!AbstractModInitializer.overwriteCurrentDimension) {
@@ -95,15 +97,15 @@ public abstract class MapConnection {
             }
         }
 
-        for (int i = 0; i < playerPositions.length; i++) {
-            UpdateAfkInfo(playerPositions[i]);
+        for (PlayerPosition p : playerPositions) {
+            UpdateAfkInfo(p);
 
-            if (!CommonModConfig.Instance.debugMode() && (!Objects.equals(playerPositions[i].world, currentDimension) || Objects.equals(playerPositions[i].player, clientName))) {
-                playerPositions[i] = null;
+            if (CommonModConfig.Instance.debugMode() || (Objects.equals(p.world, currentDimension) && !Objects.equals(p.player, clientName))) {
+                newPlayerPositions.put(p.player, p);
             }
         }
 
-        return playerPositions;
+        return newPlayerPositions;
     }
 
     public void UpdateAfkInfo(PlayerPosition playerPosition){

@@ -29,6 +29,7 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Util
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 /**
@@ -37,7 +38,7 @@ import java.util.Objects;
  * @author ewpratten
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 18.06.2024
+ * @version 24.06.2024
  */
 public class DynmapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -69,7 +70,7 @@ public class DynmapConnection extends MapConnection {
             queryURL = URI.create(serverEntry.link).toURL();
             // TODO: implement markers for method 1
             // Test the url
-            PlayerPosition[] a = this.getPlayerPositions();
+            this.getPlayerPositions();
 
             if (CommonModConfig.Instance.debugMode()){
                 Utils.sendToClientChat(("got link with method 1 | overwrite mode active!"));
@@ -121,7 +122,7 @@ public class DynmapConnection extends MapConnection {
                 AbstractModInitializer.LOGGER.info("url: " + queryURL);
 
                 // Test the url
-                PlayerPosition[] b = this.getPlayerPositions();
+                this.getPlayerPositions();
 
                 if (CommonModConfig.Instance.debugMode()){
                     Utils.sendToClientChat("got link with method 2 | that is good!");
@@ -140,7 +141,7 @@ public class DynmapConnection extends MapConnection {
                     markerStringTemplate = baseURL + "/tiles/_markers_/marker_{world}.json";
 
                     // Test the url
-                    PlayerPosition[] c = this.getPlayerPositions();
+                    this.getPlayerPositions();
 
                     if (CommonModConfig.Instance.debugMode()){
                         Utils.sendErrorToClientChat("got link with method 3 instead of 2 | please report this on github!");
@@ -158,7 +159,7 @@ public class DynmapConnection extends MapConnection {
                     markerStringTemplate = baseURL + "/tiles/_markers_/marker_{world}.json";
 
                     // Test the url
-                    PlayerPosition[] c = this.getPlayerPositions();
+                    this.getPlayerPositions();
 
                     if (CommonModConfig.Instance.debugMode()){
                         Utils.sendErrorToClientChat("got link with method 4 instead of 2 | please report this on github!");
@@ -180,7 +181,7 @@ public class DynmapConnection extends MapConnection {
      * @throws IOException
      */
     @Override
-    public PlayerPosition[] getPlayerPositions() throws IOException {
+    public HashMap<String, PlayerPosition> getPlayerPositions() throws IOException {
         // Make request for all players
         DynmapPlayerUpdate update = HTTP.makeJSONHTTPRequest(queryURL, DynmapPlayerUpdate.class);
 

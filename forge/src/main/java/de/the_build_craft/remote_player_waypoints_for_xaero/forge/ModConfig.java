@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 19.06.2024
+ * @version 24.06.2024
  */
 @Config(name = "remote_player_waypoints_for_xaero")
 @Config.Gui.Background("minecraft:textures/block/acacia_planks.png")
@@ -55,6 +55,8 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         public boolean enabled = true;
         public boolean enablePlayerWaypoints = true;
         public boolean enableMarkerWaypoints = true;
+        @ConfigEntry.Gui.Excluded
+        public boolean enablePlayerIcons = true;
         @Comment("in ms")
         @ConfigEntry.BoundedDiscrete(min = 2000, max = 10000)
         public int updateDelay = 2000;
