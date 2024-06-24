@@ -41,5 +41,6 @@ And make sure to set the "map-type" correctly!
 - [MeerBiene](https://github.com/MeerBiene) for having the idea and helping with the AFK-time formatting
 - [eatmyvenom](https://github.com/eatmyvenom) for having the idea and helping with implementing the marker support
 - [James Seibel](https://gitlab.com/jeseibel) for making Distance Horizons: I used a lot of the multi-version build scripts from there.
+- [TheMrEngMan](https://github.com/TheMrEngMan) for letting me use the features from his own fork of the original RemotePlayers mod
 
 _This mod is not officially affiliated with Dynmap, Bluemap, Squaremap, Pl3xMap or Xaero in any way._
