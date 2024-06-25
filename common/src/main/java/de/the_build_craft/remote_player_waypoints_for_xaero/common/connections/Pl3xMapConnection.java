@@ -38,7 +38,7 @@ import java.util.Objects;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 24.06.2024
+ * @version 25.06.2024
  */
 public class Pl3xMapConnection extends MapConnection{
     private String markerLayerStringTemplate = "";
@@ -97,12 +97,12 @@ public class Pl3xMapConnection extends MapConnection{
     }
 
     @Override
-    public WaypointPosition[] getWaypointPositions() throws IOException {
+    public HashMap<String, WaypointPosition> getWaypointPositions() throws IOException {
         if (markerStringTemplate.isEmpty() || markerLayerStringTemplate.isEmpty() || currentDimension.isEmpty()) {
-            return new WaypointPosition[0];
+            return new HashMap<>();
         }
 
-        ArrayList<WaypointPosition> positions = new ArrayList<>();
+        HashMap<String, WaypointPosition> positions = new HashMap<>();
 
         for (String layer : getMarkerLayers()){
             Type apiResponseType = new TypeToken<Pl3xMapMarkerUpdate[]>() {}.getType();
@@ -112,11 +112,12 @@ public class Pl3xMapConnection extends MapConnection{
 
             for (Pl3xMapMarkerUpdate marker : markers){
                 if (!Objects.equals(marker.type, "icon")) continue;
-                positions.add(new WaypointPosition(marker.options.tooltip.content, marker.data.point.x, CommonModConfig.Instance.defaultY(), marker.data.point.z));
+                WaypointPosition newWaypointPosition = new WaypointPosition(marker.options.tooltip.content, marker.data.point.x, CommonModConfig.Instance.defaultY(), marker.data.point.z);
+                positions.put(newWaypointPosition.name, newWaypointPosition);
             }
         }
 
-        return positions.toArray(new WaypointPosition[0]);
+        return positions;
     }
 
     private String[] getMarkerLayers() throws IOException {

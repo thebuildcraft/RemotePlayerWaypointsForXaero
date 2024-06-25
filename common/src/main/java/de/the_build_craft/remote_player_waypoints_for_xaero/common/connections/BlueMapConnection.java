@@ -37,7 +37,7 @@ import java.lang.reflect.Type;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 24.06.2024
+ * @version 25.06.2024
  */
 public class BlueMapConnection extends MapConnection {
     public int lastWorldIndex;
@@ -98,7 +98,7 @@ public class BlueMapConnection extends MapConnection {
     }
 
     @Override
-    public WaypointPosition[] getWaypointPositions() throws IOException {
+    public HashMap<String, WaypointPosition> getWaypointPositions() throws IOException {
         Type apiResponseType = new TypeToken<Map<String, BlueMapMarkerSet>>() {}.getType();
         URL reqUrl;
         if (AbstractModInitializer.overwriteCurrentDimension && !Objects.equals(currentDimension, "")){
@@ -109,7 +109,7 @@ public class BlueMapConnection extends MapConnection {
         }
         Map<String, BlueMapMarkerSet> markerSets = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
 
-        ArrayList<WaypointPosition> positions = new ArrayList<>();
+        HashMap<String, WaypointPosition> positions = new HashMap<>();
 
         for (Map.Entry<String, BlueMapMarkerSet> m : markerSets.entrySet()){
             if (CommonModConfig.Instance.debugMode()){
@@ -120,12 +120,13 @@ public class BlueMapConnection extends MapConnection {
             for(BlueMapMarkerSet.Marker marker : m.getValue().markers.values()){
                 if (Objects.equals(marker.type, "poi") || Objects.equals(marker.type, "html")){
                     BlueMapMarkerSet.Position pos = marker.position;
-                    positions.add(new WaypointPosition(marker.label, Math.round(pos.x), Math.round(pos.y), Math.round(pos.z)));
+                    WaypointPosition newWaypointPosition = new WaypointPosition(marker.label, Math.round(pos.x), Math.round(pos.y), Math.round(pos.z));
+                    positions.put(newWaypointPosition.name, newWaypointPosition);
                 }
             }
         }
 
-        return positions.toArray(new WaypointPosition[0]);
+        return positions;
     }
 
     @Override

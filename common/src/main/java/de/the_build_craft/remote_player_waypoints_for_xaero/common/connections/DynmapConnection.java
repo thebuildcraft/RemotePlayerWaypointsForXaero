@@ -28,7 +28,6 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Util
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -38,7 +37,7 @@ import java.util.Objects;
  * @author ewpratten
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 24.06.2024
+ * @version 25.06.2024
  */
 public class DynmapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -196,7 +195,7 @@ public class DynmapConnection extends MapConnection {
     }
 
     @Override
-    public WaypointPosition[] getWaypointPositions() throws IOException {
+    public HashMap<String, WaypointPosition> getWaypointPositions() throws IOException {
         String dimension;
         if (CommonModConfig.Instance.debugMode()){
             dimension = firstWorldName;
@@ -208,18 +207,19 @@ public class DynmapConnection extends MapConnection {
             dimension = currentDimension;
         }
         if (markerStringTemplate.isEmpty() || dimension.isEmpty()) {
-            return new WaypointPosition[0];
+            return new HashMap<>();
         }
 
         DynmapMarkerUpdate update = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", dimension)).toURL(), DynmapMarkerUpdate.class);
-        ArrayList<WaypointPosition> positions = new ArrayList<>();
+        HashMap<String, WaypointPosition> positions = new HashMap<>();
 
         for (DynmapMarkerUpdate.Set set : update.sets.values()){
             for (DynmapMarkerUpdate.Set.Marker m : set.markers.values()){
-                positions.add(new WaypointPosition(m.label, Math.round(m.x), Math.round(m.y), Math.round(m.z)));
+                WaypointPosition newWaypointPosition = new WaypointPosition(m.label, Math.round(m.x), Math.round(m.y), Math.round(m.z));
+                positions.put(newWaypointPosition.name, newWaypointPosition);
             }
         }
 
-        return positions.toArray(new WaypointPosition[0]);
+        return positions;
     }
 }

@@ -41,7 +41,7 @@ import java.util.Objects;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 24.06.2024
+ * @version 25.06.2024
  */
 public abstract class MapConnection {
     public URL queryURL;
@@ -130,7 +130,7 @@ public abstract class MapConnection {
         AbstractModInitializer.lastPlayerDataDic.put(playerPosition.player, playerPosition);
     }
 
-    public abstract WaypointPosition[] getWaypointPositions() throws IOException;
+    public abstract HashMap<String, WaypointPosition> getWaypointPositions() throws IOException;
 
     public void OpenOnlineMapConfig(){
         Utils.sendToClientChat(Text.literal(onlineMapConfigLink).withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, onlineMapConfigLink))));

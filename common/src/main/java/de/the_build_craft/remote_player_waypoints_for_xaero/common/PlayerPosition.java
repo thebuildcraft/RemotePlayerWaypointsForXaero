@@ -28,7 +28,7 @@ import com.mojang.authlib.GameProfile;
  *
  * @author ewpratten
  * @author Leander Knüttel
- * @version 24.06.2024
+ * @version 25.06.2024
  */
 public class PlayerPosition {
     public GameProfile gameProfile;
@@ -39,7 +39,7 @@ public class PlayerPosition {
     public final String world;
 
     public PlayerPosition(String username, int x, int y, int z, String world) {
-        this.player = username;
+        this.player = PlayerWaypoint.getDisplayName(username);
         this.x = x;
         this.y = y;
         this.z = z;

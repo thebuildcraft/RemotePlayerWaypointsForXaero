@@ -79,13 +79,9 @@ public class UpdateTask extends TimerTask {
     private final int maxMarkerCountBeforeWarning = 25;
 
     public static HashMap<String, PlayerPosition> playerPositions;
-    private WaypointPosition[] markerWaypointPositions;
-    private String previousDimensionName;
+    public static HashMap<String, WaypointPosition> markerPositions;
     private ArrayList<Waypoint> playerWaypointList = null;
     private ArrayList<Waypoint> markerWaypointList = null;
-    boolean switchedDimension = false;
-    boolean previousMarkerWaypointVisibility = false;
-    boolean toggledMarkerWaypoints = false;
 
     @Override
     public void run() {
@@ -223,29 +219,22 @@ public class UpdateTask extends TimerTask {
             AbstractModInitializer.setConnection(null);
             return;
         }
-        switchedDimension = !Objects.equals(AbstractModInitializer.getConnection().currentDimension, previousDimensionName);
-        previousDimensionName = AbstractModInitializer.getConnection().currentDimension;
-
-        toggledMarkerWaypoints = CommonModConfig.Instance.enableMarkerWaypoints() != previousMarkerWaypointVisibility;
-        previousMarkerWaypointVisibility = CommonModConfig.Instance.enableMarkerWaypoints();
 
         if (CommonModConfig.Instance.enableMarkerWaypoints()){
-            if (switchedDimension || toggledMarkerWaypoints){
-                try {
-                    markerWaypointPositions = AbstractModInitializer.getConnection().getWaypointPositions();
-                } catch (IOException e) {
-                    markerWaypointPositions = new WaypointPosition[0];
-                    if (!cantGetMarkerPositionsErrorWasShown){
-                        cantGetMarkerPositionsErrorWasShown = true;
-                        Utils.sendErrorToClientChat("[" + AbstractModInitializer.MOD_NAME + "]: " +
-                                "Failed to make online map request (for marker waypoints). Please check your config (probably your link...) or report a bug.");
-                    }
-                    e.printStackTrace();
+            try {
+                markerPositions = AbstractModInitializer.getConnection().getWaypointPositions();
+            } catch (IOException e) {
+                markerPositions = new HashMap<>();
+                if (!cantGetMarkerPositionsErrorWasShown) {
+                    cantGetMarkerPositionsErrorWasShown = true;
+                    Utils.sendErrorToClientChat("[" + AbstractModInitializer.MOD_NAME + "]: " +
+                            "Failed to make online map request (for marker waypoints). Please check your config (probably your link...) or report a bug.");
                 }
+                e.printStackTrace();
             }
         }
         else {
-            markerWaypointPositions = new WaypointPosition[0];
+            markerPositions = new HashMap<>();
         }
 
         AbstractModInitializer.connected = true;
@@ -357,42 +346,65 @@ public class UpdateTask extends TimerTask {
 
             synchronized (markerWaypointList) {
                 if (CommonModConfig.Instance.enableMarkerWaypoints()){
-                    if (switchedDimension || toggledMarkerWaypoints){
-                        markerWaypointList.clear();
+                    // Create indexes of matching marker names to waypoints to update the waypoints by index
+                    HashMap<String, Integer> waypointNamesIndexes = new HashMap<>(markerWaypointList.size());
+                    for (int i = 0; i < markerWaypointList.size(); i++) {
+                        Waypoint waypoint = markerWaypointList.get(i);
+                        waypointNamesIndexes.put(waypoint.getName(), i);
+                    }
 
-                        int markerCount = 0;
-                        for(WaypointPosition waypointPosition : markerWaypointPositions){
-                            if (waypointPosition == null) continue;
+                    // Keep track of which waypoints were previously shown
+                    // to remove any that are not to be shown anymore
+                    ArrayList<String> currentMarkerWaypointNames = new ArrayList<>();
 
-                            double d = mc.player.position().distanceTo(new Vec3(waypointPosition.x, waypointPosition.y, waypointPosition.z));
-                            if (d < CommonModConfig.Instance.minDistanceMarker() || d > CommonModConfig.Instance.maxDistanceMarker()) continue;
-                            // Add waypoint for the marker
+                    // Add each marker to the map
+                    for (WaypointPosition markerPosition : markerPositions.values()) {
+                        if (markerPosition == null) continue;
+                        String markerName = markerPosition.name;
+
+                        int minimumWaypointDistanceToUse = CommonModConfig.Instance.minDistanceMarker();
+                        int maximumWaypointDistanceToUse = CommonModConfig.Instance.maxDistanceMarker();
+                        if (minimumWaypointDistanceToUse > maximumWaypointDistanceToUse)
+                            maximumWaypointDistanceToUse = minimumWaypointDistanceToUse;
+
+                        // If closer than the minimum waypoint distance or further away than the maximum waypoint distance,
+                        // don't show waypoint
+                        double d = mc.cameraEntity.position().distanceTo(new Vec3(markerPosition.x, markerPosition.y, markerPosition.z));
+                        if (d < minimumWaypointDistanceToUse || d > maximumWaypointDistanceToUse) continue;
+
+                        // If a waypoint for this marker already exists, update it
+                        if (waypointNamesIndexes.containsKey(markerName)) {
+                            Waypoint waypoint = markerWaypointList.get(waypointNamesIndexes.get(markerName));
+
+                            waypoint.setX(markerPosition.x);
+                            waypoint.setY(markerPosition.y);
+                            waypoint.setZ(markerPosition.z);
+
+                            currentMarkerWaypointNames.add(waypoint.getName());
+                        }
+                        // Otherwise, add a waypoint for the marker
+                        else {
                             try {
-                                String tempDisplayName = FixedWaypoint.getDisplayName(waypointPosition.name);
-                                if (!tempDisplayName.isEmpty() && !StringUtils.isBlank(tempDisplayName)){
-                                    String tempAbbreviation = FixedWaypoint.getAbbreviation(tempDisplayName);
-                                    if (!tempAbbreviation.isEmpty() && !StringUtils.isBlank(tempAbbreviation)){
-                                        markerWaypointList.add(new FixedWaypoint(waypointPosition));
-                                        markerCount++;
-                                    }
-                                }
-                            } catch (NullPointerException e) {
-                                AbstractModInitializer.LOGGER.warn("can't add marker waypoint");
-                                e.printStackTrace();
+                                FixedWaypoint currentMarkerWaypoint = new FixedWaypoint(markerPosition);
+                                markerWaypointList.add(currentMarkerWaypoint);
+                                currentMarkerWaypointNames.add(currentMarkerWaypoint.getName());
+                            } catch (NullPointerException ignored) {
                             }
                         }
+                    }
+                    // Remove any waypoints for markers not shown on the map anymore
+                    markerWaypointList.removeIf(waypoint -> !currentMarkerWaypointNames.contains(waypoint.getName()));
 
-                        if (!markerMessageWasShown && markerCount > maxMarkerCountBeforeWarning && !CommonModConfig.Instance.ignoreMarkerMessage()){
-                            markerMessageWasShown = true;
-                            Utils.sendToClientChat(Text.literal("[" + AbstractModInitializer.MOD_NAME + "]: " +
-                                            "Looks like you have quite a lot of markers from the server visible! " +
-                                            "Did you know that you can decrease their maximum distance or disable marker waypoints entirely? ")
-                                    .withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD))
-                                    .append(Text.literal("[Don't show this again]")
-                                            .withStyle(Style.EMPTY.withClickEvent(
-                                                            new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + AbstractModInitializer.MOD_ID + " ignore_marker_message"))
-                                                    .withColor(ChatFormatting.GREEN).withBold(true))));
-                        }
+                    if (!markerMessageWasShown && currentMarkerWaypointNames.size() > maxMarkerCountBeforeWarning && !CommonModConfig.Instance.ignoreMarkerMessage()) {
+                        markerMessageWasShown = true;
+                        Utils.sendToClientChat(Text.literal("[" + AbstractModInitializer.MOD_NAME + "]: " +
+                                        "Looks like you have quite a lot of markers from the server visible! " +
+                                        "Did you know that you can decrease their maximum distance or disable marker waypoints entirely? ")
+                                .withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD))
+                                .append(Text.literal("[Don't show this again]")
+                                        .withStyle(Style.EMPTY.withClickEvent(
+                                                        new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + AbstractModInitializer.MOD_ID + " ignore_marker_message"))
+                                                .withColor(ChatFormatting.GREEN).withBold(true))));
                     }
                 }
                 else {

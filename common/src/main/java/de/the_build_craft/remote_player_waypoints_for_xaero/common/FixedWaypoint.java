@@ -29,7 +29,7 @@ import xaero.common.minimap.waypoints.Waypoint;
  * @author ewpratten
  * @author eatmyvenom
  * @author Leander Knüttel
- * @version 17.06.2024
+ * @version 25.06.2024
  */
 public class FixedWaypoint extends Waypoint {
     public FixedWaypoint(WaypointPosition wp) {
@@ -37,7 +37,7 @@ public class FixedWaypoint extends Waypoint {
     }
 
     public FixedWaypoint(int x, int y, int z, String name) {
-        super(x, y, z, getDisplayName(name), getAbbreviation(getDisplayName(name)),
+        super(x, y, z, name, getAbbreviation(name),
                 CommonModConfig.Instance.markerWaypointColor(), 0, true);
     }
 

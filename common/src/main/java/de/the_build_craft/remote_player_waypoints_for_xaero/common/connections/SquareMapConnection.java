@@ -30,14 +30,13 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 24.06.2024
+ * @version 25.06.2024
  */
 public class SquareMapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -94,25 +93,26 @@ public class SquareMapConnection extends MapConnection {
     }
 
     @Override
-    public WaypointPosition[] getWaypointPositions() throws IOException {
+    public HashMap<String, WaypointPosition> getWaypointPositions() throws IOException {
         if (markerStringTemplate.isEmpty() || currentDimension.isEmpty()) {
-            return new WaypointPosition[0];
+            return new HashMap<>();
         }
 
         Type apiResponseType = new TypeToken<SquareMapMarkerUpdate[]>() {}.getType();
         URL reqUrl = URI.create(markerStringTemplate.replace("{world}", currentDimension)).toURL();
         SquareMapMarkerUpdate[] markersLayers = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
 
-        ArrayList<WaypointPosition> positions = new ArrayList<>();
+        HashMap<String, WaypointPosition> positions = new HashMap<>();
 
         for (SquareMapMarkerUpdate markerLayer : markersLayers){
             for (SquareMapMarkerUpdate.Marker marker : markerLayer.markers){
                 if (Objects.equals(marker.type, "icon")) {
-                    positions.add(new WaypointPosition(marker.tooltip, marker.point.x, CommonModConfig.Instance.defaultY(), marker.point.z));
+                    WaypointPosition newWaypointPosition = new WaypointPosition(marker.tooltip, marker.point.x, CommonModConfig.Instance.defaultY(), marker.point.z);
+                    positions.put(newWaypointPosition.name, newWaypointPosition);
                 }
             }
         }
 
-        return positions.toArray(new WaypointPosition[0]);
+        return positions;
     }
 }
