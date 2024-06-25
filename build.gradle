@@ -19,7 +19,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * file changed by: Leander Knüttel
- * date: 16.06.2024
+ * date: 25.06.2024
  */
 
 plugins {
@@ -533,6 +533,10 @@ allprojects { p ->
 
         // Required for Mixins & VanillaGradle
         maven { url "https://repo.spongepowered.org/maven/" }
+
+        // neoforge
+        maven { url "https://maven.neoforged.net/releases/" }
+        maven { url "https://maven.neoforged.net/snapshots/" }
 
         // These 4 are for importing mods that arnt on CursedForge, Modrinth, GitHub, GitLab or anywhere opensource
         flatDir {

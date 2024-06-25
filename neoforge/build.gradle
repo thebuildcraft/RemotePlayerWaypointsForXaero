@@ -19,7 +19,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * file changed by: Leander Knüttel
- * date: 14.06.2024
+ * date: 25.06.2024
  */
 
 plugins {
@@ -35,15 +35,6 @@ architectury {
     neoForge()
 }
 
-// TODO this is already defined in the main settings.gradle file, why doesn't it work unless also defined here?
-//  (If compiling does work without this block feel free to remove)
-repositories {
-    maven {
-        name "Neoforge"
-        url "https://maven.neoforged.net/releases/"
-    }
-}
-
 loom {
     silentMojangMappingsLicense() // Shut the licencing warning
     accessWidenerPath = project(":common").file("src/main/resources/${accessWidenerVersion}.${mod_id}.accesswidener")
@@ -52,22 +43,12 @@ loom {
         useLegacyMixinAp = false
     }
     neoForge {
-        //TODO can this all be removed ?????
+        // Access wideners are defined in the `remapJar.atAccessWideners`
 
-        // Access wideners are now defined in the `remapJar.atAccessWideners`
-//        convertAccessWideners = true
-//        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
-
-        // Mixins are now defined in the `mods.toml`
-//        mixinConfigs = [
-//                "remote_player_waypoints_for_xaero.mixins.json"
-//        ]
+        // Mixins are defined in the `mods.toml`
     }
     mixin {
-        // Mixins are now defined in the `mods.toml`
-//        mixinConfigs = [
-//                "remote_player_waypoints_for_xaero.mixins.json"
-//        ]
+        // Mixins are defined in the `mods.toml`
     }
 
     // "runs" isn't required, but when we do need it then it can be useful
@@ -77,7 +58,7 @@ loom {
             setConfigName("NeoForge Client")
             ideConfigGenerated(true)
             runDir("../run")
-//            vmArgs("-XX:-OmitStackTraceInFastThrow", minecraftMemoryJavaArg)
+            //vmArgs("-XX:-OmitStackTraceInFastThrow", minecraftMemoryJavaArg)
         }
         server {
             server()
@@ -91,7 +72,6 @@ loom {
 remapJar {
     inputFile = shadowJar.archiveFile
     dependsOn shadowJar
-//    classifier null
 
     atAccessWideners.add("${rootProject.mod_id}.accesswidener")
 }
