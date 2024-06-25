@@ -41,6 +41,7 @@ import xaero.common.AXaeroMinimap;
 #else
 import xaero.common.HudMod;
 #endif
+import org.apache.commons.lang3.StringUtils;
 import xaero.common.XaeroMinimapSession;
 import xaero.common.minimap.waypoints.Waypoint;
 import xaero.common.minimap.waypoints.WaypointWorld;
@@ -56,7 +57,7 @@ import java.util.*;
  * @author eatmyvenom
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 24.06.2024
+ * @version 25.06.2024
  */
 public class UpdateTask extends TimerTask {
     private final Minecraft mc;
@@ -368,9 +369,9 @@ public class UpdateTask extends TimerTask {
                             // Add waypoint for the marker
                             try {
                                 String tempDisplayName = FixedWaypoint.getDisplayName(waypointPosition.name);
-                                if (!tempDisplayName.isEmpty() && !tempDisplayName.isBlank()){
+                                if (!tempDisplayName.isEmpty() && !StringUtils.isBlank(tempDisplayName)){
                                     String tempAbbreviation = FixedWaypoint.getAbbreviation(tempDisplayName);
-                                    if (!tempAbbreviation.isEmpty() && !tempAbbreviation.isBlank()){
+                                    if (!tempAbbreviation.isEmpty() && !StringUtils.isBlank(tempAbbreviation)){
                                         markerWaypointList.add(new FixedWaypoint(waypointPosition));
                                         markerCount++;
                                     }

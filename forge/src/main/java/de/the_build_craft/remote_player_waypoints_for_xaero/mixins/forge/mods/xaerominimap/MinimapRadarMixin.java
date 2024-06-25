@@ -39,7 +39,7 @@ import java.util.List;
 /**
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 24.06.2024
+ * @version 25.06.2024
  */
 
 @Mixin(MinimapRadar.class)
@@ -69,7 +69,11 @@ public class MinimapRadarMixin {
             if(renderedPlayerNames.contains(playerPosition.player)) continue;
 
             // Add remote player to list as an entity
+            #if MC_VER == MC_1_19_2
+            RemotePlayer playerEntity = new RemotePlayer(Minecraft.getInstance().level, playerPosition.gameProfile, null);
+            #else
             RemotePlayer playerEntity = new RemotePlayer(Minecraft.getInstance().level, playerPosition.gameProfile);
+            #endif
             playerEntity.moveTo(playerPosition.x, playerPosition.y, playerPosition.z, 0, 0);
             playerEntities.add(playerEntity);
         }
