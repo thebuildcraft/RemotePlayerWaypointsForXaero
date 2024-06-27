@@ -83,6 +83,9 @@ public class UpdateTask extends TimerTask {
     private ArrayList<Waypoint> playerWaypointList = null;
     private ArrayList<Waypoint> markerWaypointList = null;
 
+    private int previousPlayerWaypointColor = 0;
+    private int previousMarkerWaypointColor = 0;
+
     @Override
     public void run() {
         try{
@@ -338,6 +341,14 @@ public class UpdateTask extends TimerTask {
                     }
                     // Remove any waypoints for players not shown on the map anymore
                     playerWaypointList.removeIf(waypoint -> !currentPlayerWaypointNames.contains(waypoint.getName()));
+
+                    int newPlayerWaypointColor = CommonModConfig.Instance.playerWaypointColor();
+                    if (previousPlayerWaypointColor != newPlayerWaypointColor){
+                        previousPlayerWaypointColor = newPlayerWaypointColor;
+                        for (Waypoint waypoint : playerWaypointList){
+                            waypoint.setColor(newPlayerWaypointColor);
+                        }
+                    }
                 }
                 else {
                     playerWaypointList.clear();
@@ -394,6 +405,14 @@ public class UpdateTask extends TimerTask {
                     }
                     // Remove any waypoints for markers not shown on the map anymore
                     markerWaypointList.removeIf(waypoint -> !currentMarkerWaypointNames.contains(waypoint.getName()));
+
+                    int newMarkerWaypointColor = CommonModConfig.Instance.markerWaypointColor();
+                    if (previousMarkerWaypointColor != newMarkerWaypointColor){
+                        previousMarkerWaypointColor = newMarkerWaypointColor;
+                        for (Waypoint waypoint : markerWaypointList){
+                            waypoint.setColor(newMarkerWaypointColor);
+                        }
+                    }
 
                     if (!markerMessageWasShown && currentMarkerWaypointNames.size() > maxMarkerCountBeforeWarning && !CommonModConfig.Instance.ignoreMarkerMessage()) {
                         markerMessageWasShown = true;
