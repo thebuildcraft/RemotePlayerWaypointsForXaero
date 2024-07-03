@@ -5,7 +5,9 @@
     "mixins": [
     ],
     "client": [
-        "common.client.PlayerListHudMixin"
+        "common.client.PlayerListHudMixin",
+        "neoforge.mods.xaerominimap.MinimapRadarMixin",
+        "neoforge.mods.xaerominimap.WaypointsGuiRendererMixin"
     ],
     "server": [
     ],

@@ -5,7 +5,9 @@
     "mixins": [
     ],
     "client": [
-        "common.client.PlayerListHudMixin"
+        "common.client.PlayerListHudMixin",
+        "fabric.mods.xaerominimap.MinimapRadarMixin",
+        "fabric.mods.xaerominimap.WaypointsGuiRendererMixin"
     ],
     "server": [
     ],
