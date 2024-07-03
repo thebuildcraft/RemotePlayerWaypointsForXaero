@@ -20,16 +20,11 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-#if MC_VER <= MC_1_18_2
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-#endif
+import net.minecraft.network.chat.*;
 
 /**
  * @author Leander Knüttel
- * @version 22.05.2024
+ * @version 03.07.2024
  */
 public class Text {
     #if MC_VER > MC_1_18_2
@@ -37,11 +32,20 @@ public class Text {
         return Component.literal(string);
     }
 
+    public static MutableComponent translatable(String translateKey) {
+        return Component.translatable(translateKey);
+    }
+
     //TODO implement Style functions & Actions
     #else
     public static MutableComponent literal(String string) {
         return new TextComponent(string);
     }
+
+    public static MutableComponent translatable(String translateKey) {
+        return new TranslatableComponent(translateKey);
+    }
+
     //TODO implement Style functions & Actions (write to chat, if not supported in current version)
     #endif
 }
