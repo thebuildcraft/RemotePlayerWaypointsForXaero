@@ -41,7 +41,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 24.06.2024
+ * @version 03.07.2024
  */
 public class CommonModConfigForge extends CommonModConfig {
     public CommonModConfigForge(){
@@ -85,6 +85,11 @@ public class CommonModConfigForge extends CommonModConfig {
     @Override
     public boolean enableEntityRadar() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.enablePlayerIcons;
+    }
+
+    @Override
+    public WaypointRenderBelowMode minimapWaypointsRenderBelow() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.minimapWaypointsRenderBelow;
     }
 
     @Override

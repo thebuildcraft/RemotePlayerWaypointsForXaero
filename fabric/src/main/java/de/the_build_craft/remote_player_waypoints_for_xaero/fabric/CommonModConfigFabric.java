@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 24.06.2024
+ * @version 03.07.2024
  */
 public class CommonModConfigFabric extends CommonModConfig {
     public CommonModConfigFabric(){
@@ -61,6 +61,11 @@ public class CommonModConfigFabric extends CommonModConfig {
     @Override
     public boolean enableEntityRadar() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.enablePlayerIcons;
+    }
+
+    @Override
+    public WaypointRenderBelowMode minimapWaypointsRenderBelow() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.minimapWaypointsRenderBelow;
     }
 
     @Override

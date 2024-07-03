@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 24.06.2024
+ * @version 03.07.2024
  */
 @Config(name = "remote_player_waypoints_for_xaero")
 #if MC_VER < MC_1_20_6
@@ -57,8 +57,12 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         public boolean enabled = true;
         public boolean enablePlayerWaypoints = true;
         public boolean enableMarkerWaypoints = true;
-        @ConfigEntry.Gui.Excluded
         public boolean enablePlayerIcons = true;
+        @ConfigEntry.Gui.Tooltip()
+        @ConfigEntry.Gui.EnumHandler(
+                option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON
+        )
+        public CommonModConfig.WaypointRenderBelowMode minimapWaypointsRenderBelow = CommonModConfig.WaypointRenderBelowMode.WHEN_PLAYER_LIST_SHOWN;
         @Comment("in ms")
         @ConfigEntry.BoundedDiscrete(min = 2000, max = 10000)
         public int updateDelay = 2000;

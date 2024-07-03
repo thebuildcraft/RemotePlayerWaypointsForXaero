@@ -20,11 +20,12 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.common;
 
+import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Text;
 import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 24.06.2024
+ * @version 03.07.2024
  */
 public abstract class CommonModConfig {
     public CommonModConfig() {
@@ -37,6 +38,7 @@ public abstract class CommonModConfig {
     public abstract boolean enablePlayerWaypoints();
     public abstract boolean enableMarkerWaypoints();
     public abstract boolean enableEntityRadar();
+    public abstract WaypointRenderBelowMode minimapWaypointsRenderBelow();
     public abstract int updateDelay();
     public abstract int minDistance();
     public abstract int maxDistance();
@@ -100,6 +102,21 @@ public abstract class CommonModConfig {
         White;
 
         WaypointColor(){
+        }
+    }
+
+    public enum WaypointRenderBelowMode {
+        NEVER,
+        ALWAYS,
+        WHEN_PLAYER_LIST_SHOWN,
+        WHEN_PLAYER_LIST_HIDDEN;
+
+        WaypointRenderBelowMode(){
+        }
+
+        @Override
+        public String toString() {
+            return Text.translatable("text.autoconfig.remote_player_waypoints_for_xaero.option.general.minimapWaypointsRenderBelow." + this.name()).getString();
         }
     }
 }
