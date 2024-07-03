@@ -11,6 +11,5 @@
     ],
     "injectors": {
         "defaultRequire": 1
-    },
-    "plugin": "de.the_build_craft.remote_player_waypoints_for_xaero.mixins.fabric.FabricMixinPlugin"
+    }
 }

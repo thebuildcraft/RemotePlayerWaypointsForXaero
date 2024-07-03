@@ -21,8 +21,6 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.mixins.neoforge;
 
-import de.the_build_craft.remote_player_waypoints_for_xaero.common.AbstractModInitializer;
-import net.neoforged.fml.ModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -34,13 +32,12 @@ import java.util.Set;
  * @author coolGi
  * @author cortex
  * @author Leander Knüttel
- * @version 23.06.2024
+ * @version 03.07.2024
  */
 public class NeoforgeMixinPlugin implements IMixinConfigPlugin
 {
 	private boolean firstRun = false;
 	private boolean isNeoforgeMixinFile;
-	
 	
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName)
@@ -53,26 +50,8 @@ public class NeoforgeMixinPlugin implements IMixinConfigPlugin
 				this.isNeoforgeMixinFile = false;
 			}
 		}
-		if (!this.isNeoforgeMixinFile)
-			return false;
-
-		if (mixinClassName.contains(".mods."))
-		{ // If the mixin wants to go into a mod then we check if that mod is loaded or not
-			String modId = mixinClassName
-					// What these 2 regex's do is get the mod name that we are checking out of the mixinClassName
-					// Eg. "de.the_build_craft.remote_player_waypoints_for_xaero.mixins.mods.sodium.MixinSodiumChunkRenderer" turns into "sodium"
-					.replaceAll("^.*mods.", "") // Replaces everything before the mods
-					.replaceAll("\\..*$", ""); // Replaces everything after the mod name
-			boolean isModLoaded = false;
-			for (String aliasId : AbstractModInitializer.getModIdAliases(modId)){
-				if (ModList.get().isLoaded(aliasId)) isModLoaded = true;
-			}
-
-			return isModLoaded;
-		}
-		return true;
-	}
-	
+        return this.isNeoforgeMixinFile;
+    }
 	
 	@Override
 	public void onLoad(String mixinPackage) { }
