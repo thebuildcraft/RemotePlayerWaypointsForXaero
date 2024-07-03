@@ -29,6 +29,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import xaero.common.minimap.radar.MinimapRadar;
@@ -39,9 +40,10 @@ import java.util.List;
 /**
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 25.06.2024
+ * @version 03.07.2024
  */
 
+@Pseudo
 @Mixin(MinimapRadar.class)
 public class MinimapRadarMixin {
 
