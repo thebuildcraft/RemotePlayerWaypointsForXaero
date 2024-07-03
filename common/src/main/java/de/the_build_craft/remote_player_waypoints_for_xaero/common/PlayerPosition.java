@@ -28,7 +28,7 @@ import com.mojang.authlib.GameProfile;
  *
  * @author ewpratten
  * @author Leander Knüttel
- * @version 25.06.2024
+ * @version 03.07.2024
  */
 public class PlayerPosition {
     public GameProfile gameProfile;
@@ -39,7 +39,7 @@ public class PlayerPosition {
     public final String world;
 
     public PlayerPosition(String username, int x, int y, int z, String world) {
-        this.player = PlayerWaypoint.getDisplayName(username);
+        this.player = getDisplayName(username);
         this.x = x;
         this.y = y;
         this.z = z;
@@ -48,5 +48,16 @@ public class PlayerPosition {
 
     public boolean CompareCords(PlayerPosition otherPosition){
         return (x == otherPosition.x) && (y == otherPosition.y) && (z == otherPosition.z);
+    }
+
+    public static String getDisplayName(String name){
+        if (name.startsWith("<")) {
+            int i = name.indexOf(">");
+            if (i != (name.length() - 1)) {
+                int j = name.indexOf("<", i);
+                name = name.substring(i + 1, j);
+            }
+        }
+        return name;
     }
 }

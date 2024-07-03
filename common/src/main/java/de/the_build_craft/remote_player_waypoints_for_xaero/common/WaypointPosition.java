@@ -27,7 +27,7 @@ package de.the_build_craft.remote_player_waypoints_for_xaero.common;
  * @author ewpratten
  * @author eatmyvenom
  * @author Leander Knüttel
- * @version 25.06.2024
+ * @version 03.07.2024
  */
 public class WaypointPosition {
     public final String name;
@@ -36,7 +36,7 @@ public class WaypointPosition {
     public final int z;
 
     public WaypointPosition(String name, int x, int y, int z) {
-        this.name = FixedWaypoint.getDisplayName(name);
+        this.name = getDisplayName(name);
         this.x = x;
         this.y = y;
         this.z = z;
@@ -44,5 +44,16 @@ public class WaypointPosition {
 
     public boolean CompareCords(WaypointPosition otherPosition){
         return (this.x == otherPosition.x) && (this.y == otherPosition.y) && (this.z == otherPosition.z);
+    }
+
+    public static String getDisplayName(String name){
+        if (name.startsWith("<")) {
+            int i = name.indexOf(">");
+            if (i != (name.length() - 1)) {
+                int j = name.indexOf("<", i);
+                name = name.substring(i + 1, j);
+            }
+        }
+        return name;
     }
 }

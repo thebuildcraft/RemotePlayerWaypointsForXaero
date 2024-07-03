@@ -29,7 +29,7 @@ import xaero.common.minimap.waypoints.Waypoint;
  * @author ewpratten
  * @author eatmyvenom
  * @author Leander Knüttel
- * @version 25.06.2024
+ * @version 03.07.2024
  */
 public class PlayerWaypoint extends Waypoint {
     public PlayerWaypoint(PlayerPosition player) {
@@ -39,17 +39,6 @@ public class PlayerWaypoint extends Waypoint {
     public PlayerWaypoint(int x, int y, int z, String name) {
         super(x, y, z, name, getAbbreviation(name),
                 CommonModConfig.Instance.playerWaypointColor(), 0, true);
-    }
-
-    public static String getDisplayName(String name){
-        if (name.startsWith("<")) {
-            int i = name.indexOf(">");
-            if (i != (name.length() - 1)) {
-                int j = name.indexOf("<", i);
-                name = name.substring(i + 1, j);
-            }
-        }
-        return name;
     }
 
     public static String getAbbreviation(String name){
