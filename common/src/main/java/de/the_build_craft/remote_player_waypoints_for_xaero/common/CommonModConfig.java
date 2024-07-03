@@ -103,6 +103,11 @@ public abstract class CommonModConfig {
 
         WaypointColor(){
         }
+
+        @Override
+        public String toString() {
+            return Text.translatable("WaypointColor." + this.name()).getString();
+        }
     }
 
     public enum WaypointRenderBelowMode {

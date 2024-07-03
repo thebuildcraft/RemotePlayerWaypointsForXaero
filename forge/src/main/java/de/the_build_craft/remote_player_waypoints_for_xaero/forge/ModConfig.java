@@ -25,7 +25,6 @@ import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
-import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +34,13 @@ import java.util.List;
  * @version 03.07.2024
  */
 @Config(name = "remote_player_waypoints_for_xaero")
+#if MC_VER < MC_1_20_6
 @Config.Gui.Background("minecraft:textures/block/acacia_planks.png")
 @Config.Gui.CategoryBackground(
         category = "b",
         background = "minecraft:textures/block/stone.png"
 )
+#endif
 public class ModConfig extends PartitioningSerializer.GlobalData {
     @ConfigEntry.Category("a")
     @ConfigEntry.Gui.TransitiveObject
@@ -48,70 +49,94 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
     public ModConfig() {
     }
 
-    @Config(
-            name = "general"
-    )
+    @Config(name = "general")
     public static class ModuleA implements ConfigData {
         public boolean enabled = true;
-        public boolean enablePlayerWaypoints = true;
-        public boolean enableMarkerWaypoints = true;
-        public boolean enablePlayerIcons = true;
+
         @ConfigEntry.Gui.Tooltip()
-        @ConfigEntry.Gui.EnumHandler(
-                option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON
-        )
-        public CommonModConfig.WaypointRenderBelowMode minimapWaypointsRenderBelow = CommonModConfig.WaypointRenderBelowMode.WHEN_PLAYER_LIST_SHOWN;
-        @Comment("in ms")
         @ConfigEntry.BoundedDiscrete(min = 2000, max = 10000)
         public int updateDelay = 2000;
-        @Comment("in m")
-        @ConfigEntry.BoundedDiscrete(min = 0, max = 20)
-        int minDistance = 0;
-        @Comment("in m")
-        @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
-        int maxDistance = 100000;
-        @Comment("in m")
-        @ConfigEntry.BoundedDiscrete(min = 0, max = 20)
-        int minDistanceMarker = 0;
-        @Comment("in m")
-        @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
-        int maxDistanceMarker = 100000;
+
+        @ConfigEntry.Gui.Tooltip
         public List<ServerEntry> serverEntries = new ArrayList<>();
-        @Comment("default Y coordinate for maps that don't provide Y coordinates")
+
+        @ConfigEntry.Gui.Tooltip()
         @ConfigEntry.BoundedDiscrete(min = -100, max = 400)
         public int defaultY = 64;
-        @Comment("in sec")
+
+        @ConfigEntry.Gui.Tooltip()
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        public CommonModConfig.WaypointRenderBelowMode minimapWaypointsRenderBelow = CommonModConfig.WaypointRenderBelowMode.WHEN_PLAYER_LIST_SHOWN;
+
+        //Player options
+        @ConfigEntry.Gui.PrefixText
+        @ConfigEntry.Gui.Tooltip()
+        public boolean enablePlayerWaypoints = true;
+
+        @ConfigEntry.Gui.Tooltip()
+        public boolean enablePlayerIcons = true;
+
+        @ConfigEntry.Gui.Tooltip()
+        @ConfigEntry.BoundedDiscrete(min = 0, max = 20)
+        int minDistance = 0;
+
+        @ConfigEntry.Gui.Tooltip()
+        @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
+        int maxDistance = 100000;
+
+        @ConfigEntry.Gui.Tooltip()
         @ConfigEntry.BoundedDiscrete(min = 60, max = 600)
         public int timeUntilAfk = 120;
+
+        @ConfigEntry.Gui.Tooltip()
+        public boolean showAfkTimeInTabList = true;
+
+        @ConfigEntry.Gui.Tooltip
         @ConfigEntry.ColorPicker
         public int unknownAfkStateColor = 0x606060;
+
         @ConfigEntry.ColorPicker
         public int AfkColor = 0xFF5500;
-        @ConfigEntry.Gui.EnumHandler(
-                option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON
-        )
-        public CommonModConfig.WaypointColor playerWaypointColor = CommonModConfig.WaypointColor.Black;
-        @ConfigEntry.Gui.EnumHandler(
-                option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON
-        )
-        public CommonModConfig.WaypointColor markerWaypointColor = CommonModConfig.WaypointColor.Gray;
-        public boolean showAfkTimeInTabList = true;
-        public boolean debugMode = false;
 
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        public CommonModConfig.WaypointColor playerWaypointColor = CommonModConfig.WaypointColor.Black;
+
+        //Marker options
+        @ConfigEntry.Gui.PrefixText
+        @ConfigEntry.Gui.Tooltip()
+        public boolean enableMarkerWaypoints = true;
+
+        @ConfigEntry.Gui.Tooltip()
+        @ConfigEntry.BoundedDiscrete(min = 0, max = 20)
+        int minDistanceMarker = 0;
+
+        @ConfigEntry.Gui.Tooltip()
+        @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
+        int maxDistanceMarker = 100000;
+
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        public CommonModConfig.WaypointColor markerWaypointColor = CommonModConfig.WaypointColor.Gray;
+
+        //auto handled options
+        @ConfigEntry.Gui.PrefixText
         public List<String> ignoredServers = new ArrayList<>();
 
         public boolean ignoreMarkerMessage = false;
+
+        //dev options
+        @ConfigEntry.Gui.PrefixText
+        public boolean debugMode = false;
 
         public ModuleA() {
         }
     }
 
     public static class ServerEntry {
-        @ConfigEntry.Gui.EnumHandler(
-                option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON
-        )
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         public Maptype maptype;
+
         public String ip;
+
         public String link;
 
         public ServerEntry() {
