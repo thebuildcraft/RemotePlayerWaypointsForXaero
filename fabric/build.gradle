@@ -19,11 +19,11 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * file changed by: Leander Knüttel
- * date: 16.06.2024
+ * date: 05.07.2024
  */
 
 plugins {
-    id "fabric-loom" version "1.6-SNAPSHOT"
+    id "fabric-loom" version "1.7-SNAPSHOT"
 }
 
 loom {
