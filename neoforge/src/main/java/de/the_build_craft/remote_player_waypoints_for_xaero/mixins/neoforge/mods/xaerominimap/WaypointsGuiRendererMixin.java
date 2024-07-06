@@ -34,7 +34,7 @@ import xaero.common.settings.ModSettings;
 /**
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 03.07.2024
+ * @version 06.07.2024
  */
 
 @Pseudo
@@ -44,7 +44,11 @@ public class WaypointsGuiRendererMixin {
     @Inject(method = "getOrder", at = @At("RETURN"), cancellable = true, remap = false)
     private void injected(CallbackInfoReturnable<Integer> cir) {
         CommonModConfig.WaypointRenderBelowMode waypointRenderBelowMode = CommonModConfig.Instance.minimapWaypointsRenderBelow();
+        #if MC_VER > MC_1_16_5
         boolean playerListDown = Minecraft.getInstance().options.keyPlayerList.isDown() || ModSettings.keyAlternativeListPlayers.isDown();
+        #else
+        boolean playerListDown = Minecraft.getInstance().options.keyPlayerList.isDown();
+        #endif
 
         if (waypointRenderBelowMode == CommonModConfig.WaypointRenderBelowMode.ALWAYS) {
             cir.setReturnValue(-1);
