@@ -31,20 +31,24 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 03.07.2024
+ * @version 07.07.2024
  */
 @Config(name = "remote_player_waypoints_for_xaero")
 #if MC_VER < MC_1_20_6
 @Config.Gui.Background("minecraft:textures/block/acacia_planks.png")
 @Config.Gui.CategoryBackground(
         category = "b",
-        background = "minecraft:textures/block/stone.png"
+        background = "minecraft:textures/block/oak_planks.png"
 )
 #endif
 public class ModConfig extends PartitioningSerializer.GlobalData {
     @ConfigEntry.Category("a")
     @ConfigEntry.Gui.TransitiveObject
     public ModuleA general = new ModuleA();
+
+    @ConfigEntry.Category("b")
+    @ConfigEntry.Gui.TransitiveObject
+    public ModuleB friends = new ModuleB();
 
     public ModConfig() {
     }
@@ -83,6 +87,10 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         @ConfigEntry.Gui.Tooltip()
         @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
         int maxDistance = 100000;
+
+        @ConfigEntry.Gui.Tooltip()
+        @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
+        int maxIconDistance = 100000;
 
         @ConfigEntry.Gui.Tooltip()
         @ConfigEntry.BoundedDiscrete(min = 60, max = 600)
@@ -128,6 +136,38 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         public boolean debugMode = false;
 
         public ModuleA() {
+        }
+    }
+
+    @Config(name = "friends")
+    public static class ModuleB implements ConfigData {
+        @ConfigEntry.Gui.Tooltip()
+        public List<String> friendList = new ArrayList<>();
+
+        public boolean onlyShowFriendsWaypoints = false;
+
+        public boolean onlyShowFriendsIcons = false;
+
+        public boolean overwriteFriendDistances = false;
+
+        @ConfigEntry.Gui.Tooltip()
+        @ConfigEntry.BoundedDiscrete(min = 0, max = 20)
+        int minFriendDistance = 0;
+
+        @ConfigEntry.Gui.Tooltip()
+        @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
+        int maxFriendDistance = 100000;
+
+        @ConfigEntry.Gui.Tooltip()
+        @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
+        int maxFriendIconDistance = 100000;
+
+        public boolean overwriteFriendWaypointColor = false;
+
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        public CommonModConfig.WaypointColor friendWaypointColor = CommonModConfig.WaypointColor.Black;
+
+        public ModuleB() {
         }
     }
 

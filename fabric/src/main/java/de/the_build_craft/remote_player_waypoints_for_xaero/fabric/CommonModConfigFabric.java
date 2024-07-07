@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 03.07.2024
+ * @version 07.07.2024
  */
 public class CommonModConfigFabric extends CommonModConfig {
     public CommonModConfigFabric(){
@@ -81,6 +81,11 @@ public class CommonModConfigFabric extends CommonModConfig {
     @Override
     public int maxDistance() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.maxDistance;
+    }
+
+    @Override
+    public int maxIconDistance() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.maxIconDistance;
     }
 
     @Override
@@ -157,5 +162,50 @@ public class CommonModConfigFabric extends CommonModConfig {
     @Override
     public boolean ignoreMarkerMessage() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.ignoreMarkerMessage;
+    }
+
+    @Override
+    public List<String> friendList() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().friends.friendList;
+    }
+
+    @Override
+    public boolean onlyShowFriendsWaypoints() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().friends.onlyShowFriendsWaypoints;
+    }
+
+    @Override
+    public boolean onlyShowFriendsIcons() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().friends.onlyShowFriendsIcons;
+    }
+
+    @Override
+    public boolean overwriteFriendDistances() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().friends.overwriteFriendDistances;
+    }
+
+    @Override
+    public int minFriendDistance() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().friends.minFriendDistance;
+    }
+
+    @Override
+    public int maxFriendDistance() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().friends.maxFriendDistance;
+    }
+
+    @Override
+    public int maxFriendIconDistance() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().friends.maxFriendIconDistance;
+    }
+
+    @Override
+    public boolean overwriteFriendWaypointColor() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().friends.overwriteFriendWaypointColor;
+    }
+
+    @Override
+    public int friendWaypointColor() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().friends.friendWaypointColor.ordinal();
     }
 }

@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 03.07.2024
+ * @version 07.07.2024
  */
 public abstract class CommonModConfig {
     public CommonModConfig() {
@@ -42,6 +42,7 @@ public abstract class CommonModConfig {
     public abstract int updateDelay();
     public abstract int minDistance();
     public abstract int maxDistance();
+    public abstract int maxIconDistance();
     public abstract int minDistanceMarker();
     public abstract int maxDistanceMarker();
     public abstract int defaultY();
@@ -56,6 +57,25 @@ public abstract class CommonModConfig {
     public abstract List<ServerEntry> serverEntries();
     public abstract void setIgnoreMarkerMessage(boolean on);
     public abstract boolean ignoreMarkerMessage();
+
+    public abstract List<String> friendList();
+    public abstract boolean onlyShowFriendsWaypoints();
+    public abstract boolean onlyShowFriendsIcons();
+    public abstract boolean overwriteFriendDistances();
+    public abstract int minFriendDistance();
+    public abstract int maxFriendDistance();
+    public abstract int maxFriendIconDistance();
+    public abstract boolean overwriteFriendWaypointColor();
+    public abstract int friendWaypointColor();
+
+    public int getPlayerWaypointColor(String playerName) {
+        if (overwriteFriendWaypointColor() && friendList().contains(playerName)){
+            return friendWaypointColor();
+        }
+        else {
+            return playerWaypointColor();
+        }
+    }
 
     public static class ServerEntry {
         public Maptype maptype;

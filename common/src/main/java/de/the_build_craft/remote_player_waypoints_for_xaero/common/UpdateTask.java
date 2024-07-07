@@ -41,7 +41,6 @@ import xaero.common.AXaeroMinimap;
 #else
 import xaero.common.HudMod;
 #endif
-import org.apache.commons.lang3.StringUtils;
 import xaero.common.XaeroMinimapSession;
 import xaero.common.minimap.waypoints.Waypoint;
 import xaero.common.minimap.waypoints.WaypointWorld;
@@ -57,7 +56,7 @@ import java.util.*;
  * @author eatmyvenom
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 25.06.2024
+ * @version 07.07.2024
  */
 public class UpdateTask extends TimerTask {
     private final Minecraft mc;
@@ -85,6 +84,9 @@ public class UpdateTask extends TimerTask {
 
     private int previousPlayerWaypointColor = 0;
     private int previousMarkerWaypointColor = 0;
+    private int previousFriendWaypointColor = 0;
+    private boolean previousFriendColorOverride = false;
+    private int previousFriendListHashCode = 0;
 
     @Override
     public void run() {
@@ -270,6 +272,8 @@ public class UpdateTask extends TimerTask {
             }
         }
 
+        Vec3 camPosition = mc.cameraEntity.position();
+
         try {
             synchronized (playerWaypointList) {
                 if (CommonModConfig.Instance.enablePlayerWaypoints()){
@@ -298,14 +302,27 @@ public class UpdateTask extends TimerTask {
                         if (playerPosition == null) continue;
                         String playerName = playerPosition.player;
 
-                        int minimumWaypointDistanceToUse = CommonModConfig.Instance.minDistance();
-                        int maximumWaypointDistanceToUse = CommonModConfig.Instance.maxDistance();
+                        boolean isFriend = CommonModConfig.Instance.friendList().contains(playerName);
+
+                        if (CommonModConfig.Instance.onlyShowFriendsWaypoints() && !isFriend) continue;
+
+                        int minimumWaypointDistanceToUse;
+                        int maximumWaypointDistanceToUse;
+                        if (CommonModConfig.Instance.overwriteFriendDistances() && isFriend) {
+                            minimumWaypointDistanceToUse = CommonModConfig.Instance.minFriendDistance();
+                            maximumWaypointDistanceToUse = CommonModConfig.Instance.maxFriendDistance();
+                        }
+                        else {
+                            minimumWaypointDistanceToUse = CommonModConfig.Instance.minDistance();
+                            maximumWaypointDistanceToUse = CommonModConfig.Instance.maxDistance();
+                        }
+
                         if (minimumWaypointDistanceToUse > maximumWaypointDistanceToUse)
                             maximumWaypointDistanceToUse = minimumWaypointDistanceToUse;
 
                         // If closer than the minimum waypoint distance or further away than the maximum waypoint distance,
                         // don't show waypoint
-                        double d = mc.cameraEntity.position().distanceTo(new Vec3(playerPosition.x, playerPosition.y, playerPosition.z));
+                        double d = camPosition.distanceTo(new Vec3(playerPosition.x, playerPosition.y, playerPosition.z));
                         if (d < minimumWaypointDistanceToUse || d > maximumWaypointDistanceToUse) continue;
 
                         // Check if this player is within the server's player entity tracking range
@@ -343,10 +360,19 @@ public class UpdateTask extends TimerTask {
                     playerWaypointList.removeIf(waypoint -> !currentPlayerWaypointNames.contains(waypoint.getName()));
 
                     int newPlayerWaypointColor = CommonModConfig.Instance.playerWaypointColor();
-                    if (previousPlayerWaypointColor != newPlayerWaypointColor){
+                    int newFriendWaypointColor = CommonModConfig.Instance.friendWaypointColor();
+                    boolean newFriendColorOverride = CommonModConfig.Instance.overwriteFriendWaypointColor();
+                    int newFriendListHashCode = CommonModConfig.Instance.friendList().hashCode();
+                    if ((previousPlayerWaypointColor != newPlayerWaypointColor)
+                            || (previousFriendWaypointColor != newFriendWaypointColor)
+                            || (previousFriendColorOverride != newFriendColorOverride)
+                            || (previousFriendListHashCode != newFriendListHashCode)) {
                         previousPlayerWaypointColor = newPlayerWaypointColor;
+                        previousFriendWaypointColor = newFriendWaypointColor;
+                        previousFriendColorOverride = newFriendColorOverride;
+                        previousFriendListHashCode = newFriendListHashCode;
                         for (Waypoint waypoint : playerWaypointList){
-                            waypoint.setColor(newPlayerWaypointColor);
+                            waypoint.setColor(CommonModConfig.Instance.getPlayerWaypointColor(waypoint.getName()));
                         }
                     }
                 }
@@ -380,7 +406,7 @@ public class UpdateTask extends TimerTask {
 
                         // If closer than the minimum waypoint distance or further away than the maximum waypoint distance,
                         // don't show waypoint
-                        double d = mc.cameraEntity.position().distanceTo(new Vec3(markerPosition.x, markerPosition.y, markerPosition.z));
+                        double d = camPosition.distanceTo(new Vec3(markerPosition.x, markerPosition.y, markerPosition.z));
                         if (d < minimumWaypointDistanceToUse || d > maximumWaypointDistanceToUse) continue;
 
                         // If a waypoint for this marker already exists, update it

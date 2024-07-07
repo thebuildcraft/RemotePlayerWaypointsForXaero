@@ -28,6 +28,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,7 +41,7 @@ import java.util.List;
 /**
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 03.07.2024
+ * @version 06.07.2024
  */
 
 @Pseudo
@@ -55,12 +56,16 @@ public class MinimapRadarMixin {
         if(UpdateTask.playerPositions == null || UpdateTask.playerPositions.isEmpty()) return worldEntities;
         // Don't render if can't get access to world to check for players in range
         if(Minecraft.getInstance().level == null)  return worldEntities;
+        // Don't render if can't get access to cameraEntity to check for player distance
+        if(Minecraft.getInstance().cameraEntity == null)  return worldEntities;
 
         List<AbstractClientPlayer> playerClientEntityList = Minecraft.getInstance().level.players();
         ArrayList<String> renderedPlayerNames = new ArrayList<>();
         for (AbstractClientPlayer playerClientEntity : playerClientEntityList) {
             renderedPlayerNames.add(playerClientEntity.getName().plainCopy().getString());
         }
+
+        Vec3 camPosition = Minecraft.getInstance().cameraEntity.position();
 
         // For each remote player
         ArrayList<Entity> playerEntities = new ArrayList<>(UpdateTask.playerPositions.size());
@@ -70,8 +75,29 @@ public class MinimapRadarMixin {
             // Don't render same player when they are actually in range
             if(renderedPlayerNames.contains(playerPosition.player)) continue;
 
+            boolean isFriend = CommonModConfig.Instance.friendList().contains(playerPosition.player);
+
+            if (CommonModConfig.Instance.onlyShowFriendsIcons() && !isFriend) continue;
+
+            int maxIconDistance;
+            if (CommonModConfig.Instance.overwriteFriendDistances() && isFriend) {
+                maxIconDistance = CommonModConfig.Instance.maxFriendIconDistance();
+            }
+            else {
+                maxIconDistance = CommonModConfig.Instance.maxIconDistance();
+            }
+
+            // If further away than the maximum icon distance,
+            // don't show icon
+            double d = camPosition.distanceTo(new Vec3(playerPosition.x, playerPosition.y, playerPosition.z));
+            if (d > maxIconDistance) continue;
+
             // Add remote player to list as an entity
+            #if MC_VER == MC_1_19_2
+            RemotePlayer playerEntity = new RemotePlayer(Minecraft.getInstance().level, playerPosition.gameProfile, null);
+            #else
             RemotePlayer playerEntity = new RemotePlayer(Minecraft.getInstance().level, playerPosition.gameProfile);
+            #endif
             playerEntity.moveTo(playerPosition.x, playerPosition.y, playerPosition.z, 0, 0);
             playerEntities.add(playerEntity);
         }
