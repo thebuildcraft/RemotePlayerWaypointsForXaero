@@ -8,14 +8,15 @@
 ---
 
 This is a small client mod that allows you to see other players from further away on servers and see online-map-markers in game.
-It does this by getting the position data from Dynmap, Bluemap, Squaremap or Pl3xMap running on the server and displaying it with waypoints in [Xaero's Minimap](https://modrinth.com/mod/xaeros-minimap) and [Worldmap](https://modrinth.com/mod/xaeros-world-map).
+It does this by getting the position data from Dynmap, Bluemap, Squaremap or Pl3xMap running on the server and displaying it with waypoints and icons in [Xaero's Minimap](https://modrinth.com/mod/xaeros-minimap) and [Worldmap](https://modrinth.com/mod/xaeros-world-map).
 
 The AFK display feature can be used without having a map mod installed.
 
 ### Features
-- see player positions on Xaero's Minimap _(see more below)_ and Worldmap
+- see player positions as waypoints and icons on Xaero's Minimap _(see more below)_ and Worldmap
 - see online-map-markers in game
 - AFK display in tab list
+- friend-list features (for example overwrite color of waypoints of friends)
 - configurable trough Modmenu and Cloth Config Api
 - **==> [Roadmap](https://github.com/users/thebuildcraft/projects/1)**
 
