@@ -29,12 +29,12 @@ for %%f in (versionProperties\*) do (
     copy forge\build\libs\*.jar buildAllJars\original\
     copy neoforge\build\libs\*.jar buildAllJars\original\
     copy spigot\build\libs\*.jar buildAllJars\original\
-    @rem echo ==================== Deleting unnecessary *-all.jars ====================
-    @rem del /F /Q buildAllJars\original\*-all.jar
-    echo ==================== Merging !version! ====================
-    call .\gradlew.bat mergeJars -PmcVer="!version!" --no-daemon
-    echo ==================== Moving Merged jar ====================
-    move Merged\*.jar buildAllJars\
+    echo ==================== Deleting unnecessary *-all.jars ====================
+    del /F /Q buildAllJars\original\*-all.jar
+    @rem echo ==================== Merging !version! ====================
+    @rem call .\gradlew.bat mergeJars -PmcVer="!version!" --no-daemon
+    @rem echo ==================== Moving Merged jar ====================
+    @rem move Merged\*.jar buildAllJars\
 )
 
 echo ================================================================
