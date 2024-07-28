@@ -30,7 +30,9 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.connections.MapConnection;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Utils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.commands.CommandSourceStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,7 +48,7 @@ import java.util.Timer;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 23.06.2024
+ * @version 28.07.2024
  */
 public abstract class AbstractModInitializer
 {
@@ -76,6 +78,8 @@ public abstract class AbstractModInitializer
 	public static boolean enabled = true;
 	public static boolean mapModInstalled = false;
 	public static boolean overwriteCurrentDimension = false;
+
+	public static HashMap<ClientLevel, HashMap<String, RemotePlayer>> fakePlayerEntities = new HashMap<>();
 	
 	//==================//
 	// abstract methods //

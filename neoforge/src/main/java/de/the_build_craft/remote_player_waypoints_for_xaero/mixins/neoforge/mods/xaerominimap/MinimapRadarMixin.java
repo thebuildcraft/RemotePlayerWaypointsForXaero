@@ -21,6 +21,7 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.mixins.neoforge.mods.xaerominimap;
 
+import de.the_build_craft.remote_player_waypoints_for_xaero.common.AbstractModInitializer;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.CommonModConfig;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.PlayerPosition;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.UpdateTask;
@@ -36,12 +37,13 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import xaero.common.minimap.radar.MinimapRadar;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 06.07.2024
+ * @version 28.07.2024
  */
 
 @Pseudo
@@ -66,6 +68,11 @@ public class MinimapRadarMixin {
         }
 
         Vec3 camPosition = Minecraft.getInstance().cameraEntity.position();
+
+        if(!AbstractModInitializer.fakePlayerEntities.containsKey(Minecraft.getInstance().level)){
+            HashMap<String, RemotePlayer> temp = new HashMap<>();
+            AbstractModInitializer.fakePlayerEntities.put(Minecraft.getInstance().level, temp);
+        }
 
         // For each remote player
         ArrayList<Entity> playerEntities = new ArrayList<>(UpdateTask.playerPositions.size());
@@ -93,11 +100,18 @@ public class MinimapRadarMixin {
             if (d > maxIconDistance) continue;
 
             // Add remote player to list as an entity
-            #if MC_VER == MC_1_19_2
-            RemotePlayer playerEntity = new RemotePlayer(Minecraft.getInstance().level, playerPosition.gameProfile, null);
-            #else
-            RemotePlayer playerEntity = new RemotePlayer(Minecraft.getInstance().level, playerPosition.gameProfile);
-            #endif
+            RemotePlayer playerEntity;
+            if(AbstractModInitializer.fakePlayerEntities.get(Minecraft.getInstance().level).containsKey(playerPosition.player)){
+                playerEntity = AbstractModInitializer.fakePlayerEntities.get(Minecraft.getInstance().level).get(playerPosition.player);
+            }
+            else {
+                #if MC_VER == MC_1_19_2
+                playerEntity = new RemotePlayer(Minecraft.getInstance().level, playerPosition.gameProfile, null);
+                #else
+                playerEntity = new RemotePlayer(Minecraft.getInstance().level, playerPosition.gameProfile);
+                #endif
+                AbstractModInitializer.fakePlayerEntities.get(Minecraft.getInstance().level).put(playerPosition.player, playerEntity);
+            }
             playerEntity.moveTo(playerPosition.x, playerPosition.y, playerPosition.z, 0, 0);
             playerEntities.add(playerEntity);
         }
