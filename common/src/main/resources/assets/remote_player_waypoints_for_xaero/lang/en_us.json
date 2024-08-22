@@ -58,6 +58,8 @@
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.markerWaypointColor": "marker waypoint color",
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.debugMode": "debug mode",
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.debugMode.@PrefixText": "dev options - please ignore",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.showAfkInTabList": "show AFK status in tab list",
+  "text.autoconfig.remote_player_waypoints_for_xaero.option.general.hideAfkMinutes": "hide AFK minutes if AFK time is over 1 h",
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.showAfkTimeInTabList": "show AFK time in tab list",
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.showAfkTimeInTabList.@Tooltip": "Only shown if players AFK time is over the \"time until AFK\".",
   "text.autoconfig.remote_player_waypoints_for_xaero.option.general.ignoredServers": "ignored servers",

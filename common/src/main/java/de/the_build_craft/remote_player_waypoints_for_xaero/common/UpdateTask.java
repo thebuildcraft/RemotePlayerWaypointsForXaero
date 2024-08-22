@@ -56,7 +56,7 @@ import java.util.*;
  * @author eatmyvenom
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 07.07.2024
+ * @version 22.08.2024
  */
 public class UpdateTask extends TimerTask {
     private final Minecraft mc;
@@ -245,7 +245,9 @@ public class UpdateTask extends TimerTask {
         AbstractModInitializer.connected = true;
         AbstractModInitializer.AfkColor = CommonModConfig.Instance.AfkColor();
         AbstractModInitializer.unknownAfkStateColor = CommonModConfig.Instance.unknownAfkStateColor();
+        AbstractModInitializer.showAfkInTabList = CommonModConfig.Instance.showAfkInTabList();
         AbstractModInitializer.showAfkTimeInTabList = CommonModConfig.Instance.showAfkTimeInTabList();
+        AbstractModInitializer.hideAfkMinutes = CommonModConfig.Instance.hideAfkMinutes();
 
         if (!AbstractModInitializer.mapModInstalled || playerWaypointList == null || markerWaypointList == null){
             if (CommonModConfig.Instance.updateDelay() != AbstractModInitializer.TimerDelay){

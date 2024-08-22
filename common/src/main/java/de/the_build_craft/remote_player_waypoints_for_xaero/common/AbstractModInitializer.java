@@ -48,7 +48,7 @@ import java.util.Timer;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 28.07.2024
+ * @version 22.08.2024
  */
 public abstract class AbstractModInitializer
 {
@@ -73,7 +73,9 @@ public abstract class AbstractModInitializer
 	public static HashMap<String, PlayerPosition> lastPlayerDataDic = new HashMap<>();
 	public static int unknownAfkStateColor = 0x606060;
 	public static int AfkColor = 0xFF5500;
+	public static boolean showAfkInTabList = true;
 	public static boolean showAfkTimeInTabList = true;
+	public static boolean hideAfkMinutes = false;
 
 	public static boolean enabled = true;
 	public static boolean mapModInstalled = false;

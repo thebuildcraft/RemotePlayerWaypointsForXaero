@@ -31,7 +31,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 07.07.2024
+ * @version 22.08.2024
  */
 @Config(name = "remote_player_waypoints_for_xaero")
 #if MC_VER < MC_1_20_6
@@ -92,12 +92,16 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         @ConfigEntry.BoundedDiscrete(min = 100, max = 100000)
         int maxIconDistance = 100000;
 
+        public boolean showAfkInTabList = true;
+
         @ConfigEntry.Gui.Tooltip()
         @ConfigEntry.BoundedDiscrete(min = 60, max = 600)
         public int timeUntilAfk = 120;
 
         @ConfigEntry.Gui.Tooltip()
         public boolean showAfkTimeInTabList = true;
+
+        public boolean hideAfkMinutes = false;
 
         @ConfigEntry.Gui.Tooltip
         @ConfigEntry.ColorPicker

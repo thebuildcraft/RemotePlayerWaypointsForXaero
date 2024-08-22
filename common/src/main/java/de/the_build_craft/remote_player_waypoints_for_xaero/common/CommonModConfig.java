@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 07.07.2024
+ * @version 22.08.2024
  */
 public abstract class CommonModConfig {
     public CommonModConfig() {
@@ -52,6 +52,8 @@ public abstract class CommonModConfig {
     public abstract int playerWaypointColor();
     public abstract int markerWaypointColor();
     public abstract boolean showAfkTimeInTabList();
+    public abstract boolean showAfkInTabList();
+    public abstract boolean hideAfkMinutes();
     public abstract boolean debugMode();
     public abstract List<String> ignoredServers();
     public abstract List<ServerEntry> serverEntries();

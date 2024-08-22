@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * @author Leander Knüttel
  * @author MeerBiene
- * @version 16.06.2024
+ * @version 22.08.2024
  */
 @Mixin(PlayerTabOverlay.class)
 public class PlayerListHudMixin {
@@ -49,9 +49,11 @@ public class PlayerListHudMixin {
 
         if (hours == 0) {
             return minutes + " min";
-        } else {
-            return hours + " h  " + minutes + " min";
         }
+        if (AbstractModInitializer.hideAfkMinutes) {
+            return hours + " h";
+        }
+        return hours + " h  " + minutes + " min";
     }
 
 
@@ -65,7 +67,7 @@ public class PlayerListHudMixin {
             newText = ((PlayerTabOverlay)(Object)this).decorateName(entry, entry.getTabListDisplayName().copy());
         }
 
-        if (!(AbstractModInitializer.enabled && AbstractModInitializer.connected)) {
+        if (!(AbstractModInitializer.enabled && AbstractModInitializer.connected && AbstractModInitializer.showAfkInTabList)) {
             cir.setReturnValue(newText);
             return;
         }

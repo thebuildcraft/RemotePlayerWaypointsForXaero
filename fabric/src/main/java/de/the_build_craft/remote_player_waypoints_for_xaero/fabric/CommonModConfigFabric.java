@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 07.07.2024
+ * @version 22.08.2024
  */
 public class CommonModConfigFabric extends CommonModConfig {
     public CommonModConfigFabric(){
@@ -131,6 +131,16 @@ public class CommonModConfigFabric extends CommonModConfig {
     @Override
     public boolean showAfkTimeInTabList() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.showAfkTimeInTabList;
+    }
+
+    @Override
+    public boolean showAfkInTabList() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.showAfkInTabList;
+    }
+
+    @Override
+    public boolean hideAfkMinutes() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.hideAfkMinutes;
     }
 
     @Override
