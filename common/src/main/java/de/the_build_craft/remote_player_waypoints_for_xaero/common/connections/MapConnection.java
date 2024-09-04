@@ -41,7 +41,7 @@ import java.util.Objects;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 25.06.2024
+ * @version 04.09.2024
  */
 public abstract class MapConnection {
     public URL queryURL;
@@ -55,7 +55,7 @@ public abstract class MapConnection {
 
     @NotNull
     protected String getBaseURL(CommonModConfig.ServerEntry serverEntry, boolean useHttps) {
-        String baseURL = serverEntry.link.toLowerCase(Locale.ROOT);
+        String baseURL = serverEntry.link;
         if (!baseURL.startsWith(useHttps ? "https://" : "http://")){
             baseURL = (useHttps ? "https://" : "http://") + baseURL;
         }
