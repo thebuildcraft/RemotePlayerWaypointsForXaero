@@ -48,7 +48,7 @@ import java.util.Timer;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 22.08.2024
+ * @version 04.09.2024
  */
 public abstract class AbstractModInitializer
 {
@@ -59,7 +59,7 @@ public abstract class AbstractModInitializer
 	public static AbstractModInitializer INSTANCE;
 
 	// Update task
-	private static UpdateTask updateTask = new UpdateTask();
+	private static UpdateTask updateTask;
 	private static Timer RemoteUpdateThread = null;
 	public static int TimerDelay;
 
@@ -107,6 +107,18 @@ public abstract class AbstractModInitializer
 		LOGGER.info("Initializing " + MOD_NAME);
 
 		this.startup();//<-- common mod init in here
+
+		mapModInstalled = ModChecker.INSTANCE.classExists("xaero.minimap.XaeroMinimap") || ModChecker.INSTANCE.classExists("xaero.pvp.BetterPVP");
+		LOGGER.info("mapModInstalled: " + mapModInstalled);
+
+		unknownAfkStateColor = CommonModConfig.Instance.unknownAfkStateColor();
+		AfkColor = CommonModConfig.Instance.AfkColor();
+
+		RemoteUpdateThread = new Timer(true);
+		updateTask = new UpdateTask();
+		RemoteUpdateThread.scheduleAtFixedRate(updateTask, 0, CommonModConfig.Instance.updateDelay());
+		TimerDelay = CommonModConfig.Instance.updateDelay();
+
 		this.printModInfo();
 
 		this.createClientProxy().registerEvents();
@@ -157,16 +169,6 @@ public abstract class AbstractModInitializer
 		INSTANCE = this;
 		this.createInitialBindings();
 		//do common mod init here
-
-		mapModInstalled = ModChecker.INSTANCE.classExists("xaero.minimap.XaeroMinimap") || ModChecker.INSTANCE.classExists("xaero.pvp.BetterPVP");
-		LOGGER.info("mapModInstalled: " + mapModInstalled);
-
-		unknownAfkStateColor = CommonModConfig.Instance.unknownAfkStateColor();
-		AfkColor = CommonModConfig.Instance.AfkColor();
-
-		RemoteUpdateThread = new Timer(true);
-		RemoteUpdateThread.scheduleAtFixedRate(updateTask, 0, CommonModConfig.Instance.updateDelay());
-		TimerDelay = CommonModConfig.Instance.updateDelay();
 	}
 	
 	private void printModInfo()
