@@ -36,7 +36,7 @@ import java.util.Objects;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 25.06.2024
+ * @version 13.10.2024
  */
 public class SquareMapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -86,7 +86,8 @@ public class SquareMapConnection extends MapConnection {
         PlayerPosition[] positions = new PlayerPosition[update.players.length];
         for (int i = 0; i < update.players.length; i++){
             SquareMapPlayerUpdate.Player player = update.players[i];
-            positions[i] = new PlayerPosition(player.name, player.x, CommonModConfig.Instance.defaultY(), player.z, player.world);
+            positions[i] = new PlayerPosition(player.name, player.x,
+                    player.y == Integer.MIN_VALUE ? CommonModConfig.Instance.defaultY() : player.y, player.z, player.world);
         }
 
         return HandlePlayerPositions(positions);

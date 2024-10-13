@@ -22,13 +22,14 @@ package de.the_build_craft.remote_player_waypoints_for_xaero.common.mapUpdates;
 
 /**
  * @author Leander Knüttel
- * @version 14.06.2024
+ * @version 13.10.2024
  */
 public class SquareMapPlayerUpdate {
     public static class Player {
         public String name;
         public String world;
         public int x;
+        public int y = Integer.MIN_VALUE;
         public int z;
     }
 
