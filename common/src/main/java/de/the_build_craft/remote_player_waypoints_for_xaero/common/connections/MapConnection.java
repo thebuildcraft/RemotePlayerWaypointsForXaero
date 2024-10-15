@@ -77,7 +77,7 @@ public abstract class MapConnection {
         if (baseURL.endsWith("/")){
             baseURL = baseURL.substring(0, baseURL.length() - 1);
         }
-        return baseURL;
+        return baseURL.replace(" ", "%20");
     }
 
     public abstract HashMap<String, PlayerPosition> getPlayerPositions() throws IOException;

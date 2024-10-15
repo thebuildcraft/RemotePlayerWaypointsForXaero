@@ -72,8 +72,8 @@ public class BlueMapConnection extends MapConnection {
         // Get config and build the urls
         for (String w : ((BlueMapConfiguration) HTTP.makeJSONHTTPRequest(
                 URI.create(baseURL + "/settings.json?").toURL(), BlueMapConfiguration.class)).maps){
-            playerUrls.add(URI.create(baseURL + "/maps/" + w + "/live/players.json?").toURL());
-            markerUrls.add(URI.create(baseURL + "/maps/" + w + "/live/markers.json?").toURL());
+            playerUrls.add(URI.create((baseURL + "/maps/" + w + "/live/players.json?").replace(" ", "%20")).toURL());
+            markerUrls.add(URI.create((baseURL + "/maps/" + w + "/live/markers.json?").replace(" ", "%20")).toURL());
             worlds.add(w);
         }
 

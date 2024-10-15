@@ -66,7 +66,7 @@ public class DynmapConnection extends MapConnection {
 
         try{
             // test if the link is already the correct get-request
-            queryURL = URI.create(serverEntry.link).toURL();
+            queryURL = URI.create(serverEntry.link.replace(" ", "%20")).toURL();
             // TODO: implement markers for method 1
             // Test the url
             this.getPlayerPositions();
@@ -91,12 +91,12 @@ public class DynmapConnection extends MapConnection {
                     int k  = substring.indexOf("?");
                     substring = substring.substring(0, k);
                 }
-                AbstractModInitializer.LOGGER.info("configuration link: " + baseURL + substring);
-                onlineMapConfigLink = baseURL + substring;
+                onlineMapConfigLink = (baseURL + substring).replace(" ", "%20");
+                AbstractModInitializer.LOGGER.info("configuration link: " + onlineMapConfigLink);
 
                 // Get the first world name. I know it seems random. Just trust me...
                 firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
-                        URI.create(baseURL + substring).toURL(), DynmapConfiguration.class)).worlds[0].name;
+                        URI.create(onlineMapConfigLink).toURL(), DynmapConfiguration.class)).worlds[0].name.replace(" ", "%20");
 
                 AbstractModInitializer.LOGGER.info("firstWorldName: " + firstWorldName);
 
@@ -131,7 +131,7 @@ public class DynmapConnection extends MapConnection {
                 try{
                     // Get the first world name. I know it seems random. Just trust me...
                     firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
-                            URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name;
+                            URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name.replace(" ", "%20");
 
                     onlineMapConfigLink = baseURL + "/up/configuration";
 
@@ -149,7 +149,7 @@ public class DynmapConnection extends MapConnection {
                 catch (Exception ignored){
                     // Get the first world name. I know it seems random. Just trust me...
                     firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
-                            URI.create(baseURL + "/standalone/dynmap_config.json?").toURL(), DynmapConfiguration.class)).worlds[0].name;
+                            URI.create(baseURL + "/standalone/dynmap_config.json?").toURL(), DynmapConfiguration.class)).worlds[0].name.replace(" ", "%20");
 
                     onlineMapConfigLink = baseURL + "/standalone/dynmap_config.json?";
 
@@ -210,7 +210,7 @@ public class DynmapConnection extends MapConnection {
             return new HashMap<>();
         }
 
-        DynmapMarkerUpdate update = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", dimension)).toURL(), DynmapMarkerUpdate.class);
+        DynmapMarkerUpdate update = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", dimension).replace(" ", "%20")).toURL(), DynmapMarkerUpdate.class);
         HashMap<String, WaypointPosition> positions = new HashMap<>();
 
         for (DynmapMarkerUpdate.Set set : update.sets.values()){
