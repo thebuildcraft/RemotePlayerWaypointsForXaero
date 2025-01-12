@@ -34,8 +34,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+#if MC_VER == MC_1_17_1
 import xaero.common.minimap.radar.MinimapRadar;
-
+#else
+import xaero.hud.minimap.radar.state.RadarStateUpdater;
+#endif
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,14 +46,22 @@ import java.util.List;
 /**
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 28.07.2024
+ * @version 12.01.2025
  */
 
 @Pseudo
+#if MC_VER == MC_1_17_1
 @Mixin(MinimapRadar.class)
+#else
+@Mixin(RadarStateUpdater.class)
+#endif
 public class MinimapRadarMixin {
 
+    #if MC_VER == MC_1_17_1
     @ModifyVariable(method = "updateRadar", at = @At("STORE"), ordinal = 0)
+    #else
+    @ModifyVariable(method = "update", at = @At("STORE"), ordinal = 0)
+    #endif
     private Iterable<Entity> updateRadarEntities(Iterable<Entity> worldEntities) {
         // Don't render if feature not enabled
         if(!CommonModConfig.Instance.enableEntityRadar()) return worldEntities;
