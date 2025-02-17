@@ -22,7 +22,7 @@ package de.the_build_craft.remote_player_waypoints_for_xaero.common.mapUpdates;
 
 /**
  * @author Leander Knüttel
- * @version 14.06.2024
+ * @version 17.02.2025
  */
 public class SquareMapMarkerUpdate {
     public static class Marker{
@@ -36,5 +36,6 @@ public class SquareMapMarkerUpdate {
         public String type;
     }
 
+    public String name;
     public Marker[] markers;
 }

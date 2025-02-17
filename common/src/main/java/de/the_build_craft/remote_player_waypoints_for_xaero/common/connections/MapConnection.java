@@ -41,7 +41,7 @@ import java.util.Objects;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 04.09.2024
+ * @version 17.02.2025
  */
 public abstract class MapConnection {
     public URL queryURL;
@@ -116,7 +116,7 @@ public abstract class MapConnection {
                 } else {
                     AbstractModInitializer.AfkTimeDic.put(playerPosition.player, (CommonModConfig.Instance.updateDelay() / 1000));
                 }
-                if (CommonModConfig.Instance.debugMode()) {
+                if (CommonModConfig.Instance.debugMode() && CommonModConfig.Instance.chatLogInDebugMode()) {
                     Utils.sendToClientChat(playerPosition.player + "  afk_time: " + AbstractModInitializer.AfkTimeDic.get(playerPosition.player));
                 }
                 if (AbstractModInitializer.AfkTimeDic.get(playerPosition.player) >= CommonModConfig.Instance.timeUntilAfk()) {

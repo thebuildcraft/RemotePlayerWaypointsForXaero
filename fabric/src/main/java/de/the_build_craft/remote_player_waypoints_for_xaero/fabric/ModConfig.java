@@ -31,7 +31,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 22.08.2024
+ * @version 17.02.2025
  */
 @Config(name = "remote_player_waypoints_for_xaero")
 #if MC_VER < MC_1_20_6
@@ -139,6 +139,8 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         @ConfigEntry.Gui.PrefixText
         public boolean debugMode = false;
 
+        public boolean chatLogInDebugMode = true;
+
         public ModuleA() {
         }
     }
@@ -183,14 +185,23 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
 
         public String link;
 
+        @ConfigEntry.Gui.Tooltip()
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        public MarkerVisibilityMode markerVisibilityMode;
+
+        @ConfigEntry.Gui.Tooltip()
+        public List<String> markerLayers;
+
         public ServerEntry() {
-            this("", "", Maptype.Dynmap);
+            this("", "", Maptype.Dynmap, MarkerVisibilityMode.Auto, new ArrayList<>());
         }
 
-        public ServerEntry(String ip, String link, Maptype maptype) {
+        public ServerEntry(String ip, String link, Maptype maptype, MarkerVisibilityMode markerVisibilityMode, List<String> markerLayers) {
             this.ip = ip;
             this.link = link;
             this.maptype = maptype;
+            this.markerVisibilityMode = markerVisibilityMode;
+            this.markerLayers = markerLayers;
         }
 
         public enum Maptype {
@@ -200,6 +211,17 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
             Pl3xMap;
 
             Maptype() {
+            }
+        }
+
+        public enum MarkerVisibilityMode {
+            Auto,
+            All,
+            None,
+            BlackList,
+            WhiteList;
+
+            MarkerVisibilityMode() {
             }
         }
     }

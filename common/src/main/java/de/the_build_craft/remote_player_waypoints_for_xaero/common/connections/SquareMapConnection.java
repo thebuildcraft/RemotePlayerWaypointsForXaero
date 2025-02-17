@@ -30,13 +30,15 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 13.10.2024
+ * @version 17.02.2025
  */
 public class SquareMapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -105,7 +107,18 @@ public class SquareMapConnection extends MapConnection {
 
         HashMap<String, WaypointPosition> positions = new HashMap<>();
 
+        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
+        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
+            List<String> layers = new ArrayList<>();
+            for (SquareMapMarkerUpdate markerLayer : markersLayers) {
+                layers.add(markerLayer.name);
+            }
+            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, layers);
+        }
+
         for (SquareMapMarkerUpdate markerLayer : markersLayers){
+            if (!serverEntry.includeMarkerLayer(markerLayer.name)) continue;
+
             for (SquareMapMarkerUpdate.Marker marker : markerLayer.markers){
                 if (Objects.equals(marker.type, "icon")) {
                     WaypointPosition newWaypointPosition = new WaypointPosition(marker.tooltip, marker.point.x, CommonModConfig.Instance.defaultY(), marker.point.z);

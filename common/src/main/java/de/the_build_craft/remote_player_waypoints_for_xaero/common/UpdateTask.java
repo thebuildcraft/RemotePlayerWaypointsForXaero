@@ -56,7 +56,7 @@ import java.util.*;
  * @author eatmyvenom
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 22.08.2024
+ * @version 17.02.2025
  */
 public class UpdateTask extends TimerTask {
     private final Minecraft mc;
@@ -156,12 +156,8 @@ public class UpdateTask extends TimerTask {
 
         if (AbstractModInitializer.getConnection() == null){
             try {
-                CommonModConfig.ServerEntry serverEntry = null;
-                for (CommonModConfig.ServerEntry server : CommonModConfig.Instance.serverEntries()){
-                    if (Objects.equals(serverIP, server.ip.toLowerCase(Locale.ROOT))){
-                        serverEntry = server;
-                    }
-                }
+                CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
+
                 if (Objects.equals(serverEntry, null)) {
                     if (!(CommonModConfig.Instance.ignoredServers().contains(serverIP) || cantFindServerErrorWasShown)) {
                         if ((AbstractModInitializer.INSTANCE.loaderType == LoaderType.Fabric)
@@ -446,7 +442,7 @@ public class UpdateTask extends TimerTask {
                         markerMessageWasShown = true;
                         Utils.sendToClientChat(Text.literal("[" + AbstractModInitializer.MOD_NAME + "]: " +
                                         "Looks like you have quite a lot of markers from the server visible! " +
-                                        "Did you know that you can decrease their maximum distance or disable marker waypoints entirely? ")
+                                        "Did you know that you can chose the marker layers that are shown in the config, decrease their maximum distance or disable marker waypoints entirely? ")
                                 .withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD))
                                 .append(Text.literal("[Don't show this again]")
                                         .withStyle(Style.EMPTY.withClickEvent(

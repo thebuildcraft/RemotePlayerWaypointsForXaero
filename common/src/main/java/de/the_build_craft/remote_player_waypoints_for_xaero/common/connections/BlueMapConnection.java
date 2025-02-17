@@ -37,7 +37,7 @@ import java.lang.reflect.Type;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 25.06.2024
+ * @version 17.02.2025
  */
 public class BlueMapConnection extends MapConnection {
     public int lastWorldIndex;
@@ -111,11 +111,22 @@ public class BlueMapConnection extends MapConnection {
 
         HashMap<String, WaypointPosition> positions = new HashMap<>();
 
+        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
+        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
+            List<String> layers = new ArrayList<>();
+            for (Map.Entry<String, BlueMapMarkerSet> m : markerSets.entrySet()) {
+                layers.add(m.getKey());
+            }
+            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, layers);
+        }
+
         for (Map.Entry<String, BlueMapMarkerSet> m : markerSets.entrySet()){
-            if (CommonModConfig.Instance.debugMode()){
+            if (CommonModConfig.Instance.debugMode() && CommonModConfig.Instance.chatLogInDebugMode()){
                 Utils.sendToClientChat("====================================");
                 Utils.sendToClientChat("markerSet: " + m.getKey());
             }
+
+            if (!serverEntry.includeMarkerLayer(m.getKey())) continue;
 
             for(BlueMapMarkerSet.Marker marker : m.getValue().markers.values()){
                 if (Objects.equals(marker.type, "poi") || Objects.equals(marker.type, "html")){

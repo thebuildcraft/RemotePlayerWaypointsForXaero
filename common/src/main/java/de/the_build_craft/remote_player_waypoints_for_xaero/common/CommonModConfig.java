@@ -21,11 +21,16 @@
 package de.the_build_craft.remote_player_waypoints_for_xaero.common;
 
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Text;
+import net.minecraft.client.Minecraft;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 /**
  * @author Leander Knüttel
- * @version 22.08.2024
+ * @version 17.02.2025
  */
 public abstract class CommonModConfig {
     public CommonModConfig() {
@@ -55,8 +60,10 @@ public abstract class CommonModConfig {
     public abstract boolean showAfkInTabList();
     public abstract boolean hideAfkMinutes();
     public abstract boolean debugMode();
+    public abstract boolean chatLogInDebugMode();
     public abstract List<String> ignoredServers();
     public abstract List<ServerEntry> serverEntries();
+    public abstract void setMarkerLayers(String ip, List<String> layers);
     public abstract void setIgnoreMarkerMessage(boolean on);
     public abstract boolean ignoreMarkerMessage();
 
@@ -79,19 +86,34 @@ public abstract class CommonModConfig {
         }
     }
 
+    public ServerEntry getCurrentServerEntry() {
+        String serverIP = Objects.requireNonNull(Minecraft.getInstance().getCurrentServer()).ip.toLowerCase(Locale.ROOT);
+        ServerEntry serverEntry = null;
+        for (ServerEntry server : serverEntries()){
+            if (Objects.equals(serverIP, server.ip.toLowerCase(Locale.ROOT))){
+                serverEntry = server;
+            }
+        }
+        return serverEntry;
+    }
+
     public static class ServerEntry {
         public Maptype maptype;
         public String ip;
         public String link;
+        public MarkerVisibilityMode markerVisibilityMode;
+        public List<String> markerLayers;
 
         public ServerEntry() {
-            this("", "", Maptype.Dynmap);
+            this("", "", Maptype.Dynmap, MarkerVisibilityMode.Auto, new ArrayList<>());
         }
 
-        public ServerEntry(String ip, String link, Maptype maptype) {
+        public ServerEntry(String ip, String link, Maptype maptype, MarkerVisibilityMode markerVisibilityMode, List<String> markerLayers) {
             this.ip = ip;
             this.link = link;
             this.maptype = maptype;
+            this.markerVisibilityMode = markerVisibilityMode;
+            this.markerLayers = markerLayers;
         }
 
         public enum Maptype {
@@ -101,6 +123,33 @@ public abstract class CommonModConfig {
             Pl3xMap;
 
             Maptype() {
+            }
+        }
+
+        public enum MarkerVisibilityMode {
+            Auto,
+            All,
+            None,
+            BlackList,
+            WhiteList;
+
+            MarkerVisibilityMode() {
+            }
+        }
+
+        public boolean includeMarkerLayer(String layer) {
+            switch (markerVisibilityMode) {
+                case Auto:
+                case All:
+                    return true;
+                case None:
+                    return false;
+                case BlackList:
+                    return !markerLayers.contains(layer);
+                case WhiteList:
+                    return markerLayers.contains(layer);
+                default:
+                    throw new IllegalArgumentException();
             }
         }
     }

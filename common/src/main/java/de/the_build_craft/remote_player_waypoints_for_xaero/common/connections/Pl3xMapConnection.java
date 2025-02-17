@@ -33,12 +33,13 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 25.06.2024
+ * @version 17.02.2025
  */
 public class Pl3xMapConnection extends MapConnection{
     private String markerLayerStringTemplate = "";
@@ -127,11 +128,19 @@ public class Pl3xMapConnection extends MapConnection{
 
         ArrayList<String> layers = new ArrayList<>();
 
+        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
+
         for (Pl3xMapMarkerLayerConfig layer : markerLayers){
             if (!Objects.equals(layer.key, "pl3xmap_players")) {
                 layers.add(layer.key);
             }
         }
+
+        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
+            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, layers);
+        }
+
+        layers.removeIf(o -> !serverEntry.includeMarkerLayer(o));
 
         return layers.toArray(new String[0]);
     }

@@ -38,10 +38,11 @@ import net.minecraftforge.fml.ModLoadingContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @author Leander Knüttel
- * @version 22.08.2024
+ * @version 17.02.2025
  */
 public class CommonModConfigForge extends CommonModConfig {
     public CommonModConfigForge(){
@@ -173,6 +174,11 @@ public class CommonModConfigForge extends CommonModConfig {
     }
 
     @Override
+    public boolean chatLogInDebugMode() {
+        return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.chatLogInDebugMode;
+    }
+
+    @Override
     public List<String> ignoredServers() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.ignoredServers;
     }
@@ -182,9 +188,26 @@ public class CommonModConfigForge extends CommonModConfig {
         List<ModConfig.ServerEntry> se = AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.serverEntries;
         ArrayList<ServerEntry> seN = new ArrayList<ServerEntry>();
         for (ModConfig.ServerEntry s: se){
-            seN.add(new ServerEntry(s.ip, s.link, ServerEntry.Maptype.valueOf(s.maptype.toString())));
+            seN.add(new ServerEntry(s.ip,
+                    s.link,
+                    ServerEntry.Maptype.valueOf(s.maptype.toString()),
+                    ServerEntry.MarkerVisibilityMode.valueOf(s.markerVisibilityMode.toString()),
+                    s.markerLayers));
         }
         return seN;
+    }
+
+    @Override
+    public void setMarkerLayers(String ip, List<String> layers) {
+        List<ModConfig.ServerEntry> entries = AutoConfig.getConfigHolder(ModConfig.class).getConfig().general.serverEntries;
+        for (ModConfig.ServerEntry entry : entries) {
+            if (entry.ip.toLowerCase(Locale.ROOT).equals(ip.toLowerCase(Locale.ROOT))) {
+                entry.markerLayers = layers;
+                entry.markerVisibilityMode = ModConfig.ServerEntry.MarkerVisibilityMode.All;
+                saveConfig();
+                return;
+            }
+        }
     }
 
     @Override

@@ -28,7 +28,9 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Util
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -37,7 +39,7 @@ import java.util.Objects;
  * @author ewpratten
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 25.06.2024
+ * @version 17.02.2025
  */
 public class DynmapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -213,7 +215,18 @@ public class DynmapConnection extends MapConnection {
         DynmapMarkerUpdate update = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", dimension).replace(" ", "%20")).toURL(), DynmapMarkerUpdate.class);
         HashMap<String, WaypointPosition> positions = new HashMap<>();
 
+        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
+        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
+            List<String> layers = new ArrayList<>();
+            for (DynmapMarkerUpdate.Set set : update.sets.values()) {
+                layers.add(set.label);
+            }
+            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, layers);
+        }
+
         for (DynmapMarkerUpdate.Set set : update.sets.values()){
+            if (!serverEntry.includeMarkerLayer(set.label)) continue;
+
             for (DynmapMarkerUpdate.Set.Marker m : set.markers.values()){
                 WaypointPosition newWaypointPosition = new WaypointPosition(m.label, Math.round(m.x), Math.round(m.y), Math.round(m.z));
                 positions.put(newWaypointPosition.name, newWaypointPosition);
