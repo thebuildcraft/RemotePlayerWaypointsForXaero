@@ -18,27 +18,16 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.the_build_craft.remote_player_waypoints_for_xaero.common.mapUpdates;
+package de.the_build_craft.remote_player_waypoints_for_xaero.common.connections;
 
 /**
  * @author Leander Knüttel
  * @version 18.02.2025
  */
-public class Pl3xMapPlayerUpdate {
-    public static class Player {
-        public String name;
-        public String world;
-        public Position position;
-        public static class Position{
-            public int x;
-            public int z;
-        }
-    }
-
-    public static class WorldSetting {
+public class SquareMapConfiguration {
+    public static class World {
         public String name;
     }
 
-    public Player[] players;
-    public WorldSetting[] worldSettings;
+    public World[] worlds;
 }

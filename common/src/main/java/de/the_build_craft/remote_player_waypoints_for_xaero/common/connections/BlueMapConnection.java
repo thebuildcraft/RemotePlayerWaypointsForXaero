@@ -37,7 +37,7 @@ import java.lang.reflect.Type;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 17.02.2025
+ * @version 18.02.2025
  */
 public class BlueMapConnection extends MapConnection {
     public int lastWorldIndex;
@@ -100,6 +100,19 @@ public class BlueMapConnection extends MapConnection {
     @Override
     public HashMap<String, WaypointPosition> getWaypointPositions() throws IOException {
         Type apiResponseType = new TypeToken<Map<String, BlueMapMarkerSet>>() {}.getType();
+
+        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
+        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
+            HashSet<String> layers = new HashSet<>();
+            for (URL url : markerUrls) {
+                Map<String, BlueMapMarkerSet> sets = HTTP.makeJSONHTTPRequest(url, apiResponseType);
+                for (Map.Entry<String, BlueMapMarkerSet> m : sets.entrySet()) {
+                    layers.add(m.getKey());
+                }
+            }
+            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(layers));
+        }
+
         URL reqUrl;
         if (AbstractModInitializer.overwriteCurrentDimension && !Objects.equals(currentDimension, "")){
             reqUrl = markerUrls.get(worlds.indexOf(currentDimension));
@@ -107,18 +120,9 @@ public class BlueMapConnection extends MapConnection {
         else{
             reqUrl = markerUrls.get(lastWorldIndex);
         }
+
         Map<String, BlueMapMarkerSet> markerSets = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
-
         HashMap<String, WaypointPosition> positions = new HashMap<>();
-
-        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
-        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
-            List<String> layers = new ArrayList<>();
-            for (Map.Entry<String, BlueMapMarkerSet> m : markerSets.entrySet()) {
-                layers.add(m.getKey());
-            }
-            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, layers);
-        }
 
         for (Map.Entry<String, BlueMapMarkerSet> m : markerSets.entrySet()){
             if (CommonModConfig.Instance.debugMode() && CommonModConfig.Instance.chatLogInDebugMode()){

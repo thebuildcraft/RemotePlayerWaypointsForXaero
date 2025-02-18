@@ -28,10 +28,7 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Util
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Represents a connection to a dynmap server
@@ -39,11 +36,12 @@ import java.util.Objects;
  * @author ewpratten
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 17.02.2025
+ * @version 18.02.2025
  */
 public class DynmapConnection extends MapConnection {
     private String markerStringTemplate = "";
     public String firstWorldName = "";
+    public String[] worldNames = new String[0];
     public DynmapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         super(serverEntry, updateTask);
         try {
@@ -96,9 +94,7 @@ public class DynmapConnection extends MapConnection {
                 onlineMapConfigLink = (baseURL + substring).replace(" ", "%20");
                 AbstractModInitializer.LOGGER.info("configuration link: " + onlineMapConfigLink);
 
-                // Get the first world name. I know it seems random. Just trust me...
-                firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
-                        URI.create(onlineMapConfigLink).toURL(), DynmapConfiguration.class)).worlds[0].name.replace(" ", "%20");
+                setWorldNames();
 
                 AbstractModInitializer.LOGGER.info("firstWorldName: " + firstWorldName);
 
@@ -131,11 +127,9 @@ public class DynmapConnection extends MapConnection {
             }
             catch (Exception b){
                 try{
-                    // Get the first world name. I know it seems random. Just trust me...
-                    firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
-                            URI.create(baseURL + "/up/configuration").toURL(), DynmapConfiguration.class)).worlds[0].name.replace(" ", "%20");
-
                     onlineMapConfigLink = baseURL + "/up/configuration";
+
+                    setWorldNames();
 
                     // Build the url
                     queryURL = URI.create(baseURL + "/up/world/" + firstWorldName + "/").toURL();
@@ -149,11 +143,9 @@ public class DynmapConnection extends MapConnection {
                     }
                 }
                 catch (Exception ignored){
-                    // Get the first world name. I know it seems random. Just trust me...
-                    firstWorldName = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
-                            URI.create(baseURL + "/standalone/dynmap_config.json?").toURL(), DynmapConfiguration.class)).worlds[0].name.replace(" ", "%20");
-
                     onlineMapConfigLink = baseURL + "/standalone/dynmap_config.json?";
+
+                    setWorldNames();
 
                     // Build the url
                     queryURL = URI.create(baseURL + "/standalone/world/" + firstWorldName + ".json?").toURL();
@@ -173,6 +165,18 @@ public class DynmapConnection extends MapConnection {
         if (CommonModConfig.Instance.debugMode()){
             Utils.sendToClientChat("new link: " + queryURL);
         }
+    }
+
+    private void setWorldNames() throws IOException {
+        DynmapConfiguration.World[] worlds = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
+                URI.create(onlineMapConfigLink).toURL(), DynmapConfiguration.class)).worlds;
+        worldNames = new String[worlds.length];
+        for (int k = 0, worldsLength = worlds.length; k < worldsLength; k++) {
+            worldNames[k] = worlds[k].name.replace(" ", "%20");
+        }
+
+        // Get the first world name. I know it seems random. Just trust me...
+        firstWorldName = worldNames[0];
     }
 
     /**
@@ -198,6 +202,18 @@ public class DynmapConnection extends MapConnection {
 
     @Override
     public HashMap<String, WaypointPosition> getWaypointPositions() throws IOException {
+        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
+        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
+            HashSet<String> layers = new HashSet<>();
+            for (String world : worldNames) {
+                DynmapMarkerUpdate u = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", world).replace(" ", "%20")).toURL(), DynmapMarkerUpdate.class);
+                for (DynmapMarkerUpdate.Set set : u.sets.values()) {
+                    layers.add(set.label);
+                }
+            }
+            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(layers));
+        }
+
         String dimension;
         if (CommonModConfig.Instance.debugMode()){
             dimension = firstWorldName;
@@ -214,15 +230,6 @@ public class DynmapConnection extends MapConnection {
 
         DynmapMarkerUpdate update = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", dimension).replace(" ", "%20")).toURL(), DynmapMarkerUpdate.class);
         HashMap<String, WaypointPosition> positions = new HashMap<>();
-
-        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
-        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
-            List<String> layers = new ArrayList<>();
-            for (DynmapMarkerUpdate.Set set : update.sets.values()) {
-                layers.add(set.label);
-            }
-            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, layers);
-        }
 
         for (DynmapMarkerUpdate.Set set : update.sets.values()){
             if (!serverEntry.includeMarkerLayer(set.label)) continue;

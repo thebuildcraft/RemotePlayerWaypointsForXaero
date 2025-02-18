@@ -31,15 +31,12 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 17.02.2025
+ * @version 18.02.2025
  */
 public class Pl3xMapConnection extends MapConnection{
     private String markerLayerStringTemplate = "";
@@ -123,21 +120,31 @@ public class Pl3xMapConnection extends MapConnection{
 
     private String[] getMarkerLayers() throws IOException {
         Type apiResponseType = new TypeToken<Pl3xMapMarkerLayerConfig[]>() {}.getType();
+
+        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
+        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
+            Pl3xMapPlayerUpdate update = HTTP.makeJSONHTTPRequest(queryURL, Pl3xMapPlayerUpdate.class);
+            HashSet<String> layerMap = new HashSet<>();
+            for (Pl3xMapPlayerUpdate.WorldSetting ws : update.worldSettings) {
+                Pl3xMapMarkerLayerConfig[] mls = HTTP.makeJSONHTTPRequest(URI.create(markerLayerStringTemplate.replace("{world}", ws.name.replaceAll(":", "-"))).toURL(), apiResponseType);
+                for (Pl3xMapMarkerLayerConfig ml : mls) {
+                    if (!Objects.equals(ml.key, "pl3xmap_players")) {
+                        layerMap.add(ml.key);
+                    }
+                }
+            }
+            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(layerMap));
+        }
+
         URL reqUrl = URI.create(markerLayerStringTemplate.replace("{world}", currentDimension.replaceAll(":", "-"))).toURL();
         Pl3xMapMarkerLayerConfig[] markerLayers = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
 
         ArrayList<String> layers = new ArrayList<>();
 
-        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
-
         for (Pl3xMapMarkerLayerConfig layer : markerLayers){
             if (!Objects.equals(layer.key, "pl3xmap_players")) {
                 layers.add(layer.key);
             }
-        }
-
-        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
-            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, layers);
         }
 
         layers.removeIf(o -> !serverEntry.includeMarkerLayer(o));

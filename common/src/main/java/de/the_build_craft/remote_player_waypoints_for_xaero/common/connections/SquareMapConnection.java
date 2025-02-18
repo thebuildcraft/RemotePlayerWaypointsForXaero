@@ -30,15 +30,12 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 17.02.2025
+ * @version 18.02.2025
  */
 public class SquareMapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -102,19 +99,24 @@ public class SquareMapConnection extends MapConnection {
         }
 
         Type apiResponseType = new TypeToken<SquareMapMarkerUpdate[]>() {}.getType();
+
+        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
+        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
+            HashSet<String> layers = new HashSet<>();
+            SquareMapConfiguration squareMapConfiguration = HTTP.makeJSONHTTPRequest(URI.create(onlineMapConfigLink).toURL(), SquareMapConfiguration.class);
+            for (SquareMapConfiguration.World world : squareMapConfiguration.worlds) {
+                SquareMapMarkerUpdate[] ml = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", world.name)).toURL(), apiResponseType);
+                for (SquareMapMarkerUpdate markerLayer : ml) {
+                    layers.add(markerLayer.name);
+                }
+            }
+            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(layers));
+        }
+
         URL reqUrl = URI.create(markerStringTemplate.replace("{world}", currentDimension)).toURL();
         SquareMapMarkerUpdate[] markersLayers = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
 
         HashMap<String, WaypointPosition> positions = new HashMap<>();
-
-        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
-        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
-            List<String> layers = new ArrayList<>();
-            for (SquareMapMarkerUpdate markerLayer : markersLayers) {
-                layers.add(markerLayer.name);
-            }
-            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, layers);
-        }
 
         for (SquareMapMarkerUpdate markerLayer : markersLayers){
             if (!serverEntry.includeMarkerLayer(markerLayer.name)) continue;
