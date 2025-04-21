@@ -29,6 +29,8 @@ import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Util
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Represents a connection to a dynmap server
@@ -36,20 +38,19 @@ import java.util.*;
  * @author ewpratten
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 18.02.2025
+ * @version 21.04.2025
  */
 public class DynmapConnection extends MapConnection {
     private String markerStringTemplate = "";
     public String firstWorldName = "";
     public String[] worldNames = new String[0];
     public DynmapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
-        super(serverEntry, updateTask);
         try {
-            generateLink(serverEntry, false);
+            generateLink(serverEntry, true);
         }
         catch (Exception ignored){
             try {
-                generateLink(serverEntry, true);
+                generateLink(serverEntry, false);
             }
             catch (Exception e){
                 if (!updateTask.linkBrokenErrorWasShown){
@@ -59,6 +60,10 @@ public class DynmapConnection extends MapConnection {
                 throw e;
             }
         }
+    }
+
+    public DynmapConnection(String baseURL, String config) throws IOException {
+        generateLinkWithConfig(baseURL, config);
     }
 
     private void generateLink(CommonModConfig.ServerEntry serverEntry, boolean useHttps) throws IOException {
@@ -79,47 +84,8 @@ public class DynmapConnection extends MapConnection {
             try{
                 // get config.js
                 String mapConfig = HTTP.makeTextHttpRequest(URI.create(baseURL + "/standalone/config.js").toURL());
-                int i = mapConfig.indexOf("configuration: ");
-                int j = mapConfig.indexOf(",", i);
 
-                AbstractModInitializer.LOGGER.info("mapConfig: " + mapConfig);
-                String substring = mapConfig.substring(i + 16, j - 1);
-                if (!substring.startsWith("/")){
-                    substring = "/" + substring;
-                }
-                if (substring.contains("?")){
-                    int k  = substring.indexOf("?");
-                    substring = substring.substring(0, k);
-                }
-                onlineMapConfigLink = (baseURL + substring).replace(" ", "%20");
-                AbstractModInitializer.LOGGER.info("configuration link: " + onlineMapConfigLink);
-
-                setWorldNames();
-
-                AbstractModInitializer.LOGGER.info("firstWorldName: " + firstWorldName);
-
-                i = mapConfig.indexOf("update: ");
-                j = mapConfig.indexOf(",", i);
-                String updateStringTemplate = mapConfig.substring(i + 9, j - 1);
-                if (!updateStringTemplate.startsWith("/")){
-                    updateStringTemplate = "/" + updateStringTemplate;
-                }
-                updateStringTemplate = updateStringTemplate.replace("{timestamp}", "1");
-
-                AbstractModInitializer.LOGGER.info("updateStringTemplate: " + updateStringTemplate);
-
-                i = mapConfig.indexOf("markers: ");
-                int l = "markers: ".length() + 1;
-                j = mapConfig.indexOf("'", i + l + 1);
-                markerStringTemplate = baseURL + "/" + mapConfig.substring(i + l, j) + "_markers_/marker_{world}.json";
-
-                // Build the url
-                queryURL = URI.create(baseURL + updateStringTemplate.replace("{world}", firstWorldName)).toURL();
-
-                AbstractModInitializer.LOGGER.info("url: " + queryURL);
-
-                // Test the url
-                this.getPlayerPositions();
+                generateLinkWithConfig(baseURL, mapConfig);
 
                 if (CommonModConfig.Instance.debugMode()){
                     Utils.sendToClientChat("got link with method 2 | that is good!");
@@ -167,9 +133,71 @@ public class DynmapConnection extends MapConnection {
         }
     }
 
+    public void generateLinkWithConfig(String baseURL, String mapConfig) throws IOException {
+        Matcher matcher = Pattern.compile(".*?//\\w*(\\.\\w+)+(:\\w+)?").matcher(baseURL);
+        if (!matcher.find()) throw new RuntimeException("wrong url pattern");
+        baseURL = matcher.group();
+
+        int i = mapConfig.indexOf("configuration: ");
+        int j = mapConfig.indexOf(",", i);
+
+        AbstractModInitializer.LOGGER.info("mapConfig: " + mapConfig);
+        String substring = mapConfig.substring(i + 16, j - 1);
+        if (substring.contains("?")){
+            int k  = substring.indexOf("?");
+            substring = substring.substring(0, k);
+        }
+        if (substring.contains("//")) {
+            onlineMapConfigLink = substring.replace(" ", "%20");
+        } else {
+            if (!substring.startsWith("/")){
+                substring = "/" + substring;
+            }
+            onlineMapConfigLink = (baseURL + substring).replace(" ", "%20");
+        }
+        AbstractModInitializer.LOGGER.info("configuration link: " + onlineMapConfigLink);
+
+        setWorldNames();
+
+        AbstractModInitializer.LOGGER.info("firstWorldName: " + firstWorldName);
+
+        i = mapConfig.indexOf("update: ");
+        j = mapConfig.indexOf(",", i);
+        String updateStringTemplate = mapConfig.substring(i + 9, j - 1).replace("{timestamp}", "1");
+        AbstractModInitializer.LOGGER.info("updateStringTemplate: " + updateStringTemplate);
+
+        if (updateStringTemplate.contains("//")) {
+            queryURL = URI.create(updateStringTemplate.replace("{world}", firstWorldName)).toURL();
+        } else {
+            if (!updateStringTemplate.startsWith("/")){
+                updateStringTemplate = "/" + updateStringTemplate;
+            }
+            queryURL = URI.create(baseURL + updateStringTemplate.replace("{world}", firstWorldName)).toURL();
+        }
+
+        AbstractModInitializer.LOGGER.info("url: " + queryURL);
+
+        i = mapConfig.indexOf("markers: ");
+        int l = "markers: ".length() + 1;
+        j = mapConfig.indexOf("'", i + l + 1);
+        String markerSubstring = mapConfig.substring(i + l, j);
+        if (markerSubstring.contains("//")) {
+            markerStringTemplate = markerSubstring + "_markers_/marker_{world}.json";
+        } else {
+            if(!markerSubstring.startsWith("/")) {
+                markerSubstring = "/" + markerSubstring;
+            }
+            markerStringTemplate = baseURL + markerSubstring + "_markers_/marker_{world}.json";
+        }
+        AbstractModInitializer.LOGGER.info("markerStringTemplate: " + markerStringTemplate);
+
+        // Test the url
+        this.getPlayerPositions();
+    }
+
     private void setWorldNames() throws IOException {
-        DynmapConfiguration.World[] worlds = ((DynmapConfiguration) HTTP.makeJSONHTTPRequest(
-                URI.create(onlineMapConfigLink).toURL(), DynmapConfiguration.class)).worlds;
+        DynmapConfiguration.World[] worlds = HTTP.makeJSONHTTPRequest(
+                URI.create(onlineMapConfigLink).toURL(), DynmapConfiguration.class).worlds;
         worldNames = new String[worlds.length];
         for (int k = 0, worldsLength = worlds.length; k < worldsLength; k++) {
             worldNames[k] = worlds[k].name.replace(" ", "%20");
@@ -183,7 +211,6 @@ public class DynmapConnection extends MapConnection {
      * Ask the server for a list of all player positions
      *
      * @return Player positions
-     * @throws IOException
      */
     @Override
     public HashMap<String, PlayerPosition> getPlayerPositions() throws IOException {
@@ -201,17 +228,30 @@ public class DynmapConnection extends MapConnection {
     }
 
     @Override
+    public HashSet<String> getMarkerLayers() {
+        HashSet<String> layers = new HashSet<>();
+        for (String world : worldNames) {
+            DynmapMarkerUpdate u;
+            try {
+                u = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", world).replace(" ", "%20")).toURL(), DynmapMarkerUpdate.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            for (DynmapMarkerUpdate.Set set : u.sets.values()) {
+                layers.add(set.label);
+            }
+        }
+        return layers;
+    }
+
+    String lastMarkerDimension = "";
+    HashMap<String, WaypointPosition> lastResult = new HashMap<>();
+
+    @Override
     public HashMap<String, WaypointPosition> getWaypointPositions() throws IOException {
         CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
         if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
-            HashSet<String> layers = new HashSet<>();
-            for (String world : worldNames) {
-                DynmapMarkerUpdate u = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", world).replace(" ", "%20")).toURL(), DynmapMarkerUpdate.class);
-                for (DynmapMarkerUpdate.Set set : u.sets.values()) {
-                    layers.add(set.label);
-                }
-            }
-            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(layers));
+            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(getMarkerLayers()));
         }
 
         String dimension;
@@ -227,6 +267,10 @@ public class DynmapConnection extends MapConnection {
         if (markerStringTemplate.isEmpty() || dimension.isEmpty()) {
             return new HashMap<>();
         }
+        if (lastMarkerDimension.equals(dimension)) {
+            return lastResult;
+        }
+        lastMarkerDimension = dimension;
 
         DynmapMarkerUpdate update = HTTP.makeJSONHTTPRequest(URI.create(markerStringTemplate.replace("{world}", dimension).replace(" ", "%20")).toURL(), DynmapMarkerUpdate.class);
         HashMap<String, WaypointPosition> positions = new HashMap<>();
@@ -239,7 +283,7 @@ public class DynmapConnection extends MapConnection {
                 positions.put(newWaypointPosition.name, newWaypointPosition);
             }
         }
-
+        lastResult = positions;
         return positions;
     }
 }

@@ -23,7 +23,6 @@ package de.the_build_craft.remote_player_waypoints_for_xaero.common.connections;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.CommonModConfig;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.PlayerPosition;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.AbstractModInitializer;
-import de.the_build_craft.remote_player_waypoints_for_xaero.common.UpdateTask;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.WaypointPosition;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Text;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Utils;
@@ -33,24 +32,28 @@ import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 17.02.2025
+ * @version 21.04.2025
  */
 public abstract class MapConnection {
     public URL queryURL;
     public final Minecraft mc;
     public String currentDimension;
     public String onlineMapConfigLink;
+    long lastUpdateTimeMs;
+    public boolean foundPlayer;
 
-    public MapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) {
+    public MapConnection() {
         this.mc = Minecraft.getInstance();
+        lastUpdateTimeMs = System.currentTimeMillis();
     }
 
     @NotNull
@@ -88,15 +91,20 @@ public abstract class MapConnection {
             return newPlayerPositions;
         }
         String clientName = mc.player.getName().getString();
+        foundPlayer = false;
         if (!AbstractModInitializer.overwriteCurrentDimension) {
             currentDimension = "";
             for (PlayerPosition p : playerPositions){
                 if (Objects.equals(p.player, clientName)) {
                     currentDimension = p.world;
+                    foundPlayer = true;
                 }
             }
         }
 
+        if (CommonModConfig.Instance.debugMode() && CommonModConfig.Instance.chatLogInDebugMode()) {
+            Utils.sendToClientChat("---");
+        }
         for (PlayerPosition p : playerPositions) {
             UpdateAfkInfo(p);
 
@@ -104,6 +112,7 @@ public abstract class MapConnection {
                 newPlayerPositions.put(p.player, p);
             }
         }
+        lastUpdateTimeMs = System.currentTimeMillis();
 
         return newPlayerPositions;
     }
@@ -112,18 +121,18 @@ public abstract class MapConnection {
         if (AbstractModInitializer.lastPlayerDataDic.containsKey(playerPosition.player)) {
             if (AbstractModInitializer.lastPlayerDataDic.get(playerPosition.player).CompareCords(playerPosition)) {
                 if (AbstractModInitializer.AfkTimeDic.containsKey(playerPosition.player)) {
-                    AbstractModInitializer.AfkTimeDic.put(playerPosition.player, AbstractModInitializer.AfkTimeDic.get(playerPosition.player) + (CommonModConfig.Instance.updateDelay() / 1000));
+                    AbstractModInitializer.AfkTimeDic.put(playerPosition.player, AbstractModInitializer.AfkTimeDic.get(playerPosition.player) + (System.currentTimeMillis() - lastUpdateTimeMs));
                 } else {
-                    AbstractModInitializer.AfkTimeDic.put(playerPosition.player, (CommonModConfig.Instance.updateDelay() / 1000));
+                    AbstractModInitializer.AfkTimeDic.put(playerPosition.player, (System.currentTimeMillis() - lastUpdateTimeMs));
                 }
                 if (CommonModConfig.Instance.debugMode() && CommonModConfig.Instance.chatLogInDebugMode()) {
-                    Utils.sendToClientChat(playerPosition.player + "  afk_time: " + AbstractModInitializer.AfkTimeDic.get(playerPosition.player));
+                    Utils.sendToClientChat(playerPosition.player + "  afk_time: " + AbstractModInitializer.AfkTimeDic.get(playerPosition.player) / 1000);
                 }
-                if (AbstractModInitializer.AfkTimeDic.get(playerPosition.player) >= CommonModConfig.Instance.timeUntilAfk()) {
+                if (AbstractModInitializer.AfkTimeDic.get(playerPosition.player) / 1000 >= CommonModConfig.Instance.timeUntilAfk()) {
                     AbstractModInitializer.AfkDic.put(playerPosition.player, true);
                 }
             } else {
-                AbstractModInitializer.AfkTimeDic.put(playerPosition.player, 0);
+                AbstractModInitializer.AfkTimeDic.put(playerPosition.player, 0L);
                 AbstractModInitializer.AfkDic.put(playerPosition.player, false);
             }
         }
@@ -133,6 +142,12 @@ public abstract class MapConnection {
     public abstract HashMap<String, WaypointPosition> getWaypointPositions() throws IOException;
 
     public void OpenOnlineMapConfig(){
+        #if MC_VER < MC_1_21_5
         Utils.sendToClientChat(Text.literal(onlineMapConfigLink).withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, onlineMapConfigLink))));
+        #else
+        Utils.sendToClientChat(Text.literal(onlineMapConfigLink).withStyle(Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create(onlineMapConfigLink)))));
+        #endif
     }
+
+    public abstract HashSet<String> getMarkerLayers();
 }

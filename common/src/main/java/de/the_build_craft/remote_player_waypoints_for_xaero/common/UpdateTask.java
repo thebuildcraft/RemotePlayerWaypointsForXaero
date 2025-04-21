@@ -21,10 +21,7 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.common;
 
-import de.the_build_craft.remote_player_waypoints_for_xaero.common.connections.BlueMapConnection;
-import de.the_build_craft.remote_player_waypoints_for_xaero.common.connections.DynmapConnection;
-import de.the_build_craft.remote_player_waypoints_for_xaero.common.connections.Pl3xMapConnection;
-import de.the_build_craft.remote_player_waypoints_for_xaero.common.connections.SquareMapConnection;
+import de.the_build_craft.remote_player_waypoints_for_xaero.common.connections.*;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Text;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Utils;
 import net.minecraft.ChatFormatting;
@@ -38,12 +35,17 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 #if MC_VER == MC_1_17_1
 import xaero.common.AXaeroMinimap;
+import xaero.common.XaeroMinimapSession;
+import xaero.common.minimap.waypoints.WaypointWorld;
 #else
 import xaero.common.HudMod;
+import xaero.hud.minimap.BuiltInHudModules;
+import xaero.hud.minimap.module.MinimapSession;
+import xaero.hud.minimap.waypoint.WaypointColor;
+import xaero.hud.minimap.waypoint.set.WaypointSet;
+import xaero.hud.minimap.world.MinimapWorld;
 #endif
-import xaero.common.XaeroMinimapSession;
 import xaero.common.minimap.waypoints.Waypoint;
-import xaero.common.minimap.waypoints.WaypointWorld;
 
 import java.io.IOException;
 import java.util.*;
@@ -56,7 +58,7 @@ import java.util.*;
  * @author eatmyvenom
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 17.02.2025
+ * @version 21.04.2025
  */
 public class UpdateTask extends TimerTask {
     private final Minecraft mc;
@@ -79,8 +81,13 @@ public class UpdateTask extends TimerTask {
 
     public static HashMap<String, PlayerPosition> playerPositions;
     public static HashMap<String, WaypointPosition> markerPositions;
+    #if MC_VER == MC_1_17_1
     private ArrayList<Waypoint> playerWaypointList = null;
     private ArrayList<Waypoint> markerWaypointList = null;
+    #else
+    private WaypointSet playerWaypointList = null;
+    private WaypointSet markerWaypointList = null;
+    #endif
 
     private int previousPlayerWaypointColor = 0;
     private int previousMarkerWaypointColor = 0;
@@ -117,15 +124,32 @@ public class UpdateTask extends TimerTask {
         if (AbstractModInitializer.mapModInstalled){
             try{
                 // Access the current waypoint world
+                #if MC_VER == MC_1_17_1
                 WaypointWorld currentWorld = XaeroMinimapSession.getCurrentSession().getWaypointsManager().getCurrentWorld();
-                if (!currentWorld.getSets().containsKey(PLAYER_SET_NAME)){
+
+                if (currentWorld.getSets().get(PLAYER_SET_NAME) == null){
                     currentWorld.addSet(PLAYER_SET_NAME);
                 }
-                if (!currentWorld.getSets().containsKey(MARKER_SET_NAME)){
+                if (currentWorld.getSets().get(MARKER_SET_NAME) == null){
                     currentWorld.addSet(MARKER_SET_NAME);
                 }
+
                 playerWaypointList = currentWorld.getSets().get(PLAYER_SET_NAME).getList();
                 markerWaypointList = currentWorld.getSets().get(MARKER_SET_NAME).getList();
+                #else
+                MinimapSession session = BuiltInHudModules.MINIMAP.getCurrentSession();
+                MinimapWorld currentWorld = session.getWorldManager().getCurrentWorld();
+
+                if (currentWorld.getWaypointSet(PLAYER_SET_NAME) == null){
+                    currentWorld.addWaypointSet(PLAYER_SET_NAME);
+                }
+                if (currentWorld.getWaypointSet(MARKER_SET_NAME) == null){
+                    currentWorld.addWaypointSet(MARKER_SET_NAME);
+                }
+
+                playerWaypointList = currentWorld.getWaypointSet(PLAYER_SET_NAME);
+                markerWaypointList = currentWorld.getWaypointSet(MARKER_SET_NAME);
+                #endif
             }
             catch (Exception ignored){
             }
@@ -160,21 +184,28 @@ public class UpdateTask extends TimerTask {
 
                 if (Objects.equals(serverEntry, null)) {
                     if (!(CommonModConfig.Instance.ignoredServers().contains(serverIP) || cantFindServerErrorWasShown)) {
+                        String message = "[" + AbstractModInitializer.MOD_NAME + "]: " +
+                                "Could not find an online map link for this server. " +
+                                "Make sure to add it to the config. (this server ip was detected: " + serverIP + ") ";
                         if ((AbstractModInitializer.INSTANCE.loaderType == LoaderType.Fabric)
                                 || (AbstractModInitializer.INSTANCE.loaderType == LoaderType.Quilt)) {
-                            Utils.sendToClientChat(Text.literal("[" + AbstractModInitializer.MOD_NAME + "]: " +
-                                            "Could not find an online map link for this server. " +
-                                            "Make sure to add it to the config. (this server ip was detected: " + serverIP + ") ")
+                            Utils.sendToClientChat(Text.literal(message)
                                     .setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)).append(Text.literal("[ignore this server]")
                                             .setStyle(Style.EMPTY.withColor(ChatFormatting.GREEN).withBold(true)
+                                                    #if MC_VER < MC_1_21_5
                                                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + AbstractModInitializer.MOD_ID + " ignore_server")))));
+                                                    #else
+                                                    .withClickEvent(new ClickEvent.RunCommand("/" + AbstractModInitializer.MOD_ID + " ignore_server")))));
+                                                    #endif
                         } else {
-                            Utils.sendToClientChat(Text.literal("[" + AbstractModInitializer.MOD_NAME + "]: " +
-                                            "Could not find an online map link for this server. " +
-                                            "Make sure to add it to the config. (this server ip was detected: " + serverIP + ") ")
+                            Utils.sendToClientChat(Text.literal(message)
                                     .setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)).append(Text.literal("[ignore this server]")
                                             .setStyle(Style.EMPTY.withColor(ChatFormatting.GREEN).withBold(true)
+                                                    #if MC_VER < MC_1_21_5
                                                     .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + AbstractModInitializer.MOD_ID + " ignore_server")))));
+                                                    #else
+                                                    .withClickEvent(new ClickEvent.SuggestCommand("/" + AbstractModInitializer.MOD_ID + " ignore_server")))));
+                                                    #endif
                         }//                                                        RUN_COMMAND doesn't seem to work on Forge and NeoForge...
 
                         cantFindServerErrorWasShown = true;
@@ -190,6 +221,8 @@ public class UpdateTask extends TimerTask {
                     AbstractModInitializer.setConnection(new BlueMapConnection(serverEntry, this));
                 } else if (serverEntry.maptype == CommonModConfig.ServerEntry.Maptype.Pl3xMap) {
                     AbstractModInitializer.setConnection(new Pl3xMapConnection(serverEntry, this));
+                } else if (serverEntry.maptype == CommonModConfig.ServerEntry.Maptype.LiveAtlas) {
+                    AbstractModInitializer.setConnection(new LiveAtlasConnection(serverEntry, this));
                 } else {
                     throw new IllegalStateException("Unexpected value: " + serverEntry.maptype);
                 }
@@ -355,7 +388,15 @@ public class UpdateTask extends TimerTask {
                         }
                     }
                     // Remove any waypoints for players not shown on the map anymore
+                    #if MC_VER == MC_1_17_1
                     playerWaypointList.removeIf(waypoint -> !currentPlayerWaypointNames.contains(waypoint.getName()));
+                    #else
+                    Iterator<Waypoint> iterator = playerWaypointList.getWaypoints().iterator();
+                    while (iterator.hasNext()) {
+                        Waypoint w = iterator.next();
+                        if (!currentPlayerWaypointNames.contains(w.getName())) iterator.remove();
+                    }
+                    #endif
 
                     int newPlayerWaypointColor = CommonModConfig.Instance.playerWaypointColor();
                     int newFriendWaypointColor = CommonModConfig.Instance.friendWaypointColor();
@@ -369,9 +410,15 @@ public class UpdateTask extends TimerTask {
                         previousFriendWaypointColor = newFriendWaypointColor;
                         previousFriendColorOverride = newFriendColorOverride;
                         previousFriendListHashCode = newFriendListHashCode;
-                        for (Waypoint waypoint : playerWaypointList){
+                        #if MC_VER == MC_1_17_1
+                        for (Waypoint waypoint : playerWaypointList) {
                             waypoint.setColor(CommonModConfig.Instance.getPlayerWaypointColor(waypoint.getName()));
                         }
+                        #else
+                        for (Waypoint waypoint : playerWaypointList.getWaypoints()){
+                            waypoint.setWaypointColor(WaypointColor.fromIndex(CommonModConfig.Instance.getPlayerWaypointColor(waypoint.getName())));
+                        }
+                        #endif
                     }
                 }
                 else {
@@ -428,14 +475,28 @@ public class UpdateTask extends TimerTask {
                         }
                     }
                     // Remove any waypoints for markers not shown on the map anymore
+                    #if MC_VER == MC_1_17_1
                     markerWaypointList.removeIf(waypoint -> !currentMarkerWaypointNames.contains(waypoint.getName()));
+                    #else
+                    Iterator<Waypoint> iterator = markerWaypointList.getWaypoints().iterator();
+                    while (iterator.hasNext()) {
+                        Waypoint w = iterator.next();
+                        if (!currentMarkerWaypointNames.contains(w.getName())) iterator.remove();
+                    }
+                    #endif
 
                     int newMarkerWaypointColor = CommonModConfig.Instance.markerWaypointColor();
                     if (previousMarkerWaypointColor != newMarkerWaypointColor){
                         previousMarkerWaypointColor = newMarkerWaypointColor;
-                        for (Waypoint waypoint : markerWaypointList){
+                        #if MC_VER == MC_1_17_1
+                        for (Waypoint waypoint : markerWaypointList) {
                             waypoint.setColor(newMarkerWaypointColor);
                         }
+                        #else
+                        for (Waypoint waypoint : markerWaypointList.getWaypoints()){
+                            waypoint.setWaypointColor(WaypointColor.fromIndex(newMarkerWaypointColor));
+                        }
+                        #endif
                     }
 
                     if (!markerMessageWasShown && currentMarkerWaypointNames.size() > maxMarkerCountBeforeWarning && !CommonModConfig.Instance.ignoreMarkerMessage()) {
@@ -446,7 +507,11 @@ public class UpdateTask extends TimerTask {
                                 .withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD))
                                 .append(Text.literal("[Don't show this again]")
                                         .withStyle(Style.EMPTY.withClickEvent(
-                                                        new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + AbstractModInitializer.MOD_ID + " ignore_marker_message"))
+                                                #if MC_VER < MC_1_21_5
+                                                new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + AbstractModInitializer.MOD_ID + " ignore_marker_message"))
+                                                #else
+                                                new ClickEvent.SuggestCommand("/" + AbstractModInitializer.MOD_ID + " ignore_marker_message"))
+                                                #endif
                                                 .withColor(ChatFormatting.GREEN).withBold(true))));
                     }
                 }

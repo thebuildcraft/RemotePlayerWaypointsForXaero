@@ -22,6 +22,10 @@
 package de.the_build_craft.remote_player_waypoints_for_xaero.common;
 
 import xaero.common.minimap.waypoints.Waypoint;
+#if MC_VER != MC_1_17_1
+import xaero.hud.minimap.waypoint.WaypointColor;
+import xaero.hud.minimap.waypoint.WaypointPurpose;
+#endif
 
 /**
  * A wrapper to improve creating temp waypoints for players
@@ -29,7 +33,7 @@ import xaero.common.minimap.waypoints.Waypoint;
  * @author ewpratten
  * @author eatmyvenom
  * @author Leander Knüttel
- * @version 07.07.2024
+ * @version 21.04.2025
  */
 public class PlayerWaypoint extends Waypoint {
     public PlayerWaypoint(PlayerPosition player) {
@@ -38,7 +42,11 @@ public class PlayerWaypoint extends Waypoint {
 
     public PlayerWaypoint(int x, int y, int z, String name) {
         super(x, y, z, name, getAbbreviation(name),
+                #if MC_VER == MC_1_17_1
                 CommonModConfig.Instance.getPlayerWaypointColor(name), 0, true);
+                #else
+                WaypointColor.fromIndex(CommonModConfig.Instance.getPlayerWaypointColor(name)), WaypointPurpose.NORMAL, true);
+                #endif
     }
 
     public static String getAbbreviation(String name){

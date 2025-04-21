@@ -48,13 +48,13 @@ import java.util.Timer;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 18.02.2025
+ * @version 21.04.2025
  */
 public abstract class AbstractModInitializer
 {
 	public static final String MOD_ID = "remote_player_waypoints_for_xaero";
 	public static final String MOD_NAME = "Remote Player Waypoints For Xaero's Map";
-	public static final String VERSION = "3.3.1";
+	public static final String VERSION = "3.4.0";
 	public static final Logger LOGGER = LogManager.getLogger("RemotePlayerWaypointsForXaero");
 	public static AbstractModInitializer INSTANCE;
 
@@ -69,7 +69,7 @@ public abstract class AbstractModInitializer
 
 	// AFK detection
 	public static HashMap<String, Boolean> AfkDic = new HashMap<>();
-	public static HashMap<String, Integer> AfkTimeDic = new HashMap<>();
+	public static HashMap<String, Long> AfkTimeDic = new HashMap<>();
 	public static HashMap<String, PlayerPosition> lastPlayerDataDic = new HashMap<>();
 	public static int unknownAfkStateColor = 0x606060;
 	public static int AfkColor = 0xFF5500;
@@ -202,7 +202,7 @@ public abstract class AbstractModInitializer
 								.executes(context -> {
                                     String playerName = StringArgumentType.getString(context, "player");
                                     int time = IntegerArgumentType.getInteger(context, "time");
-									AbstractModInitializer.AfkTimeDic.put(playerName, time);
+									AbstractModInitializer.AfkTimeDic.put(playerName, time * 1000L);
 									AbstractModInitializer.AfkDic.put(playerName, time > 0);
 									Utils.sendToClientChat("Set AFK time for " + playerName + " to " + time);
 									return 1;

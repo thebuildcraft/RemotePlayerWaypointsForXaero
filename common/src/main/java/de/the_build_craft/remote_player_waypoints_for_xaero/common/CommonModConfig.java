@@ -30,7 +30,7 @@ import java.util.Objects;
 
 /**
  * @author Leander Knüttel
- * @version 17.02.2025
+ * @version 21.04.2025
  */
 public abstract class CommonModConfig {
     public CommonModConfig() {
@@ -97,6 +97,20 @@ public abstract class CommonModConfig {
         return serverEntry;
     }
 
+    public int getWaypointLayerOrder() {
+        WaypointRenderBelowMode waypointRenderBelowMode = minimapWaypointsRenderBelow();
+        boolean playerListDown = Minecraft.getInstance().options.keyPlayerList.isDown();
+
+        if (waypointRenderBelowMode == CommonModConfig.WaypointRenderBelowMode.ALWAYS) {
+            return -1;
+        } else if (waypointRenderBelowMode == CommonModConfig.WaypointRenderBelowMode.WHEN_PLAYER_LIST_SHOWN) {
+            if (playerListDown) return -1;
+        } else if (waypointRenderBelowMode == CommonModConfig.WaypointRenderBelowMode.WHEN_PLAYER_LIST_HIDDEN) {
+            if (!playerListDown) return -1;
+        }
+        return 100;
+    }
+
     public static class ServerEntry {
         public Maptype maptype;
         public String ip;
@@ -120,7 +134,8 @@ public abstract class CommonModConfig {
             Dynmap,
             Squaremap,
             Bluemap,
-            Pl3xMap;
+            Pl3xMap,
+            LiveAtlas;
 
             Maptype() {
             }

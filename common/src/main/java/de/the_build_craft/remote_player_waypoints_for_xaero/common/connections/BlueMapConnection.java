@@ -37,7 +37,7 @@ import java.lang.reflect.Type;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 18.02.2025
+ * @version 21.04.2025
  */
 public class BlueMapConnection extends MapConnection {
     public int lastWorldIndex;
@@ -46,15 +46,14 @@ public class BlueMapConnection extends MapConnection {
     public List<String> worlds = new ArrayList<>();
 
     public BlueMapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
-        super(serverEntry, updateTask);
         playerUrls = new ArrayList<>();
         markerUrls = new ArrayList<>();
         try {
-            generateLinks(serverEntry, false);
+            generateLinks(serverEntry, true);
         }
         catch (Exception ignored){
             try {
-                generateLinks(serverEntry, true);
+                generateLinks(serverEntry, false);
             }
             catch (Exception e){
                 if (!updateTask.linkBrokenErrorWasShown){
@@ -70,8 +69,8 @@ public class BlueMapConnection extends MapConnection {
         String baseURL = getBaseURL(serverEntry, useHttps);
         AbstractModInitializer.LOGGER.info("baseURL " + baseURL);
         // Get config and build the urls
-        for (String w : ((BlueMapConfiguration) HTTP.makeJSONHTTPRequest(
-                URI.create(baseURL + "/settings.json?").toURL(), BlueMapConfiguration.class)).maps){
+        for (String w : HTTP.makeJSONHTTPRequest(
+                URI.create(baseURL + "/settings.json?").toURL(), BlueMapConfiguration.class).maps){
             playerUrls.add(URI.create((baseURL + "/maps/" + w + "/live/players.json?").replace(" ", "%20")).toURL());
             markerUrls.add(URI.create((baseURL + "/maps/" + w + "/live/markers.json?").replace(" ", "%20")).toURL());
             worlds.add(w);
@@ -98,19 +97,33 @@ public class BlueMapConnection extends MapConnection {
     }
 
     @Override
+    public HashSet<String> getMarkerLayers() {
+        Type apiResponseType = new TypeToken<Map<String, BlueMapMarkerSet>>() {}.getType();
+        HashSet<String> layers = new HashSet<>();
+        for (URL url : markerUrls) {
+            Map<String, BlueMapMarkerSet> sets;
+            try {
+                sets = HTTP.makeJSONHTTPRequest(url, apiResponseType);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            for (Map.Entry<String, BlueMapMarkerSet> m : sets.entrySet()) {
+                layers.add(m.getKey());
+            }
+        }
+        return layers;
+    }
+
+    URL lastURL = null;
+    HashMap<String, WaypointPosition> lastResult = new HashMap<>();
+
+    @Override
     public HashMap<String, WaypointPosition> getWaypointPositions() throws IOException {
         Type apiResponseType = new TypeToken<Map<String, BlueMapMarkerSet>>() {}.getType();
 
         CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
         if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
-            HashSet<String> layers = new HashSet<>();
-            for (URL url : markerUrls) {
-                Map<String, BlueMapMarkerSet> sets = HTTP.makeJSONHTTPRequest(url, apiResponseType);
-                for (Map.Entry<String, BlueMapMarkerSet> m : sets.entrySet()) {
-                    layers.add(m.getKey());
-                }
-            }
-            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(layers));
+            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(getMarkerLayers()));
         }
 
         URL reqUrl;
@@ -120,6 +133,10 @@ public class BlueMapConnection extends MapConnection {
         else{
             reqUrl = markerUrls.get(lastWorldIndex);
         }
+        if (reqUrl == lastURL) {
+            return lastResult;
+        }
+        lastURL = reqUrl;
 
         Map<String, BlueMapMarkerSet> markerSets = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
         HashMap<String, WaypointPosition> positions = new HashMap<>();
@@ -140,7 +157,7 @@ public class BlueMapConnection extends MapConnection {
                 }
             }
         }
-
+        lastResult = positions;
         return positions;
     }
 

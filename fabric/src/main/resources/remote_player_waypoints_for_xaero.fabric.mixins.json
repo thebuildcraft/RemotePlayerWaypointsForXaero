@@ -7,7 +7,8 @@
     "client": [
         "common.client.PlayerListHudMixin",
         "fabric.mods.xaerominimap.MinimapRadarMixin",
-        "fabric.mods.xaerominimap.WaypointsGuiRendererMixin"
+        "fabric.mods.xaerominimap.WaypointsGuiRendererMixin",
+        "fabric.mods.xaerominimap.MinimapElementRendererHandlerMixin"
     ],
     "server": [
     ],

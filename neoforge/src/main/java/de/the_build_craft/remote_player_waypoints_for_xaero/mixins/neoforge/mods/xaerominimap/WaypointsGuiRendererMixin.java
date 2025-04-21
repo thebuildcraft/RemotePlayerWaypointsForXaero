@@ -22,41 +22,33 @@
 package de.the_build_craft.remote_player_waypoints_for_xaero.mixins.neoforge.mods.xaerominimap;
 
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.CommonModConfig;
-import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+#if MC_VER < MC_1_21_5
 import xaero.common.minimap.waypoints.render.WaypointsGuiRenderer;
-import xaero.common.settings.ModSettings;
+#endif
+import xaero.hud.minimap.waypoint.render.WaypointMapRenderer;
+
 
 /**
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 06.07.2024
+ * @version 21.04.2025
  */
 
 @Pseudo
+#if MC_VER < MC_1_21_5
 @Mixin(WaypointsGuiRenderer.class)
+#else
+@Mixin(WaypointMapRenderer.class)
+#endif
 public class WaypointsGuiRendererMixin {
 
     @Inject(method = "getOrder", at = @At("RETURN"), cancellable = true, remap = false)
     private void injected(CallbackInfoReturnable<Integer> cir) {
-        CommonModConfig.WaypointRenderBelowMode waypointRenderBelowMode = CommonModConfig.Instance.minimapWaypointsRenderBelow();
-        #if MC_VER > MC_1_16_5
-        boolean playerListDown = Minecraft.getInstance().options.keyPlayerList.isDown() || ModSettings.keyAlternativeListPlayers.isDown();
-        #else
-        boolean playerListDown = Minecraft.getInstance().options.keyPlayerList.isDown();
-        #endif
-
-        if (waypointRenderBelowMode == CommonModConfig.WaypointRenderBelowMode.ALWAYS) {
-            cir.setReturnValue(-1);
-        } else if (waypointRenderBelowMode == CommonModConfig.WaypointRenderBelowMode.WHEN_PLAYER_LIST_SHOWN) {
-            if (playerListDown) cir.setReturnValue(-1);
-        } else if (waypointRenderBelowMode == CommonModConfig.WaypointRenderBelowMode.WHEN_PLAYER_LIST_HIDDEN) {
-            if (!playerListDown) cir.setReturnValue(-1);
-        }
+        cir.setReturnValue(CommonModConfig.Instance.getWaypointLayerOrder());
     }
-
 }

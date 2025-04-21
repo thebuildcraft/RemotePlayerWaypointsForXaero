@@ -46,7 +46,7 @@ import java.util.List;
 /**
  * @author TheMrEngMan
  * @author Leander Knüttel
- * @version 12.01.2025
+ * @version 21.04.2025
  */
 
 @Pseudo
@@ -123,7 +123,11 @@ public class MinimapRadarMixin {
                 #endif
                 AbstractModInitializer.fakePlayerEntities.get(Minecraft.getInstance().level).put(playerPosition.player, playerEntity);
             }
+            #if MC_VER < MC_1_21_5
             playerEntity.moveTo(playerPosition.x, playerPosition.y, playerPosition.z, 0, 0);
+            #else
+            playerEntity.snapTo(playerPosition.x, playerPosition.y, playerPosition.z, 0, 0);
+            #endif
             playerEntities.add(playerEntity);
         }
 

@@ -36,19 +36,18 @@ import java.util.*;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 18.02.2025
+ * @version 21.04.2025
  */
 public class Pl3xMapConnection extends MapConnection{
     private String markerLayerStringTemplate = "";
     private String markerStringTemplate = "";
     public Pl3xMapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
-        super(serverEntry, updateTask);
         try {
-            generateLink(serverEntry, false);
+            generateLink(serverEntry, true);
         }
         catch (Exception ignored){
             try {
-                generateLink(serverEntry, true);
+                generateLink(serverEntry, false);
             }
             catch (Exception e){
                 if (!updateTask.linkBrokenErrorWasShown){
@@ -94,11 +93,18 @@ public class Pl3xMapConnection extends MapConnection{
         return HandlePlayerPositions(positions);
     }
 
+    String lastMarkerDimension = "";
+    HashMap<String, WaypointPosition> lastResult = new HashMap<>();
+
     @Override
     public HashMap<String, WaypointPosition> getWaypointPositions() throws IOException {
         if (markerStringTemplate.isEmpty() || markerLayerStringTemplate.isEmpty() || currentDimension.isEmpty()) {
             return new HashMap<>();
         }
+        if (lastMarkerDimension.equals(currentDimension)) {
+            return lastResult;
+        }
+        lastMarkerDimension = currentDimension;
 
         HashMap<String, WaypointPosition> positions = new HashMap<>();
 
@@ -114,41 +120,45 @@ public class Pl3xMapConnection extends MapConnection{
                 positions.put(newWaypointPosition.name, newWaypointPosition);
             }
         }
-
+        lastResult = positions;
         return positions;
     }
 
-    private String[] getMarkerLayers() throws IOException {
-        Type apiResponseType = new TypeToken<Pl3xMapMarkerLayerConfig[]>() {}.getType();
+    public HashSet<String> getMarkerLayers() {
+        try {
+            Type apiResponseType = new TypeToken<Pl3xMapMarkerLayerConfig[]>() {}.getType();
 
-        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
-        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
-            Pl3xMapPlayerUpdate update = HTTP.makeJSONHTTPRequest(queryURL, Pl3xMapPlayerUpdate.class);
-            HashSet<String> layerMap = new HashSet<>();
-            for (Pl3xMapPlayerUpdate.WorldSetting ws : update.worldSettings) {
-                Pl3xMapMarkerLayerConfig[] mls = HTTP.makeJSONHTTPRequest(URI.create(markerLayerStringTemplate.replace("{world}", ws.name.replaceAll(":", "-"))).toURL(), apiResponseType);
-                for (Pl3xMapMarkerLayerConfig ml : mls) {
-                    if (!Objects.equals(ml.key, "pl3xmap_players")) {
-                        layerMap.add(ml.key);
+            CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
+            if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
+                Pl3xMapPlayerUpdate update = HTTP.makeJSONHTTPRequest(queryURL, Pl3xMapPlayerUpdate.class);
+                HashSet<String> layerMap = new HashSet<>();
+                for (Pl3xMapPlayerUpdate.WorldSetting ws : update.worldSettings) {
+                    Pl3xMapMarkerLayerConfig[] mls = HTTP.makeJSONHTTPRequest(URI.create(markerLayerStringTemplate.replace("{world}", ws.name.replaceAll(":", "-"))).toURL(), apiResponseType);
+                    for (Pl3xMapMarkerLayerConfig ml : mls) {
+                        if (!Objects.equals(ml.key, "pl3xmap_players")) {
+                            layerMap.add(ml.key);
+                        }
                     }
                 }
+                CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(layerMap));
             }
-            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(layerMap));
-        }
 
-        URL reqUrl = URI.create(markerLayerStringTemplate.replace("{world}", currentDimension.replaceAll(":", "-"))).toURL();
-        Pl3xMapMarkerLayerConfig[] markerLayers = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
+            URL reqUrl = URI.create(markerLayerStringTemplate.replace("{world}", currentDimension.replaceAll(":", "-"))).toURL();
+            Pl3xMapMarkerLayerConfig[] markerLayers = HTTP.makeJSONHTTPRequest(reqUrl, apiResponseType);
 
-        ArrayList<String> layers = new ArrayList<>();
+            HashSet<String> layers = new HashSet<>();
 
-        for (Pl3xMapMarkerLayerConfig layer : markerLayers){
-            if (!Objects.equals(layer.key, "pl3xmap_players")) {
-                layers.add(layer.key);
+            for (Pl3xMapMarkerLayerConfig layer : markerLayers){
+                if (!Objects.equals(layer.key, "pl3xmap_players")) {
+                    layers.add(layer.key);
+                }
             }
+
+            layers.removeIf(o -> !serverEntry.includeMarkerLayer(o));
+
+            return layers;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        layers.removeIf(o -> !serverEntry.includeMarkerLayer(o));
-
-        return layers.toArray(new String[0]);
     }
 }

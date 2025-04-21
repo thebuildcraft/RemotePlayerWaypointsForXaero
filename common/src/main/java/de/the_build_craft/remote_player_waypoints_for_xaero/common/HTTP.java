@@ -36,7 +36,7 @@ import java.net.URL;
  * @author ewpratten
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 14.06.2024
+ * @version 21.04.2025
  */
 public class HTTP {
 
@@ -49,10 +49,10 @@ public class HTTP {
      * @return Deserialized object
      * @throws IOException
      */
-    public static <T> T makeJSONHTTPRequest(URL endpoint, Class clazz) throws IOException {
+    public static <T> T makeJSONHTTPRequest(URL endpoint, Class<T> clazz) throws IOException {
         // Turn to a Java object
         Gson gson = new Gson();
-        return (T) gson.fromJson(makeTextHttpRequest(endpoint), clazz);
+        return gson.fromJson(makeTextHttpRequest(endpoint), clazz);
     }
 
     /**
@@ -67,10 +67,14 @@ public class HTTP {
     public static <T> T makeJSONHTTPRequest(URL endpoint, Type apiResponseType) throws IOException {
         // Turn to a Java object
         Gson gson = new Gson();
-        return (T) gson.fromJson(makeTextHttpRequest(endpoint), apiResponseType);
+        return gson.fromJson(makeTextHttpRequest(endpoint), apiResponseType);
     }
 
-    public static String makeTextHttpRequest(URL url) throws IOException{
+    public static String makeTextHttpRequest(URL url) throws IOException {
+        return makeTextHttpRequest(url, false);
+    }
+
+    public static String makeTextHttpRequest(URL url, boolean includeNewLine) throws IOException{
         // Open an HTTP request
         HttpURLConnection request = (HttpURLConnection) url.openConnection();
         request.setRequestMethod("GET");
@@ -83,6 +87,7 @@ public class HTTP {
         String output;
         while ((output = responseReader.readLine()) != null) {
             response.append(output);
+            if (includeNewLine) response.append("\n");
         }
 
         return response.toString();

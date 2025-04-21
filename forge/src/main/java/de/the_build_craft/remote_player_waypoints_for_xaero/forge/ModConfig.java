@@ -206,7 +206,8 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
             Dynmap,
             Squaremap,
             Bluemap,
-            Pl3xMap;
+            Pl3xMap,
+            LiveAtlas;
 
             Maptype() {
             }

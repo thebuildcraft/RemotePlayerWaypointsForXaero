@@ -35,18 +35,17 @@ import java.util.*;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 18.02.2025
+ * @version 21.04.2025
  */
 public class SquareMapConnection extends MapConnection {
     private String markerStringTemplate = "";
     public SquareMapConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
-        super(serverEntry, updateTask);
         try {
-            generateLink(serverEntry, false);
+            generateLink(serverEntry, true);
         }
         catch (Exception ignored){
             try {
-                generateLink(serverEntry, true);
+                generateLink(serverEntry, false);
             }
             catch (Exception e){
                 if (!updateTask.linkBrokenErrorWasShown){
@@ -93,15 +92,10 @@ public class SquareMapConnection extends MapConnection {
     }
 
     @Override
-    public HashMap<String, WaypointPosition> getWaypointPositions() throws IOException {
-        if (markerStringTemplate.isEmpty() || currentDimension.isEmpty()) {
-            return new HashMap<>();
-        }
+    public HashSet<String> getMarkerLayers() {
+        try {
+            Type apiResponseType = new TypeToken<SquareMapMarkerUpdate[]>() {}.getType();
 
-        Type apiResponseType = new TypeToken<SquareMapMarkerUpdate[]>() {}.getType();
-
-        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
-        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
             HashSet<String> layers = new HashSet<>();
             SquareMapConfiguration squareMapConfiguration = HTTP.makeJSONHTTPRequest(URI.create(onlineMapConfigLink).toURL(), SquareMapConfiguration.class);
             for (SquareMapConfiguration.World world : squareMapConfiguration.worlds) {
@@ -110,7 +104,30 @@ public class SquareMapConnection extends MapConnection {
                     layers.add(markerLayer.name);
                 }
             }
-            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(layers));
+            return layers;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    String lastMarkerDimension = "";
+    HashMap<String, WaypointPosition> lastResult = new HashMap<>();
+
+    @Override
+    public HashMap<String, WaypointPosition> getWaypointPositions() throws IOException {
+        if (markerStringTemplate.isEmpty() || currentDimension.isEmpty()) {
+            return new HashMap<>();
+        }
+        if (lastMarkerDimension.equals(currentDimension)) {
+            return lastResult;
+        }
+        lastMarkerDimension = currentDimension;
+
+        Type apiResponseType = new TypeToken<SquareMapMarkerUpdate[]>() {}.getType();
+
+        CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
+        if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
+            CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(getMarkerLayers()));
         }
 
         URL reqUrl = URI.create(markerStringTemplate.replace("{world}", currentDimension)).toURL();
@@ -128,7 +145,7 @@ public class SquareMapConnection extends MapConnection {
                 }
             }
         }
-
+        lastResult = positions;
         return positions;
     }
 }

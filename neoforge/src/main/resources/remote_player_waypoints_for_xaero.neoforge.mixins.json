@@ -7,7 +7,8 @@
     "client": [
         "common.client.PlayerListHudMixin",
         "neoforge.mods.xaerominimap.MinimapRadarMixin",
-        "neoforge.mods.xaerominimap.WaypointsGuiRendererMixin"
+        "neoforge.mods.xaerominimap.WaypointsGuiRendererMixin",
+        "neoforge.mods.xaerominimap.MinimapElementRendererHandlerMixin"
     ],
     "server": [
     ],
