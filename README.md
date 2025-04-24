@@ -3,8 +3,7 @@
 
 # Remote player waypoints for Xaero's Map
 
-<a href="https://modrinth.com/mod/remote-player-waypoints-for-xaeros-map"><img alt="Modrinth Downloads" src="https://img.shields.io/modrinth/dt/remote-player-waypoints-for-xaeros-map?logo=modrinth">
-</a>
+<a href="https://modrinth.com/mod/remote-player-waypoints-for-xaeros-map"><img alt="Modrinth Downloads" src="https://img.shields.io/modrinth/dt/remote-player-waypoints-for-xaeros-map?logo=modrinth"></a>
 <a href="https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero/blob/main/LICENSE"><img src="https://img.shields.io/github/license/thebuildcraft/RemotePlayerWaypointsForXaero?style=flat&color=900c3f" alt="License"></a>
 <img src="https://img.shields.io/badge/environment-client-1976d2">
 
