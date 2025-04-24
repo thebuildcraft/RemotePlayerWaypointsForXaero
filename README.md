@@ -1,9 +1,17 @@
-<img src="common/src/main/resources/assets/remote_player_waypoints_for_xaero/icon.png" alt="icon" style="float: none; margin-right: 10px;" width="200" height="auto" />
+<div align="center">
+  <img src="common/src/main/resources/assets/remote_player_waypoints_for_xaero/icon.png" alt="icon" width="10%" height="auto" />
 
 # Remote player waypoints for Xaero's Map
 
-<a href="https://modrinth.com/mod/remote-player-waypoints-for-xaeros-map"><img src="https://img.shields.io/modrinth/dt/remote-player-waypoints-for-xaeros-map?logo=modrinth&label=&suffix=%20&style=flat&color=242629&labelColor=5ca424&logoColor=1c1c1c" alt="Modrinth"></a>
+<a href="https://modrinth.com/mod/remote-player-waypoints-for-xaeros-map"><img alt="Modrinth Downloads" src="https://img.shields.io/modrinth/dt/remote-player-waypoints-for-xaeros-map?logo=modrinth">
+</a>
 <a href="https://github.com/thebuildcraft/RemotePlayerWaypointsForXaero/blob/main/LICENSE"><img src="https://img.shields.io/github/license/thebuildcraft/RemotePlayerWaypointsForXaero?style=flat&color=900c3f" alt="License"></a>
+<img src="https://img.shields.io/badge/environment-client-1976d2">
+
+<img alt="fabric" src="https://img.shields.io/badge/mod%20loader-Fabric-dbb18e"/>
+<img alt="forge" src="https://img.shields.io/badge/mod%20loader-Forge-959eef"/>
+<img alt="neoforge" src="https://img.shields.io/badge/mod%20loader-NeoForge-f99e6b"/>
+<img alt="quilt" src="https://img.shields.io/badge/mod%20loader-Quilt-c796f9"/>
 
 ---
 
@@ -12,19 +20,21 @@ It does this by getting the position data from Dynmap, Bluemap, Squaremap or Pl3
 
 The AFK display feature can be used without having a map mod installed.
 
+</div>
+
 ### Features
-- see player positions as waypoints and icons on Xaero's Minimap _(see more below)_ and Worldmap
+- see player positions as **waypoints** and **player-head-icons** on Xaero's Minimap and Worldmap
 - see online-map-markers in game
 - AFK display in tab list
 - friend-list features (for example overwrite color of waypoints of friends)
 - configurable trough Modmenu and Cloth Config Api
-- **==> [Roadmap](https://github.com/users/thebuildcraft/projects/1)**
 
 ### Supported Maps
 - Dynmap
 - Bluemap
 - Squaremap
 - Pl3xMap
+- LiveAtlas with multiple servers
 
 ### How to use
 You just have to add the server you want to use this mod on to the list in the config:<br>
@@ -44,4 +54,4 @@ And make sure to set the "map-type" correctly!
 - [James Seibel](https://gitlab.com/jeseibel) for making Distance Horizons: I used a lot of the multi-version build scripts from there.
 - [TheMrEngMan](https://github.com/TheMrEngMan) for letting me use the features from his own fork of the original RemotePlayers mod
 
-_This mod is not officially affiliated with Dynmap, Bluemap, Squaremap, Pl3xMap or Xaero in any way._
+_This mod is not officially affiliated with Dynmap, Bluemap, Squaremap, Pl3xMap, LiveAtlas or Xaero in any way._
