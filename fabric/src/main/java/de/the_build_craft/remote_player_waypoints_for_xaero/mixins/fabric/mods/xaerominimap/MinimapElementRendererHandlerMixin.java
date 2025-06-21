@@ -54,7 +54,7 @@ import java.util.List;
 
 /**
  * @author Leander Knüttel
- * @version 21.04.2025
+ * @version 21.06.2025
  */
 @Pseudo
 @Mixin(MinimapElementRendererHandler.class)
@@ -67,7 +67,9 @@ public class MinimapElementRendererHandlerMixin {
     int lastOrder;
 
     @Inject(method = "render", at = @At("HEAD"))
-    #if MC_VER > MC_1_19_4
+    #if MC_VER >= MC_1_21_6
+    void injected(Vec3 renderPos, float partialTicks, RenderTarget framebuffer, double backgroundCoordinateScale, ResourceKey<Level> mapDimension, CallbackInfo ci) {
+    #elif MC_VER > MC_1_19_4
     void injected(GuiGraphics guiGraphics, Vec3 renderPos, float partialTicks, RenderTarget framebuffer, double backgroundCoordinateScale, ResourceKey<Level> mapDimension, CallbackInfo ci) {
     #elif MC_VER == MC_1_17_1
     void injected(PoseStack matrixStack, Entity renderEntity, Player player, double renderX, double renderY, double renderZ, double playerDimDiv, double ps, double pc, double zoom, boolean cave, float partialTicks, RenderTarget framebuffer, AXaeroMinimap modMain, MinimapRendererHelper helper, MultiBufferSource.BufferSource renderTypeBuffers, Font font, MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers, CallbackInfo ci) {

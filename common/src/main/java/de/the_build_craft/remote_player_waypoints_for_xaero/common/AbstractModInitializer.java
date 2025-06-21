@@ -48,13 +48,13 @@ import java.util.Timer;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 21.04.2025
+ * @version 19.06.2025
  */
 public abstract class AbstractModInitializer
 {
 	public static final String MOD_ID = "remote_player_waypoints_for_xaero";
 	public static final String MOD_NAME = "Remote Player Waypoints For Xaero's Map";
-	public static final String VERSION = "3.4.0";
+	public static final String VERSION = "3.4.1";
 	public static final Logger LOGGER = LogManager.getLogger("RemotePlayerWaypointsForXaero");
 	public static AbstractModInitializer INSTANCE;
 

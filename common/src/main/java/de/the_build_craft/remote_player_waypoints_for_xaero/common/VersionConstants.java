@@ -29,7 +29,7 @@ import net.minecraft.client.Minecraft;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 17.05.2024
+ * @version 19.06.2025
  */
 public class VersionConstants
 {
@@ -43,8 +43,10 @@ public class VersionConstants
 	{
 		#if MC_VER < MC_1_19_2
 		return Minecraft.getInstance().getGame().getVersion().getId();
-		#else
+		#elif MC_VER < MC_1_21_6
 		return SharedConstants.getCurrentVersion().getId();
+		#else
+		return SharedConstants.getCurrentVersion().id();
 		#endif
 	}
 }
