@@ -192,7 +192,10 @@ public abstract class AbstractModInitializer
 		LiteralArgumentBuilder<CommandSourceStack> baseCommand = literal(MOD_ID);
 
 		LiteralArgumentBuilder<CommandSourceStack> ignoreCommand = baseCommand.then(literal("ignore_server")
-				.executes(context -> {IgnoreServer(); return 1;}));
+				.executes(context -> {
+					IgnoreServer();
+					return 1;
+				}));
 
 		dispatcher.register(ignoreCommand);
 

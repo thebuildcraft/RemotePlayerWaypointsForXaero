@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  * @author ewpratten
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 21.04.2025
+ * @version 28.06.2025
  */
 public class DynmapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -72,7 +72,6 @@ public class DynmapConnection extends MapConnection {
         try{
             // test if the link is already the correct get-request
             queryURL = URI.create(serverEntry.link.replace(" ", "%20")).toURL();
-            // TODO: implement markers for method 1
             // Test the url
             this.getPlayerPositions();
 
