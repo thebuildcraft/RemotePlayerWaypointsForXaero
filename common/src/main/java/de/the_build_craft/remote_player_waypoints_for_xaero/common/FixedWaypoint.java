@@ -33,7 +33,7 @@ import xaero.hud.minimap.waypoint.WaypointPurpose;
  * @author ewpratten
  * @author eatmyvenom
  * @author Leander Knüttel
- * @version 21.04.2025
+ * @version 29.06.2025
  */
 public class FixedWaypoint extends Waypoint {
     public FixedWaypoint(WaypointPosition wp) {
@@ -50,12 +50,6 @@ public class FixedWaypoint extends Waypoint {
     }
 
     public static String getAbbreviation(String name){
-        StringBuilder abbreviation = new StringBuilder();
-        String[] words = name.split("[ _\\-,:;.]");
-        for (String word : words) {
-            if (word.isEmpty()) continue;
-            abbreviation.append(word.substring(0, 1).toUpperCase());
-        }
-        return abbreviation.toString();
+        return PlayerWaypoint.getAbbreviation(name);
     }
 }
