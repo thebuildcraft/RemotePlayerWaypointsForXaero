@@ -21,10 +21,7 @@
 package de.the_build_craft.remote_player_waypoints_for_xaero.common.connections;
 
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.*;
-import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Text;
 import de.the_build_craft.remote_player_waypoints_for_xaero.common.wrappers.Utils;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Style;
 
 import java.io.IOException;
 import java.net.URI;
@@ -37,10 +34,11 @@ import java.util.regex.Pattern;
 
 /**
  * @author Leander Knüttel
- * @version 21.04.2025
+ * @version 26.06.2025
  */
 public class LiveAtlasConnection extends MapConnection {
     public static final Pattern dynmapRegexPattern = Pattern.compile("\\n +dynmap: \\{\\n(.*\\n)*?.*}\\n");
+    public static final Pattern Pl3xMapRegexPattern = Pattern.compile("\n +\t+ +pl3xmap: \"(.+?)\"\n");
     List<MapConnection> mapConnections = new ArrayList<>();
     int mapIndex;
 
@@ -76,14 +74,24 @@ public class LiveAtlasConnection extends MapConnection {
             try {
                 mapConnections.add(new DynmapConnection(baseURL, g));
             } catch (Exception e) {
-                AbstractModInitializer.LOGGER.error("error creating connection");
+                AbstractModInitializer.LOGGER.error("error creating Dynmap connection for LiveAtlas");
             }
         }
-        //TODO: Squaremap, Pl3XMap
+        matcher = Pl3xMapRegexPattern.matcher(liveAtlasHTML);
+        while (matcher.find()) {
+            String g = matcher.group(1);
+            try {
+                mapConnections.add(new Pl3xMapConnection(baseURL, g));
+            } catch (Exception e) {
+                AbstractModInitializer.LOGGER.error("error creating Pl3xMap connection for LiveAtlas");
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public HashMap<String, PlayerPosition> getPlayerPositions() throws IOException {
+        if (mapConnections.isEmpty()) return new HashMap<>();
         if (CommonModConfig.Instance.debugMode()) {
             HashMap<String, PlayerPosition> debug = new HashMap<>();
             for (MapConnection mapConnection : mapConnections) {
@@ -116,6 +124,7 @@ public class LiveAtlasConnection extends MapConnection {
 
     @Override
     public HashMap<String, WaypointPosition> getWaypointPositions() throws IOException {
+        if (mapConnections.isEmpty()) return new HashMap<>();
         CommonModConfig.ServerEntry serverEntry = CommonModConfig.Instance.getCurrentServerEntry();
         if (serverEntry.markerVisibilityMode == CommonModConfig.ServerEntry.MarkerVisibilityMode.Auto) {
             CommonModConfig.Instance.setMarkerLayers(serverEntry.ip, new ArrayList<>(getMarkerLayers()));
