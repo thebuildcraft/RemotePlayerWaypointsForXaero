@@ -46,7 +46,7 @@ import java.util.Objects;
 public abstract class MapConnection {
     public URL queryURL;
     public final Minecraft mc;
-    public String currentDimension;
+    public String currentDimension = "";
     public String onlineMapConfigLink;
     long lastUpdateTimeMs;
     public boolean foundPlayer;
@@ -54,6 +54,10 @@ public abstract class MapConnection {
     public MapConnection() {
         this.mc = Minecraft.getInstance();
         lastUpdateTimeMs = System.currentTimeMillis();
+    }
+
+    public void setCurrentDimension(String currentDimension) {
+        this.currentDimension = currentDimension;
     }
 
     @NotNull

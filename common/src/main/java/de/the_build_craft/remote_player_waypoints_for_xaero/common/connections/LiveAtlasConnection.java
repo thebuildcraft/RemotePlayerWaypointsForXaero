@@ -44,6 +44,13 @@ public class LiveAtlasConnection extends MapConnection {
     List<MapConnection> mapConnections = new ArrayList<>();
     int mapIndex;
 
+    @Override
+    public void setCurrentDimension(String currentDimension) {
+        for (MapConnection connection : mapConnections) {
+            connection.setCurrentDimension(currentDimension);
+        }
+    }
+
     public LiveAtlasConnection(CommonModConfig.ServerEntry serverEntry, UpdateTask updateTask) throws IOException {
         try {
             setupConnections(serverEntry, true);

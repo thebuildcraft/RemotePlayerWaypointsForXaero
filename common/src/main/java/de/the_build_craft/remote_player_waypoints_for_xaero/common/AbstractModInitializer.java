@@ -221,7 +221,7 @@ public abstract class AbstractModInitializer
 							}
 							else{
 								String dimension = StringArgumentType.getString(context, "dimension");
-								connection.currentDimension = dimension;
+								connection.setCurrentDimension(dimension);
 								Utils.sendToClientChat("Set current-dimension to: " + dimension);
 							}
 							return 1;
