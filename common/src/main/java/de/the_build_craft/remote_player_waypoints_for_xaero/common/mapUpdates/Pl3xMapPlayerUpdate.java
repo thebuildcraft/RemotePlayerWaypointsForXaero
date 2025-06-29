@@ -22,7 +22,7 @@ package de.the_build_craft.remote_player_waypoints_for_xaero.common.mapUpdates;
 
 /**
  * @author Leander Knüttel
- * @version 18.02.2025
+ * @version 28.06.2025
  */
 public class Pl3xMapPlayerUpdate {
     public static class Player {
@@ -39,6 +39,6 @@ public class Pl3xMapPlayerUpdate {
         public String name;
     }
 
-    public Player[] players;
-    public WorldSetting[] worldSettings;
+    public Player[] players = new Player[0];
+    public WorldSetting[] worldSettings = new WorldSetting[0];
 }

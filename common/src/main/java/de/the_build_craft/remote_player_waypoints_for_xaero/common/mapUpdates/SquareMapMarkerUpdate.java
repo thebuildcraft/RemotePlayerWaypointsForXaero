@@ -37,5 +37,5 @@ public class SquareMapMarkerUpdate {
     }
 
     public String name;
-    public Marker[] markers;
+    public Marker[] markers = new Marker[0];
 }

@@ -23,10 +23,10 @@ package de.the_build_craft.remote_player_waypoints_for_xaero.common.mapUpdates;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 14.06.2024
+ * @version 24.06.2025
  */
 public class BlueMapPlayerUpdate {
-    public Player[] players;
+    public Player[] players = new Player[0];
     public static class Player{
         public String name;
         public boolean foreign;

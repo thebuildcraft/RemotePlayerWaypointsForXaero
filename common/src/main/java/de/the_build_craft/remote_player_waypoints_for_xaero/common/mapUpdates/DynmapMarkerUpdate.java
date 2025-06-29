@@ -20,6 +20,7 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.common.mapUpdates;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,24 +28,20 @@ import java.util.Map;
  *
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 14.06.2024
+ * @version 26.06.2025
  */
 public class DynmapMarkerUpdate {
     public static class Set {
         public static class Marker {
-            public boolean markup;
             public float x;
-            public String icon;
             public float y;
-            public String dim;
             public float z;
             public String label;
         }
 
-        public boolean hide;
         public String label;
-        public Map<String, Marker> markers;
+        public Map<String, Marker> markers = new HashMap<>();
     }
 
-    public Map<String, Set> sets;
+    public Map<String, Set> sets = new HashMap<>();
 }

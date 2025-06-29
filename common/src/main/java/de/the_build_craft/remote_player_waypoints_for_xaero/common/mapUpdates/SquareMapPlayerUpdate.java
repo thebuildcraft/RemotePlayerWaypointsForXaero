@@ -22,7 +22,7 @@ package de.the_build_craft.remote_player_waypoints_for_xaero.common.mapUpdates;
 
 /**
  * @author Leander Knüttel
- * @version 13.10.2024
+ * @version 26.06.2025
  */
 public class SquareMapPlayerUpdate {
     public static class Player {
@@ -33,5 +33,5 @@ public class SquareMapPlayerUpdate {
         public int z;
     }
 
-    public Player[] players;
+    public Player[] players = new Player[0];
 }

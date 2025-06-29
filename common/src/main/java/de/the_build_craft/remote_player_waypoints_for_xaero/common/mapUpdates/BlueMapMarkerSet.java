@@ -20,29 +20,24 @@
 
 package de.the_build_craft.remote_player_waypoints_for_xaero.common.mapUpdates;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 14.06.2024
+ * @version 26.06.2025
  */
 public class BlueMapMarkerSet {
     public static class Marker {
         public String type;
         public String label;
         public Position position;
-        public int sorting;
-        public boolean listed;
     }
     public static class Position {
         public float x;
         public float y;
         public float z;
     }
-    public String label;
-    public boolean toggleable;
-    public boolean defaultHidden;
-    public int sorting;
-    public Map<String, Marker> markers;
+    public Map<String, Marker> markers = new HashMap<>();
 }
