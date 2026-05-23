@@ -46,52 +46,64 @@ configurations {
         canBeResolved = true
         canBeConsumed = false
     }
+    apiElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(shadowJar)
+    }
+    runtimeElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(shadowJar)
+    }
 }
 
 dependencies {
-    common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
+    common(project(path: ':common')) { transitive = false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 
     neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
 
-    modApi "me.shedaniel.cloth:cloth-config-neoforge:${rootProject.cloth_config_api_neoforge_version}"
+    api "me.shedaniel.cloth:cloth-config-neoforge:${rootProject.cloth_config_api_neoforge_version}"
 
     if (rootProject.enable_xaeros_minimap == "true") {
         if (rootProject.hasProperty("xaeros_minimap_neoforge_version") && rootProject.xaeros_minimap_neoforge_version != "") {
-            modImplementation "xaero.minimap:xaerominimap-neoforge-${rootProject.minecraft_version}:${rootProject.xaeros_minimap_neoforge_version}"
+            implementation "xaero.minimap:xaerominimap-neoforge-${rootProject.minecraft_version}:${rootProject.xaeros_minimap_neoforge_version}"
         } else {
-            modImplementation "xaero.minimap:xaerominimap-neoforge-${rootProject.minecraft_version}:${rootProject.default_xaeros_minimap_version}"
+            implementation "xaero.minimap:xaerominimap-neoforge-${rootProject.minecraft_version}:${rootProject.default_xaeros_minimap_version}"
         }
     } else {
         if (rootProject.hasProperty("xaeros_minimap_neoforge_version") && rootProject.xaeros_minimap_neoforge_version != "") {
-            modCompileOnly "xaero.minimap:xaerominimap-neoforge-${rootProject.minecraft_version}:${rootProject.xaeros_minimap_neoforge_version}"
+            compileOnly "xaero.minimap:xaerominimap-neoforge-${rootProject.minecraft_version}:${rootProject.xaeros_minimap_neoforge_version}"
         } else {
-            modCompileOnly "xaero.minimap:xaerominimap-neoforge-${rootProject.minecraft_version}:${rootProject.default_xaeros_minimap_version}"
+            compileOnly "xaero.minimap:xaerominimap-neoforge-${rootProject.minecraft_version}:${rootProject.default_xaeros_minimap_version}"
         }
     }
     if (rootProject.enable_xaeros_worldmap == "true") {
         if (rootProject.hasProperty("xaeros_worldmap_neoforge_version") && rootProject.xaeros_worldmap_neoforge_version != "") {
-            modImplementation "xaero.map:xaeroworldmap-neoforge-${rootProject.minecraft_version}:${rootProject.xaeros_worldmap_neoforge_version}"
+            implementation "xaero.map:xaeroworldmap-neoforge-${rootProject.minecraft_version}:${rootProject.xaeros_worldmap_neoforge_version}"
         } else {
-            modImplementation "xaero.map:xaeroworldmap-neoforge-${rootProject.minecraft_version}:${rootProject.default_xaeros_worldmap_version}"
+            implementation "xaero.map:xaeroworldmap-neoforge-${rootProject.minecraft_version}:${rootProject.default_xaeros_worldmap_version}"
         }
     } else {
         if (rootProject.hasProperty("xaeros_worldmap_neoforge_version") && rootProject.xaeros_worldmap_neoforge_version != "") {
-            modCompileOnly "xaero.map:xaeroworldmap-neoforge-${rootProject.minecraft_version}:${rootProject.xaeros_worldmap_neoforge_version}"
+            compileOnly "xaero.map:xaeroworldmap-neoforge-${rootProject.minecraft_version}:${rootProject.xaeros_worldmap_neoforge_version}"
         } else {
-            modCompileOnly "xaero.map:xaeroworldmap-neoforge-${rootProject.minecraft_version}:${rootProject.default_xaeros_worldmap_version}"
+            compileOnly "xaero.map:xaeroworldmap-neoforge-${rootProject.minecraft_version}:${rootProject.default_xaeros_worldmap_version}"
         }
     }
-    modCompileOnly "xaero.lib:xaerolib-neoforge-${rootProject.minecraft_version}:${rootProject.xaero_lib_version}"
+//    compileOnly "xaero.lib:xaerolib-neoforge-${rootProject.minecraft_version}:${rootProject.xaero_lib_version}"
 }
 
 shadowJar {
+    dependsOn(jar)
+    mainSpec.sourcePaths.clear()       // Remove default source set inclusion
+    from(zipTree(jar.archiveFile))     // Unpack jar output (preserves Loom modifications)
+
     configurations = [project.configurations.shadowBundle]
-    archiveClassifier = 'dev-shadow'
+    archiveClassifier = null           // shadowJar becomes the main artifact
 }
 
-remapJar {
-    inputFile.set shadowJar.archiveFile
+jar {
+    archiveClassifier = "raw"
 }
 
 processResources {
@@ -157,7 +169,6 @@ publisher {
     // setArtifact("build/libs/mymod.jar")
     // setArtifact(jar.getArchiveFile().get())
     // If this is a task, the task specified will be executed before publishing
-    //setArtifact(remapJar)
     setArtifact("build/libs/${mod_id}-neoforge-${rootProject.versionStr}.jar")
 
     // Override the artifact uploaded to modrinth

@@ -30,7 +30,9 @@ import de.the_build_craft.maplink.common.clientMapHandlers.XaeroClientMapHandler
 import de.the_build_craft.maplink.common.waypoints.TempWaypoint;
 import de.the_build_craft.maplink.common.waypoints.WaypointState;
 import net.minecraft.client.Minecraft;
-#if MC_VER >= MC_1_20_1
+#if MC_VER >= MC_1_21_6
+import xaero.hud.minimap.element.render.MinimapElementGraphics;
+#elif MC_VER >= MC_1_20_1
 import net.minecraft.client.gui.GuiGraphics;
 #endif
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -45,9 +47,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-#if MC_VER >= MC_1_21_6
-import xaero.hud.minimap.element.render.MinimapElementGraphics;
-#endif
 import xaero.hud.minimap.element.render.MinimapElementRenderInfo;
 import xaero.hud.minimap.waypoint.render.WaypointMapRenderer;
 import xaero.common.graphics.renderer.multitexture.MultiTextureRenderTypeRendererProvider;

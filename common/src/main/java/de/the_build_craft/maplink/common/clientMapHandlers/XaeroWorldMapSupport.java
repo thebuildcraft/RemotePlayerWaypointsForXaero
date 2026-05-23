@@ -172,12 +172,19 @@ public class XaeroWorldMapSupport implements IXaeroWorldMapSupport {
         idToWorldMapMarker.clear();
     }
 
-    #if MC_VER >= MC_1_21_11
+    #if MC_VER >= MC_26_1_2
+    @Override
+    public void createGuiNearestRenderer() {
+        GUI_NEAREST_Renderer = multiTextureRenderTypeRendererProvider.getRenderer(CustomRenderTypes.GUI_NEAREST);
+    }
+    #elif MC_VER >= MC_1_21_11
     @Override
     public void createGuiNearestRenderer() {
         GUI_NEAREST_Renderer = multiTextureRenderTypeRendererProvider.getRenderer(MultiTextureRenderTypeRendererProvider::defaultTextureBind, CustomRenderTypes.GUI_NEAREST);
     }
+    #endif
 
+    #if MC_VER >= MC_1_21_11
     @Override
     public Object getGuiNearestRenderer() {
         return GUI_NEAREST_Renderer;

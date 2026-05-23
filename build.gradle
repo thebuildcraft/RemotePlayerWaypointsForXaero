@@ -31,8 +31,8 @@ plugins {
     // Manifold preprocessor
     id "systems.manifold.manifold-gradle-plugin" version "0.0.2-alpha"
 
-    id 'dev.architectury.loom' version '1.13-SNAPSHOT' apply false
-    id 'architectury-plugin' version '3.4-SNAPSHOT'
+    id 'dev.architectury.loom-no-remap' version '1.14-SNAPSHOT' apply false
+    id 'architectury-plugin' version '3.5-SNAPSHOT'
 
     // Modpublisher: publish to Github, Modrinth and Curseforge in one go
     id "com.hypherionmc.modutils.modpublisher" version "2.1.7"
@@ -51,17 +51,17 @@ def writeBuildGradlePredefine(List<String> mcVers, int mcIndex)
     StringBuilder sb = new StringBuilder();
 
     sb.append("# DON'T TOUCH THIS FILE, This is handled by the build script\n");
-    
-    
+
+
     for (int i = 0; i < mcVers.size(); i++)
     {
         String verStr = mcVers[i].replace(".", "_");
         sb.append("MC_" + verStr + "=" + i.toString() + "\n");
-        
+
         if (mcIndex == i)
             sb.append("MC_VER=" + i.toString() + "\n");
     }
-    
+
 
     // Check if this is a development build
     if (mod_version.toLowerCase().contains("dev"))
@@ -91,7 +91,7 @@ subprojects { p ->
     apply plugin: "com.gradleup.shadow"
     apply plugin: "systems.manifold.manifold-gradle-plugin"
     apply plugin: "com.hypherionmc.modutils.modpublisher"
-    apply plugin: 'dev.architectury.loom'
+    apply plugin: 'dev.architectury.loom-no-remap'
     apply plugin: 'architectury-plugin'
 
     // Set the manifold version (may not be required tough)
@@ -100,7 +100,6 @@ subprojects { p ->
     }
 
     loom {
-        silentMojangMappingsLicense()
         accessWidenerPath = project(":common").file("src/main/resources/${accessWidenerVersion}.${mod_id}.accesswidener")
         mixin {
             useLegacyMixinAp = false
@@ -110,13 +109,6 @@ subprojects { p ->
     dependencies {
         annotationProcessor("systems.manifold:manifold-preprocessor:${rootProject.manifold_version}")
         minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
-        //mappings loom.officialMojangMappings()
-        mappings loom.layered() {
-            // Mojmap mappings
-            officialMojangMappings()
-            // Parchment mappings (it adds parameter mappings & javadoc)
-            parchment("org.parchmentmc.data:parchment-${rootProject.parchment_version}@zip")
-        }
         implementation 'com.github.minecraft-dev:annotations:master-SNAPSHOT'
     }
 
@@ -180,14 +172,14 @@ subprojects { p ->
                 fabric_incompatibility_list  : fabric_incompatibility_list,
                 fabric_recommend_list        : fabric_recommend_list,
         ]
-        
+
         // replace any properties in the sub-projects with the values defined here
         inputs.properties replaceProperties
         replaceProperties.put "project", project
         filesMatching(resourceTargets) {
             expand replaceProperties
         }
-        
+
         intoTargets.each { target ->
             if (file(target).exists()) {
                 copy {
@@ -220,11 +212,11 @@ subprojects { p ->
 allprojects { p ->
     apply plugin: "java"
     apply plugin: "maven-publish"
-    
-    archivesBaseName = rootProject.mod_id
+
+    base.archivesName = rootProject.mod_id
     version = project.name + "-" + rootProject.versionStr
     group = rootProject.maven_group
-    
+
     // this is the text that appears at the top of the overview (home) page
     // and is used when bookmarking a page
     javadoc.title = rootProject.mod_id + "-" + project.name
@@ -249,9 +241,6 @@ allprojects { p ->
 
         // Used for Google's Collect library
         maven { url "https://repo.enonic.com/public/" }
-
-        // For parchment mappings
-        maven { url "https://maven.parchmentmc.org" }
 
         // For Architectury API
         maven { url "https://maven.architectury.dev" }

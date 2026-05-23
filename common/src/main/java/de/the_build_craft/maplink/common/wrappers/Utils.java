@@ -41,7 +41,11 @@ public class Utils {
         if (Minecraft.getInstance().level == null) {
             AbstractModInitializer.LOGGER.warn("Caught client chat message outside the game:\n{}", text.getString());
         } else {
+            #if MC_VER >= MC_26_1_2
+            MainThreadTaskQueue.queueTask(() -> Minecraft.getInstance().gui.getChat().addClientSystemMessage(text));
+            #else
             MainThreadTaskQueue.queueTask(() -> Minecraft.getInstance().gui.getChat().addMessage(text));
+            #endif
         }
     }
 

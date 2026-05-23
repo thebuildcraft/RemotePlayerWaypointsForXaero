@@ -190,7 +190,9 @@ public class XaeroMiniMapSupport implements IXaeroMiniMapSupport {
         if (textureToData.isEmpty()) return;
         MultiTextureRenderTypeRendererProvider multiTextureRenderTypeRenderers = BuiltInHudModules.MINIMAP.getCurrentSession().getMultiTextureRenderTypeRenderers();
         MultiTextureRenderTypeRenderer renderer = multiTextureRenderTypeRenderers.getRenderer(
-                #if MC_VER >= MC_1_21_11
+                #if MC_VER >= MC_26_1_2
+                CustomRenderTypes.GUI_NEAREST);
+                #elif MC_VER >= MC_1_21_11
                 MultiTextureRenderTypeRendererProvider::defaultTextureBind,
                 CustomRenderTypes.GUI_NEAREST);
                 #elif MC_VER >= MC_1_21_6
@@ -208,7 +210,9 @@ public class XaeroMiniMapSupport implements IXaeroMiniMapSupport {
                 CustomRenderTypes.GUI_NEAREST);
                 #endif
         for (Map.Entry<DynamicTexture, List<XaeroIconRenderData>> iconData : textureToData.entrySet()) {
-            #if MC_VER >= MC_1_21_5
+            #if MC_VER >= MC_26_1_2
+            BufferBuilder buffer = renderer.begin(iconData.getKey().getTextureView());
+            #elif MC_VER >= MC_1_21_5
             BufferBuilder buffer = renderer.begin(iconData.getKey().getTexture());
             #else
             BufferBuilder buffer = renderer.begin(iconData.getKey().getId());

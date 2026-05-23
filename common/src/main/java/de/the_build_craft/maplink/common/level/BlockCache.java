@@ -25,6 +25,9 @@ import de.the_build_craft.maplink.common.waypoints.Color;
 import it.unimi.dsi.fastutil.ints.Int2ShortOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
+#if MC_VER >= MC_26_1_2
+import net.minecraft.client.multiplayer.ClientLevel;
+#endif
 import net.minecraft.core.BlockPos;
 #if MC_VER <= MC_1_21_1 && MC_VER > MC_1_19_2
 import net.minecraft.core.HolderLookup;
@@ -79,7 +82,11 @@ public class BlockCache {
 
     static void cacheBlockColors() {
         BlockPos zeroPos = BlockPos.ZERO;
+        #if MC_VER >= MC_26_1_2
+        ClientLevel level = Minecraft.getInstance().level;
+        #else
         Level level = Minecraft.getInstance().level;
+        #endif
 
         WorldMapSession worldMapSession = WorldMapSession.getCurrentSession();
         MapProcessor mapProcessor = worldMapSession.getMapProcessor();

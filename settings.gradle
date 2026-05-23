@@ -53,10 +53,6 @@ pluginManagement {
             url "https://repo.spongepowered.org/repository/maven-public/"
         }
         maven {
-            name "ParchmentMC"
-            url "https://maven.parchmentmc.org"
-        }
-        maven {
             name "Spigot"
             url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
         }
@@ -70,7 +66,7 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
-        
+
         // Not needed, but useful for debugging gradle plugins
         mavenLocal()
     }

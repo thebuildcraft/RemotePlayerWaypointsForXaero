@@ -46,56 +46,63 @@ configurations {
         canBeResolved = true
         canBeConsumed = false
     }
+    apiElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(shadowJar)
+    }
+    runtimeElements {
+        outgoing.artifacts.clear()
+        outgoing.artifact(shadowJar)
+    }
 }
 
 dependencies {
-    common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
+    common(project(path: ':common')) { transitive = false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 
     // Fabric loader
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    implementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
     // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+    implementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 
     // Mod Menu
     if (rootProject.modmenu_version != "") {
-        modImplementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}") {
+        implementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}") {
             exclude(group: "net.fabricmc")
         }
     }
 
-    modApi("me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_config_api_fabric_version}") {
+    api("me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_config_api_fabric_version}") {
         exclude(group: "net.fabricmc")
     }
 
     if (rootProject.enable_xaeros_minimap == "true") {
         if (rootProject.hasProperty("xaeros_minimap_fabric_version") && rootProject.xaeros_minimap_fabric_version != "") {
-            modImplementation "xaero.minimap:xaerominimap-fabric-${rootProject.minecraft_version}:${rootProject.xaeros_minimap_fabric_version}"
+            implementation "xaero.minimap:xaerominimap-fabric-${rootProject.minecraft_version}:${rootProject.xaeros_minimap_fabric_version}"
         } else {
-            modImplementation "xaero.minimap:xaerominimap-fabric-${rootProject.minecraft_version}:${rootProject.default_xaeros_minimap_version}"
+            implementation "xaero.minimap:xaerominimap-fabric-${rootProject.minecraft_version}:${rootProject.default_xaeros_minimap_version}"
         }
     } else {
         if (rootProject.hasProperty("xaeros_minimap_fabric_version") && rootProject.xaeros_minimap_fabric_version != "") {
-            modCompileOnly "xaero.minimap:xaerominimap-fabric-${rootProject.minecraft_version}:${rootProject.xaeros_minimap_fabric_version}"
+            compileOnly "xaero.minimap:xaerominimap-fabric-${rootProject.minecraft_version}:${rootProject.xaeros_minimap_fabric_version}"
         } else {
-            modCompileOnly "xaero.minimap:xaerominimap-fabric-${rootProject.minecraft_version}:${rootProject.default_xaeros_minimap_version}"
+            compileOnly "xaero.minimap:xaerominimap-fabric-${rootProject.minecraft_version}:${rootProject.default_xaeros_minimap_version}"
         }
     }
     if (rootProject.enable_xaeros_worldmap == "true") {
         if (rootProject.hasProperty("xaeros_worldmap_fabric_version") && rootProject.xaeros_worldmap_fabric_version != "") {
-            modImplementation "xaero.map:xaeroworldmap-fabric-${rootProject.minecraft_version}:${rootProject.xaeros_worldmap_fabric_version}"
+            implementation "xaero.map:xaeroworldmap-fabric-${rootProject.minecraft_version}:${rootProject.xaeros_worldmap_fabric_version}"
         } else {
-            modImplementation "xaero.map:xaeroworldmap-fabric-${rootProject.minecraft_version}:${rootProject.default_xaeros_worldmap_version}"
+            implementation "xaero.map:xaeroworldmap-fabric-${rootProject.minecraft_version}:${rootProject.default_xaeros_worldmap_version}"
         }
     } else {
         if (rootProject.hasProperty("xaeros_worldmap_fabric_version") && rootProject.xaeros_worldmap_fabric_version != "") {
-            modCompileOnly "xaero.map:xaeroworldmap-fabric-${rootProject.minecraft_version}:${rootProject.xaeros_worldmap_fabric_version}"
+            compileOnly "xaero.map:xaeroworldmap-fabric-${rootProject.minecraft_version}:${rootProject.xaeros_worldmap_fabric_version}"
         } else {
-            modCompileOnly "xaero.map:xaeroworldmap-fabric-${rootProject.minecraft_version}:${rootProject.default_xaeros_worldmap_version}"
+            compileOnly "xaero.map:xaeroworldmap-fabric-${rootProject.minecraft_version}:${rootProject.default_xaeros_worldmap_version}"
         }
     }
-    modCompileOnly "xaero.lib:xaerolib-fabric-${rootProject.minecraft_version}:${rootProject.xaero_lib_version}"
 }
 
 processResources {
@@ -103,12 +110,16 @@ processResources {
 }
 
 shadowJar {
+    dependsOn(jar)
+    mainSpec.sourcePaths.clear()       // Remove default source set inclusion
+    from(zipTree(jar.archiveFile))     // Unpack jar output (preserves Loom modifications)
+
     configurations = [project.configurations.shadowBundle]
-    archiveClassifier = 'dev-shadow'
+    archiveClassifier = null           // shadowJar becomes the main artifact
 }
 
-remapJar {
-    inputFile.set shadowJar.archiveFile
+jar {
+    archiveClassifier = "raw"
 }
 
 publisher {
@@ -188,7 +199,6 @@ publisher {
     // setArtifact("build/libs/mymod.jar")
     // setArtifact(jar.getArchiveFile().get())
     // If this is a task, the task specified will be executed before publishing
-    //setArtifact(remapJar)
     setArtifact("build/libs/${mod_id}-fabric-${rootProject.versionStr}.jar")
 
     // Override the artifact uploaded to modrinth

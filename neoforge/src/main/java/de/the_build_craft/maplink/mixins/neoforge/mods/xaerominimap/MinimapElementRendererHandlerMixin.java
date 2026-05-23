@@ -21,7 +21,7 @@
 package de.the_build_craft.maplink.mixins.neoforge.mods.xaerominimap;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-#if MC_VER > MC_1_19_4
+#if MC_VER > MC_1_19_4 && MC_VER < MC_1_21_6
 import net.minecraft.client.gui.GuiGraphics;
 #else
 import com.mojang.blaze3d.vertex.PoseStack;
