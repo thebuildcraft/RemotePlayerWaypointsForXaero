@@ -21,6 +21,10 @@
 package de.the_build_craft.maplink.common.waypoints;
 
 import de.the_build_craft.maplink.common.clientMapHandlers.ClientMapHandler;
+import xaero.hud.minimap.waypoint.WaypointColor;
+import xaero.hud.minimap.waypoint.WaypointPurpose;
+import xaero.hud.minimap.waypoint.WaypointRenderInfo;
+import xaero.hud.minimap.waypoint.WaypointVisibilityType;
 import xaero.map.mods.gui.Waypoint;
 
 import static de.the_build_craft.maplink.common.CommonModConfig.config;
@@ -36,20 +40,22 @@ public class CustomWorldMapWaypoint extends Waypoint {
     private WaypointState waypointState;
 
     public CustomWorldMapWaypoint(Position p, WaypointState waypointState) {
-        super(new Object(),
-                (int) Math.floor(p.pos.x),
-                (int) Math.floor(p.pos.y),
-                (int) Math.floor(p.pos.z),
-                p.name,
-                p.id,
-                waypointState.isPlayer ? XAERO_COLORS[getPlayerWaypointColor(p.name)] : XAERO_COLORS[config.general.markerWaypointColor.ordinal()],
-                0,
+        super(
+                new xaero.common.minimap.waypoints.Waypoint(
+                        (int) Math.floor(p.pos.x),
+                        (int) Math.floor(p.pos.y),
+                        (int) Math.floor(p.pos.z),
+                        p.name,
+                        p.id,
+                        WaypointColor.fromIndex(waypointState.isPlayer ? getPlayerWaypointColor(p.name) : config.general.markerWaypointColor.ordinal()),
+                        WaypointPurpose.NORMAL,
+                        true,
+                        true
+                ),
                 false,
                 ClientMapHandler.waypointPrefix,
-                true,
-                1);
-        setTemporary(true);
-        setGlobal(false);
+                1
+        );
         this.id = p.id;
         this.waypointState = waypointState;
     }

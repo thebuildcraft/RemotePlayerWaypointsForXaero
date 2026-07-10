@@ -8,7 +8,6 @@
         "common.client.PlayerListHudMixin",
         "common.mods.xaerominimap.WaypointMapRenderReaderMixin",
         "common.mods.xaerominimap.AbstractWaypointRenderProviderMixin",
-        "common.mods.xaeroworldmap.WorldMapWaypointAccessor",
         "common.mods.xaeroworldmap.WaypointReaderMixin",
         "common.mods.xaeroworldmap.WaypointRenderProviderMixin",
         "common.mods.xaeroworldmap.MapWriterMixin",

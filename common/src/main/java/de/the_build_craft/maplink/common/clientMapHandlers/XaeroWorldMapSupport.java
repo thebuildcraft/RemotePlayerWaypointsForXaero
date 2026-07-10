@@ -30,8 +30,8 @@ import de.the_build_craft.maplink.common.waypoints.CustomWorldMapWaypoint;
 import de.the_build_craft.maplink.common.waypoints.Int3;
 import de.the_build_craft.maplink.common.waypoints.Position;
 import de.the_build_craft.maplink.common.waypoints.WaypointState;
-import de.the_build_craft.maplink.mixins.common.mods.xaeroworldmap.WorldMapWaypointAccessor;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import xaero.hud.minimap.waypoint.WaypointColor;
 import xaero.map.WorldMap;
 import xaero.map.common.config.option.WorldMapProfiledConfigOptions;
 #if MC_VER >= MC_1_21_11
@@ -93,8 +93,9 @@ public class XaeroWorldMapSupport implements IXaeroWorldMapSupport {
                 XaeroClientMapHandler.queuedTaskMap.remove(position.id);
             } else {
                 queuedTask.future.thenRun(() -> {
-                    WorldMapWaypointAccessor w = (WorldMapWaypointAccessor) idToWaypoint.get(position.id);
-                    if (w != null) {
+                    Waypoint wp = idToWaypoint.get(position.id);
+                    if (wp != null) {
+                        xaero.common.minimap.waypoints.Waypoint w = (xaero.common.minimap.waypoints.Waypoint) wp.getOriginal();
                         Int3 pos = position.pos.floorToInt3();
                         w.setX(pos.x);
                         w.setY(pos.y);
@@ -104,8 +105,9 @@ public class XaeroWorldMapSupport implements IXaeroWorldMapSupport {
                 return;
             }
         }
-        WorldMapWaypointAccessor w = (WorldMapWaypointAccessor) idToWaypoint.get(position.id);
-        if (w != null) {
+        Waypoint wp = idToWaypoint.get(position.id);
+        if (wp != null) {
+            xaero.common.minimap.waypoints.Waypoint w = (xaero.common.minimap.waypoints.Waypoint) wp.getOriginal();
             Int3 pos = position.pos.floorToInt3();
             w.setX(pos.x);
             w.setY(pos.y);
@@ -119,7 +121,7 @@ public class XaeroWorldMapSupport implements IXaeroWorldMapSupport {
 
     private static void updateWorldMapWaypointColors(Map<String, Waypoint> map, Function<Waypoint, Integer> waypointToColor) {
         for (Waypoint waypoint : map.values()) {
-            ((WorldMapWaypointAccessor) waypoint).setColor(CustomWorldMapWaypoint.XAERO_COLORS[waypointToColor.apply(waypoint)]);
+            ((xaero.common.minimap.waypoints.Waypoint)waypoint.getOriginal()).setWaypointColor(WaypointColor.fromIndex(waypointToColor.apply(waypoint)));
         }
     }
 
