@@ -26,8 +26,7 @@ import de.the_build_craft.maplink.common.*;
 import de.the_build_craft.maplink.common.clientMapHandlers.ClientMapHandler;
 import de.the_build_craft.maplink.common.clientMapHandlers.XaeroClientMapHandler;
 import de.the_build_craft.maplink.common.configurations.DynmapConfiguration;
-import de.the_build_craft.maplink.common.level.BlockCache;
-import de.the_build_craft.maplink.common.level.ChunkCache;
+import de.the_build_craft.maplink.common.level.AreaSelection;
 import de.the_build_craft.maplink.common.mapUpdates.DynmapMarkerUpdate;
 import de.the_build_craft.maplink.common.mapUpdates.DynmapPlayerUpdate;
 import de.the_build_craft.maplink.common.waypoints.*;
@@ -47,7 +46,7 @@ import static de.the_build_craft.maplink.common.CommonModConfig.*;
  * @author ewpratten
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 public class DynmapConnection extends MapConnection {
     private String markerStringTemplate = "";
@@ -381,8 +380,7 @@ public class DynmapConnection extends MapConnection {
 
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
-                        //int pixel = image.getPixel(currChunkX * 16 + x, currChunkZ * 16 + z);
-                        //XaeroClientMapHandler.xaeroWorldMapSupport.writeBlock(cx + x, cz + z, 0, 100, pixel);
+                        //TODO
                     }
                 }
             }
@@ -395,57 +393,16 @@ public class DynmapConnection extends MapConnection {
     }
 
     @Override
-    public boolean downloadTiles(String map, int centerChunkX, int centerChunkZ, int maxChunksX, int maxChunksZ) {
+    public boolean downloadTiles(String map, AreaSelection areaSelection) {
         String template = null;
         for (DynmapConfiguration.World world : worlds) {
             if (world.name.equals(currentDimension)) {
-                //for (DynmapConfiguration.World.Map map : world.maps) {
-                //    if (map.compassview.toUpperCase(Locale.ROOT).equals("S")) {
-                //        //"{world}/{prefix}/{regionX}_{regionZ}/{z}_{chunkX}_{chunkZ}"
-                //        //template = tilesStringTemplate
-                //        //        .replace("{world}", currentDimension)
-                //        //        .replace("{prefix}", map.prefix)
-                //        //        .replace("{z}", "z".repeat(0));
-                //        ////TODO
-                //        //scale 1 ->
-                //        //scale 4 -> zz
-                //        //scale 8 -> zzz
-                //        break;
-                //    }
-                //}
+                //TODO
                 break;
             }
         }
         if (template == null) return false;
-
-        int scale = 4;
-
-        int startChunkX = centerChunkX - (maxChunksX / 2);
-        startChunkX -= startChunkX % scale;
-        int startChunkZ = centerChunkZ - (maxChunksZ / 2);
-        startChunkZ -= startChunkZ % scale;
-        int chunksInTile = 128 / 16;
-        int deltaDiv = chunksInTile / scale;
-
-        try {
-            for (int chunkX = startChunkX; chunkX < startChunkX + maxChunksX; chunkX += chunksInTile) {
-                for (int chunkZ = startChunkZ; chunkZ < startChunkZ + maxChunksZ; chunkZ += chunksInTile) {
-                    String url = template
-                            .replace("{regionX}", "" + chunkX / 32)
-                            .replace("{regionZ}", "" + chunkZ / 32)
-                            .replace("{chunkX}", "" + chunkX / deltaDiv)
-                            .replace("{chunkZ}", "" + chunkZ / deltaDiv);
-                    try (NativeImage image = HTTP.makeImageHttpRequest(new URI(url).toURL())) {
-                        convertImage(image, chunkX, chunkZ, -deltaDiv);
-                    }
-                }
-            }
-
-            XaeroClientMapHandler.xaeroWorldMapSupport.setReadyForRender();
-            return true;
-        } catch (Exception e) {
-            AbstractModInitializer.LOGGER.error("Error converting Dynmap tiles!", e);
-        }
+        //TODO
         return false;
     }
 }

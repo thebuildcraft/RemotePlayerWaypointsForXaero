@@ -4,26 +4,30 @@ echo ================================================================
 echo =================== Automatic Mod Publishing ===================
 echo ================================================================
 
-rem needs special handling... set /p github= release to github:
-set /p modrinth= release to modrinth:
-set /p curseforge= release to curseforge:
+set /p confirm= release:
 
 echo ================================================================
 
-rem needs special handling... IF %github%==true echo will be released to github
-IF %modrinth%==true echo will be released to modrinth
-IF %curseforge%==true echo will be released to curseforge
+IF "%confirm%"=="true" (
+    echo will be released
+) ELSE (
+    echo you didn't confirm with "true"
+    exit
+)
 
 echo ================================================================
 
 echo Are you sure, you want to publish all versions now?
 pause
 
+del /F /Q buildAllJars\*
+mkdir buildAllJars
+
 @rem Loop trough everything in the version properties folder
 for %%f in (versionProperties\*) do (
     @rem Get the name of the version that is going to be compiled
     set version=%%~nf
-    @rem Clean out the folders, build it, and merge it
+    @rem Clean out the folders, build it, and publish it
     echo ==================== Cleaning workspace to build !version! ====================
     call .\gradlew.bat clean -PmcVer="!version!" --no-daemon
     del fabric\build\libs\*.jar
@@ -32,13 +36,14 @@ for %%f in (versionProperties\*) do (
     del /F /Q forge\build
     del neoforge\build\libs\*.jar
     del /F /Q neoforge\build
-    echo ==================== Building !version! ====================
-    call .\gradlew.bat build -PmcVer="!version!" --no-daemon
-    echo ==================== Publishing !version! ==================
-    rem call .\gradlew.bat publishMod -PmcVer="!version!" --no-daemon
-    rem needs special handling... IF %github%==true call .\gradlew.bat publishGitHub -PmcVer="!version!" --no-daemon
-    IF %modrinth%==true call .\gradlew.bat publishModrinth -PmcVer="!version!" --no-daemon
-    IF %curseforge%==true call .\gradlew.bat publishCurseforge -PmcVer="!version!" --no-daemon
+    echo ==================== Building and Publishing !version! ==================
+    call .\gradlew.bat publishMods -PmcVer="!version!" --no-daemon
+    echo ==================== Copying jars ====================
+    copy fabric\build\libs\*.jar buildAllJars\
+    copy forge\build\libs\*.jar buildAllJars\
+    copy neoforge\build\libs\*.jar buildAllJars\
+    echo ==================== Deleting unnecessary *-all.jars ====================
+    del /F /Q buildAllJars\*-all.jar
 )
 
 echo ================================================================

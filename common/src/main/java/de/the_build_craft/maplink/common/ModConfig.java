@@ -37,7 +37,7 @@ import static de.the_build_craft.maplink.common.CommonModConfig.config;
 
 /**
  * @author Leander Knüttel
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 @Config(name = "maplink")
 #if MC_VER < MC_1_20_6
@@ -268,11 +268,11 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
 
         @ConfigEntry.Gui.Tooltip()
         @ConfigEntry.BoundedDiscrete(min = 10, max = 200)
-        public int markerTextScale = 100;
+        public int markerTextScale = 90;
 
         @ConfigEntry.Gui.Tooltip()
         @ConfigEntry.BoundedDiscrete(min = 10, max = 200)
-        public int markerIconScale = 100;
+        public int markerIconScale = 85;
 
         @ConfigEntry.Gui.PrefixText
         @ConfigEntry.Gui.Tooltip()
@@ -305,7 +305,7 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         public int maxMarkerDistance = 100000;
 
         @ConfigEntry.Gui.Tooltip()
-        public int maxMarkerWaypoints = 40;
+        public int maxMarkerWaypoints = 20;
 
         @ConfigEntry.Gui.PrefixText
         @ConfigEntry.Gui.Tooltip()
@@ -315,7 +315,7 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         public int maxMarkerIconDistance = 100000;
 
         @ConfigEntry.Gui.Tooltip()
-        public int maxMarkerIconWaypoints = 40;
+        public int maxMarkerIconWaypoints = 20;
 
         public HudModule() {
         }
@@ -350,11 +350,11 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
 
         @ConfigEntry.Gui.Tooltip()
         @ConfigEntry.BoundedDiscrete(min = 10, max = 200)
-        public int markerTextScale = 100;
+        public int markerTextScale = 90;
 
         @ConfigEntry.Gui.Tooltip()
         @ConfigEntry.BoundedDiscrete(min = 10, max = 200)
-        public int markerIconScale = 100;
+        public int markerIconScale = 80;
 
         @ConfigEntry.Gui.PrefixText
         @ConfigEntry.Gui.Tooltip()
@@ -384,7 +384,7 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         public int maxMarkerDistance = 100000;
 
         @ConfigEntry.Gui.Tooltip()
-        public int maxMarkerWaypoints = 40;
+        public int maxMarkerWaypoints = 30;
 
         @ConfigEntry.Gui.PrefixText
         @ConfigEntry.Gui.Tooltip()
@@ -394,7 +394,7 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
         public int maxMarkerIconDistance = 100000;
 
         @ConfigEntry.Gui.Tooltip()
-        public int maxMarkerIconWaypoints = 40;
+        public int maxMarkerIconWaypoints = 30;
 
         public MiniMapModule() {
         }
@@ -427,11 +427,11 @@ public class ModConfig extends PartitioningSerializer.GlobalData {
 
         @ConfigEntry.Gui.Tooltip()
         @ConfigEntry.BoundedDiscrete(min = 10, max = 200)
-        public int markerTextScale = 100;
+        public int markerTextScale = 90;
 
         @ConfigEntry.Gui.Tooltip()
         @ConfigEntry.BoundedDiscrete(min = 10, max = 200)
-        public int markerIconScale = 100;
+        public int markerIconScale = 80;
 
         @ConfigEntry.Gui.PrefixText
         @ConfigEntry.Gui.Tooltip()

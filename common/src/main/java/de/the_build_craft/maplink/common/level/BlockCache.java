@@ -22,9 +22,10 @@ package de.the_build_craft.maplink.common.level;
 
 import de.the_build_craft.maplink.common.AbstractModInitializer;
 import de.the_build_craft.maplink.common.waypoints.Color;
-import it.unimi.dsi.fastutil.ints.Int2ShortOpenHashMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
+#if MC_VER >= MC_26_1_0
+import net.minecraft.client.multiplayer.ClientLevel;
+#endif
 import net.minecraft.core.BlockPos;
 #if MC_VER <= MC_1_21_1 && MC_VER > MC_1_19_2
 import net.minecraft.core.HolderLookup;
@@ -42,34 +43,37 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import xaero.lib.client.level.block.BlockTextureColorUtils;
+import xaero.lib.platform.ClientOnlyServices;
 import xaero.map.MapProcessor;
 import xaero.map.MapWriter;
 import xaero.map.WorldMapSession;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 #if MC_VER > MC_1_21_1 || MC_VER <= MC_1_19_2
 import java.util.Map;
 #endif
 
 /**
  * @author Leander Knüttel
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 public class BlockCache {
-    private static Short2ObjectOpenHashMap<FakeBlock> idToBlock;
-    private static Int2ShortOpenHashMap rgbToId;
+    private static List<FakeBlock> idToBlock;
+    private static ConcurrentHashMap<Integer, Short> rgbToId;
     private static KDTree okLabToIdTree;
     private static short currId;
 
     static void clear() {
-        idToBlock = new Short2ObjectOpenHashMap<>();
-        rgbToId = new Int2ShortOpenHashMap();
+        idToBlock = new ArrayList<>();
+        rgbToId = new ConcurrentHashMap<>();
         okLabToIdTree = new KDTree();
         currId = Short.MIN_VALUE;
     }
 
-    private static Iterable<Block> getBlockRegistry(Level level) {
+    private static Iterable<Block> getBlockRegistry() {
         #if MC_VER > MC_1_19_2
         return BuiltInRegistries.BLOCK;
         #else
@@ -78,8 +82,14 @@ public class BlockCache {
     }
 
     static void cacheBlockColors() {
+        BlockTextureColorUtils colorUtils = ClientOnlyServices.PLATFORM.getBlockUtils().getTextureColorUtils();
+
         BlockPos zeroPos = BlockPos.ZERO;
+        #if MC_VER >= MC_26_1_0
+        ClientLevel level = Minecraft.getInstance().level;
+        #else
         Level level = Minecraft.getInstance().level;
+        #endif
 
         WorldMapSession worldMapSession = WorldMapSession.getCurrentSession();
         MapProcessor mapProcessor = worldMapSession.getMapProcessor();
@@ -99,36 +109,43 @@ public class BlockCache {
         List<Integer> stainedGlassColors = new ArrayList<>(17);
         stainedGlassBlocks.add(null);
         stainedGlassColors.add(0);
-        for (Block block : getBlockRegistry(level)) {
+        for (Block block : getBlockRegistry()) {
             if (!(block instanceof StainedGlassBlock)) continue;
             BlockState defaultState = block.defaultBlockState();
             stainedGlassBlocks.add(defaultState);
             #if MC_VER > MC_1_19_2
-            stainedGlassColors.add(mapWriter.loadBlockColourFromTexture(defaultState, true, level, BuiltInRegistries.BLOCK, zeroPos));
+            stainedGlassColors.add(colorUtils.getBlockTextureColor(defaultState, true, level, BuiltInRegistries.BLOCK, zeroPos));
             #else
-            stainedGlassColors.add(mapWriter.loadBlockColourFromTexture(defaultState, true, level, zeroPos));
+            stainedGlassColors.add(colorUtils.getBlockTextureColor(defaultState, true, level, zeroPos));
             #endif
         }
 
         BlockState[] extraGlass = new BlockState[]{
                 null,
+                #if MC_VER >= MC_26_2_0
+                Blocks.STAINED_GLASS.white().defaultBlockState(),
+                Blocks.STAINED_GLASS.lightGray().defaultBlockState(),
+                Blocks.STAINED_GLASS.gray().defaultBlockState(),
+                Blocks.STAINED_GLASS.black().defaultBlockState()
+                #else
                 Blocks.WHITE_STAINED_GLASS.defaultBlockState(),
                 Blocks.LIGHT_GRAY_STAINED_GLASS.defaultBlockState(),
                 Blocks.GRAY_STAINED_GLASS.defaultBlockState(),
                 Blocks.BLACK_STAINED_GLASS.defaultBlockState()
+                #endif
         };
         int[] extraGlassColors = new int[extraGlass.length];
         for (int i = 1; i < extraGlass.length; i++) {
             #if MC_VER > MC_1_19_2
-            extraGlassColors[i] = mapWriter.loadBlockColourFromTexture(extraGlass[i], true, level, BuiltInRegistries.BLOCK, zeroPos);
+            extraGlassColors[i] = colorUtils.getBlockTextureColor(extraGlass[i], true, level, BuiltInRegistries.BLOCK, zeroPos);
             #else
-            extraGlassColors[i] = mapWriter.loadBlockColourFromTexture(extraGlass[i], true, level, zeroPos);
+            extraGlassColors[i] = colorUtils.getBlockTextureColor(extraGlass[i], true, level, zeroPos);
             #endif
         }
 
         boolean useBiomes = false;
 
-        for (Block block : getBlockRegistry(level)) {
+        for (Block block : getBlockRegistry()) {
             if (block instanceof LeavesBlock || isTransparent(block)) continue;
 
             BlockState defaultState = block.defaultBlockState();
@@ -139,9 +156,9 @@ public class BlockCache {
             #endif
 
             #if MC_VER > MC_1_19_2
-            int argb = mapWriter.loadBlockColourFromTexture(defaultState, true, level, BuiltInRegistries.BLOCK, zeroPos);
+            int argb = colorUtils.getBlockTextureColor(defaultState, true, level, BuiltInRegistries.BLOCK, zeroPos);
             #else
-            int argb = mapWriter.loadBlockColourFromTexture(defaultState, true, level, zeroPos);
+            int argb = colorUtils.getBlockTextureColor(defaultState, true, level, zeroPos);
             #endif
             if (new Color(argb).a < 1) continue;
 
@@ -192,7 +209,7 @@ public class BlockCache {
         }
         rgbToId.put(argb, currId);
         okLabToIdTree.insert(OKLab.sRgbToOkLab(color), currId);
-        idToBlock.put(currId, fakeBlock);
+        idToBlock.add(fakeBlock);
         currId++;
     }
 
@@ -243,7 +260,7 @@ public class BlockCache {
     }
 
     static BlockState getBlockState(short id, int y) {
-        FakeBlock fakeBlock = idToBlock.get(id);
+        FakeBlock fakeBlock = getFakeBlock(id);
         BlockState temp = null;
         if (y <= 0) temp = fakeBlock.bottom;
         if (y > 0 && y <= fakeBlock.top.length) temp = fakeBlock.top[fakeBlock.top.length - y];
@@ -251,7 +268,7 @@ public class BlockCache {
     }
 
     static FakeBlock getFakeBlock(short id) {
-        return idToBlock.get(id);
+        return idToBlock.get(id - Short.MIN_VALUE);
     }
 
     static short convertColorToBlockId(int pixelRgb) {

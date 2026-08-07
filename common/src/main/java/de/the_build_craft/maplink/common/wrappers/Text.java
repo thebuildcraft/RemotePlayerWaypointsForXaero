@@ -20,12 +20,11 @@
 
 package de.the_build_craft.maplink.common.wrappers;
 
-import com.demonwav.mcdev.annotations.Translatable;
 import net.minecraft.network.chat.*;
 
 /**
  * @author Leander Knüttel
- * @version 19.09.2025
+ * @version 06.08.2026
  */
 public class Text {
     #if MC_VER > MC_1_18_2
@@ -33,7 +32,7 @@ public class Text {
         return Component.literal(string);
     }
 
-    public static MutableComponent translatable(@Translatable String translateKey) {
+    public static MutableComponent translatable(String translateKey) {
         return Component.translatable(translateKey);
     }
 
@@ -42,7 +41,7 @@ public class Text {
         return new TextComponent(string);
     }
 
-    public static MutableComponent translatable(@Translatable String translateKey) {
+    public static MutableComponent translatable(String translateKey) {
         return new TranslatableComponent(translateKey);
     }
     #endif

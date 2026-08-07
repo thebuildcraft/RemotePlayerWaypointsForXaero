@@ -37,7 +37,7 @@
     
     "depends": {
         "fabricloader": "*",
-        "minecraft": $compatible_minecraft_versions,
+        "minecraft": $compatible_minecraft_versions_fabric,
         "java": ">=${java_version}",
         "${cloth_config_api_fabric_mod_id}": "*"
     },

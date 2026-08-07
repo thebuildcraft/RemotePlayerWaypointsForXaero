@@ -22,6 +22,7 @@ package de.the_build_craft.maplink.common.connections;
 
 import de.the_build_craft.maplink.common.*;
 import de.the_build_craft.maplink.common.clientMapHandlers.ClientMapHandler;
+import de.the_build_craft.maplink.common.level.AreaSelection;
 import de.the_build_craft.maplink.common.waypoints.PlayerPosition;
 import de.the_build_craft.maplink.common.wrappers.Utils;
 
@@ -35,7 +36,7 @@ import static de.the_build_craft.maplink.common.CommonModConfig.*;
 
 /**
  * @author Leander Knüttel
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 public class LiveAtlasConnection extends MapConnection {
     public static final Pattern dynmapRegexPattern = Pattern.compile("dynmap: *\\{\\R*((?!\\s+//\\s*).*\\R*)*?[^}\"']*}");
@@ -178,7 +179,7 @@ public class LiveAtlasConnection extends MapConnection {
     }
 
     @Override
-    public boolean downloadTiles(String map, int centerChunkX, int centerChunkZ, int maxChunksX, int maxChunksZ) {
+    public boolean downloadTiles(String map, AreaSelection areaSelection) {
         return false;
     }
 }

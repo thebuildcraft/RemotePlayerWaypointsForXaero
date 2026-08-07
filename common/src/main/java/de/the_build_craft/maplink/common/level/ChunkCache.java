@@ -28,12 +28,13 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * @author Leander Knüttel
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 public class ChunkCache {
     //[readyBit | light: 4 bits | height: 11 bits | fakeBlockId: 16 bits]
     //index = chunkPosX * 16*16*chunksInZDirection + chunkPosZ * 16*16 + localX * 16 + localZ
     private static int[] blocks;
+    private static boolean[] chunksToRead;
     private static int startChunkX;
     private static int startChunkZ;
     private static int endChunkX;
@@ -42,7 +43,7 @@ public class ChunkCache {
     private static int yMin;
     private static int yMax;
 
-    static void init(int startChunkX, int startChunkZ, int chunksInXDirection, int chunksInZDirection) {
+    static void init(AreaSelection areaSelection) {
         Level level = Minecraft.getInstance().level;
         if (level == null) throw new IllegalStateException();
         #if MC_VER > MC_1_21_1
@@ -55,12 +56,13 @@ public class ChunkCache {
         yMin = 0;
         yMax = level.getMaxBuildHeight() - 2;
         #endif
-        ChunkCache.startChunkX = startChunkX;
-        ChunkCache.startChunkZ = startChunkZ;
-        ChunkCache.endChunkX = startChunkX + chunksInXDirection - 1;
-        ChunkCache.endChunkZ = startChunkZ + chunksInZDirection - 1;
-        ChunkCache.chunksInZDirection = chunksInZDirection;
-        blocks = new int[chunksInXDirection * chunksInZDirection * 256];
+        startChunkX = areaSelection.minChunkX;
+        startChunkZ = areaSelection.minChunkZ;
+        endChunkX = areaSelection.maxChunkX;
+        endChunkZ = areaSelection.maxChunkZ;
+        chunksInZDirection = areaSelection.chunksZ;
+        blocks = new int[areaSelection.chunksX * areaSelection.chunksZ * 256];
+        chunksToRead = new boolean[areaSelection.chunksX * areaSelection.chunksZ];
     }
 
     private static int calcIndex(int x, int z) {
@@ -108,17 +110,55 @@ public class ChunkCache {
         return BlockCache.getFakeBlock(unpackFakeBlockId(blocks[startIndex + x * 16 + z])).biome;
     }
 
-    public static FakeChunk getFakeChunk(Level level, int x, int z) {
+    public static FakeChunk getFakeChunk(Level level, int x, int z, boolean edge) {
         if (x < startChunkX || x > endChunkX || z < startChunkZ || z > endChunkZ) return null;
         int startIndex = ((x - startChunkX) * chunksInZDirection + (z - startChunkZ)) * 256;
         if (startIndex >= blocks.length || startIndex < 0) return null;
-        for (int i = startIndex; i < startIndex + 256; i++) {
-            if (blocks[i] == 0) return null;
+        if (blocks[startIndex] == 0
+                || blocks[startIndex + 15 * 16] == 0
+                || blocks[startIndex + 15] == 0
+                || blocks[startIndex + 15 * 16 + 15] == 0) {
+            return null;
         }
-        return new FakeChunk(level, x, z, startIndex);
+        return new FakeChunk(level, x, z, startIndex, edge);
+    }
+
+    private static boolean checkChunk(int x, int z) {
+        if (x < startChunkX || x > endChunkX || z < startChunkZ || z > endChunkZ) return false;
+        int startIndex = ((x - startChunkX) * chunksInZDirection + (z - startChunkZ)) * 256;
+        if (startIndex >= blocks.length || startIndex < 0) return false;
+        return blocks[startIndex] != 0
+                && blocks[startIndex + 15 * 16] != 0
+                && blocks[startIndex + 15] != 0
+                && blocks[startIndex + 15 * 16 + 15] != 0;
+    }
+
+    public static void countChunks() {
+        for (int x = startChunkX + 1; x < endChunkX; x++) {
+            for (int z = startChunkZ + 1; z < endChunkZ; z++) {
+                if (!checkChunk(x, z)) continue;
+                ProgressCounter.totalChunks.incrementAndGet();
+                chunksToRead[(x - startChunkX) * chunksInZDirection + (z - startChunkZ)] = true;
+            }
+        }
+    }
+
+    public static void setDone(int startIndex) {
+        int tempIndex = startIndex / 256;
+        if (chunksToRead == null || tempIndex < 0 || tempIndex >= chunksToRead.length) return;
+        if (chunksToRead[tempIndex]) {
+            chunksToRead[tempIndex] = false;
+            if (ProgressCounter.renderedChunks.incrementAndGet() >= ProgressCounter.totalChunks.get()) TileConverter.clear();
+        }
+    }
+
+    public static void setDone(int x, int z) {
+        int startIndex = ((x - startChunkX) * chunksInZDirection + (z - startChunkZ)) * 256;
+        setDone(startIndex);
     }
 
     static void clear() {
         blocks = new int[0];
+        chunksToRead = new boolean[0];
     }
 }

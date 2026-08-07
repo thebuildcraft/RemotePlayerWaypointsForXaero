@@ -22,6 +22,7 @@ package de.the_build_craft.maplink.common.connections;
 
 import de.the_build_craft.maplink.common.HTTP;
 import de.the_build_craft.maplink.common.ModConfig;
+import de.the_build_craft.maplink.common.level.AreaSelection;
 import de.the_build_craft.maplink.common.waypoints.PlayerPosition;
 import de.the_build_craft.maplink.common.AbstractModInitializer;
 import de.the_build_craft.maplink.common.wrappers.Text;
@@ -44,7 +45,7 @@ import static de.the_build_craft.maplink.common.CommonModConfig.*;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 public abstract class MapConnection {
     public final ModConfig.ServerEntry serverEntry;
@@ -201,5 +202,5 @@ public abstract class MapConnection {
 
     public abstract Set<String> getMarkerLayers();
     public abstract List<String[]> getPossibleTileMaps();
-    public abstract boolean downloadTiles(String map, int centerChunkX, int centerChunkZ, int maxChunksX, int maxChunksZ);
+    public abstract boolean downloadTiles(String map, AreaSelection areaSelection);
 }

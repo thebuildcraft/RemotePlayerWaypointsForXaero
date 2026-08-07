@@ -24,6 +24,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import de.the_build_craft.maplink.common.level.ChunkCache;
 import de.the_build_craft.maplink.common.level.FakeChunk;
+import de.the_build_craft.maplink.common.level.ProgressCounter;
 import de.the_build_craft.maplink.common.level.TileConverter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -50,11 +51,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xaero.map.MapProcessor;
 import xaero.map.MapWriter;
+import xaero.map.biome.BiomeColorCalculator;
+import xaero.map.biome.BlockTintProvider;
 import xaero.map.region.MapBlock;
+import xaero.map.region.MapUpdateFastConfig;
+import xaero.map.region.OverlayManager;
 
 /**
  * @author Leander Knüttel
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 @Pseudo
 @Mixin(MapWriter.class)
@@ -67,10 +72,13 @@ public class MapWriterMixin {
     private ChunkAccess getFakeChunk(Level instance, int x, int z, ChunkStatus chunkStatus, boolean require, Operation<ChunkAccess> original) {
     #endif
         ChunkAccess realChunk = original.call(instance, x, z, chunkStatus, require);
-        if (!TileConverter.readyForRender) return realChunk;
-        if (realChunk != null && !(realChunk instanceof EmptyLevelChunk)) return realChunk;
+        if (!ProgressCounter.readyForRender.get()) return realChunk;
+        if (realChunk != null && !(realChunk instanceof EmptyLevelChunk)) {
+            ChunkCache.setDone(x, z);
+            return realChunk;
+        }
         try {
-            return ChunkCache.getFakeChunk(instance, x, z);
+            return ChunkCache.getFakeChunk(instance, x, z, false);
         } catch (Exception ignored) {
             return realChunk;
         }
@@ -79,10 +87,10 @@ public class MapWriterMixin {
     @WrapOperation(method = "writeChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getChunk(II)Lnet/minecraft/world/level/chunk/LevelChunk;"))
     private LevelChunk getFakeChunk(Level instance, int chunkX, int chunkZ, Operation<LevelChunk> original) {
         LevelChunk realChunk = original.call(instance, chunkX, chunkZ);
-        if (!TileConverter.readyForRender) return realChunk;
+        if (!ProgressCounter.readyForRender.get()) return realChunk;
         if (realChunk != null && !(realChunk instanceof EmptyLevelChunk)) return realChunk;
         try {
-            return ChunkCache.getFakeChunk(instance, chunkX, chunkZ);
+            return ChunkCache.getFakeChunk(instance, chunkX, chunkZ, true);
         } catch (Exception ignored) {
             return realChunk;
         }
@@ -91,7 +99,7 @@ public class MapWriterMixin {
     #if MC_VER > MC_1_19_2
     @WrapOperation(method = "writeChunk", at = @At(value = "INVOKE", target = "Lxaero/map/MapWriter;loadPixel(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/Registry;Lxaero/map/region/MapBlock;Lxaero/map/region/MapBlock;Lnet/minecraft/world/level/chunk/LevelChunk;IIIIZZIZZLnet/minecraft/core/Registry;ZILnet/minecraft/core/BlockPos$MutableBlockPos;)V"))
     private void fakeHeight(MapWriter instance, Level world, Registry<Block> blockRegistry, MapBlock pixel, MapBlock currentPixel, LevelChunk bchunk, int insideX, int insideZ, int highY, int lowY, boolean cave, boolean fullCave, int mappedHeight, boolean canReuseBiomeColours, boolean ignoreHeightmaps, Registry<Biome> biomeRegistry, boolean flowers, int worldBottomY, BlockPos.MutableBlockPos mutableBlockPos3, Operation<Void> original) {
-        if (TileConverter.readyForRender && bchunk instanceof FakeChunk) {
+        if (ProgressCounter.readyForRender.get() && bchunk instanceof FakeChunk) {
             try {
                 highY = ((FakeChunk) bchunk).heightAtPos(insideX, insideZ);
             } catch (Exception ignored) {}
@@ -101,7 +109,7 @@ public class MapWriterMixin {
     #elif MC_VER >= MC_1_18_2
     @WrapOperation(method = "writeChunk", at = @At(value = "INVOKE", target = "Lxaero/map/MapWriter;loadPixel(Lnet/minecraft/world/level/Level;Lxaero/map/region/MapBlock;Lxaero/map/region/MapBlock;Lnet/minecraft/world/level/chunk/LevelChunk;IIIIZZIZZLnet/minecraft/core/Registry;ZILnet/minecraft/core/BlockPos$MutableBlockPos;)V"))
     private void fakeHeight(MapWriter instance, Level world, MapBlock pixel, MapBlock currentPixel, LevelChunk bchunk, int insideX, int insideZ, int highY, int lowY, boolean cave, boolean fullCave, int mappedHeight, boolean canReuseBiomeColours, boolean ignoreHeightmaps, Registry<Biome> biomeRegistry, boolean flowers, int worldBottomY, BlockPos.MutableBlockPos mutableBlockPos3, Operation<Void> original) {
-        if (TileConverter.readyForRender && bchunk instanceof FakeChunk) {
+        if (ProgressCounter.readyForRender.get() && bchunk instanceof FakeChunk) {
             try {
                 highY = ((FakeChunk) bchunk).heightAtPos(insideX, insideZ);
             } catch (Exception ignored) {}
@@ -111,7 +119,7 @@ public class MapWriterMixin {
     #else
     @WrapOperation(method = "writeChunk", at = @At(value = "INVOKE", target = "Lxaero/map/MapWriter;loadPixel(Lnet/minecraft/world/level/Level;Lxaero/map/region/MapBlock;Lxaero/map/region/MapBlock;Lnet/minecraft/world/level/chunk/LevelChunk;IIIIZZIZZLnet/minecraft/core/WritableRegistry;ZLnet/minecraft/core/BlockPos$MutableBlockPos;)V"))
     private void fakeHeight(MapWriter instance, Level world, MapBlock pixel, MapBlock currentPixel, LevelChunk bchunk, int insideX, int insideZ, int highY, int lowY, boolean cave, boolean fullCave, int mappedHeight, boolean canReuseBiomeColours, boolean ignoreHeightmaps, WritableRegistry<Biome> biomeRegistry, boolean flowers, BlockPos.MutableBlockPos mutableBlockPos3, Operation<Void> original) {
-        if (TileConverter.readyForRender && bchunk instanceof FakeChunk) {
+        if (ProgressCounter.readyForRender.get() && bchunk instanceof FakeChunk) {
             try {
                 highY = ((FakeChunk) bchunk).heightAtPos(insideX, insideZ);
             } catch (Exception ignored) {}
@@ -122,37 +130,43 @@ public class MapWriterMixin {
 
     @Inject(method = "getWriteDistance", at = @At(value = "RETURN"), cancellable = true)
     private void fakeDistance(CallbackInfoReturnable<Integer> cir) {
-        if (TileConverter.readyForRender) cir.setReturnValue(TileConverter.fakeRange);
+        if (ProgressCounter.readyForRender.get()) cir.setReturnValue(TileConverter.fakeRange);
     }
 
     #if MC_VER > MC_1_19_2
     @WrapOperation(method = "loadPixel", at = @At(value = "INVOKE", target = "Lxaero/map/region/MapBlock;write(Lnet/minecraft/world/level/block/state/BlockState;IILnet/minecraft/resources/ResourceKey;BZZ)V"))
     private void fakeWrite(MapBlock instance, BlockState state, int height, int topHeight, ResourceKey<Biome> biomeIn, byte light, boolean glowing, boolean cave, Operation<Void> original, Level world, Registry<Block> blockRegistry, MapBlock pixel, MapBlock currentPixel, LevelChunk bchunk, int insideX, int insideZ) {
-        if (TileConverter.readyForRender && bchunk instanceof FakeChunk) {
+        if (ProgressCounter.readyForRender.get() && bchunk instanceof FakeChunk) {
             try {
                 biomeIn = ((FakeChunk) bchunk).biomeAtPos(insideX, insideZ);
                 light = (byte) ((FakeChunk)bchunk).lightAtPos(insideX, insideZ);
+                original.call(instance, state, height, topHeight, biomeIn, light, glowing, cave);
+                if (insideX == 15 && insideZ == 15) ((FakeChunk) bchunk).done();
             } catch (Exception ignored) {}
+        } else {
+            original.call(instance, state, height, topHeight, biomeIn, light, glowing, cave);
         }
-        original.call(instance, state, height, topHeight, biomeIn, light, glowing, cave);
     }
     #else
     @WrapOperation(method = "loadPixel", at = @At(value = "INVOKE", target = "Lxaero/map/region/MapBlock;write(Lnet/minecraft/world/level/block/state/BlockState;IILnet/minecraft/resources/ResourceKey;BZZ)V"))
     private void fakeWrite(MapBlock instance, BlockState state, int height, int topHeight, ResourceKey<Biome> biomeIn, byte light, boolean glowing, boolean cave, Operation<Void> original, Level world, MapBlock pixel, MapBlock currentPixel, LevelChunk bchunk, int insideX, int insideZ) {
-        if (TileConverter.readyForRender && bchunk instanceof FakeChunk) {
+        if (ProgressCounter.readyForRender.get() && bchunk instanceof FakeChunk) {
             try {
                 biomeIn = ((FakeChunk) bchunk).biomeAtPos(insideX, insideZ);
                 light = (byte) ((FakeChunk)bchunk).lightAtPos(insideX, insideZ);
+                original.call(instance, state, height, topHeight, biomeIn, light, glowing, cave);
+                ((FakeChunk) bchunk).done();
             } catch (Exception ignored) {}
+        } else {
+            original.call(instance, state, height, topHeight, biomeIn, light, glowing, cave);
         }
-        original.call(instance, state, height, topHeight, biomeIn, light, glowing, cave);
     }
     #endif
 
     #if MC_VER > MC_1_19_2
     @WrapOperation(method = "loadPixel", at = @At(value = "INVOKE", target = "Lxaero/map/MapWriter;loadPixelHelp(Lxaero/map/region/MapBlock;Lxaero/map/region/MapBlock;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/Registry;Lnet/minecraft/world/level/block/state/BlockState;BBLnet/minecraft/world/level/chunk/LevelChunk;IIIZZLnet/minecraft/world/level/material/FluidState;Lnet/minecraft/core/Registry;IZZZ)Z"))
     private boolean fakeOverlayLight(MapWriter instance, MapBlock pixel, MapBlock currentPixel, Level world, Registry<Block> blockRegistry, BlockState state, byte light, byte skyLight, LevelChunk bchunk, int insideX, int insideZ, int h, boolean canReuseBiomeColours, boolean cave, FluidState fluidFluidState, Registry<Biome> biomeRegistry, int transparentSkipY, boolean shouldExtendTillTheBottom, boolean flowers, boolean underair, Operation<Boolean> original) {
-        if (TileConverter.readyForRender && bchunk instanceof FakeChunk) {
+        if (ProgressCounter.readyForRender.get() && bchunk instanceof FakeChunk) {
             try {
                 light = (byte) ((FakeChunk)bchunk).lightAtPos(insideX, insideZ);
             } catch (Exception ignored) {}
@@ -162,7 +176,7 @@ public class MapWriterMixin {
     #elif MC_VER >= MC_1_18_2
     @WrapOperation(method = "loadPixel", at = @At(value = "INVOKE", target = "Lxaero/map/MapWriter;loadPixelHelp(Lxaero/map/region/MapBlock;Lxaero/map/region/MapBlock;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/block/state/BlockState;BBLnet/minecraft/world/level/chunk/LevelChunk;IIIZZLnet/minecraft/world/level/material/FluidState;Lnet/minecraft/core/Registry;IZZZ)Z"))
     private boolean fakeOverlayLight(MapWriter instance, MapBlock pixel, MapBlock currentPixel, Level world, BlockState state, byte light, byte skyLight, LevelChunk bchunk, int insideX, int insideZ, int h, boolean canReuseBiomeColours, boolean cave, FluidState fluidFluidState, Registry<Biome> biomeRegistry, int transparentSkipY, boolean shouldExtendTillTheBottom, boolean flowers, boolean underair, Operation<Boolean> original) {
-        if (TileConverter.readyForRender && bchunk instanceof FakeChunk) {
+        if (ProgressCounter.readyForRender.get() && bchunk instanceof FakeChunk) {
             try {
                 light = (byte) ((FakeChunk)bchunk).lightAtPos(insideX, insideZ);
             } catch (Exception ignored) {}
@@ -172,7 +186,7 @@ public class MapWriterMixin {
     #else
     @WrapOperation(method = "loadPixel", at = @At(value = "INVOKE", target = "Lxaero/map/MapWriter;loadPixelHelp(Lxaero/map/region/MapBlock;Lxaero/map/region/MapBlock;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/block/state/BlockState;BBLnet/minecraft/world/level/chunk/LevelChunk;IIIZZLnet/minecraft/world/level/material/FluidState;Lnet/minecraft/core/WritableRegistry;IZZZ)Z"))
     private boolean fakeOverlayLight(MapWriter instance, MapBlock pixel, MapBlock currentPixel, Level world, BlockState state, byte light, byte skyLight, LevelChunk bchunk, int insideX, int insideZ, int h, boolean canReuseBiomeColours, boolean cave, FluidState fluidFluidState, WritableRegistry<Biome> biomeRegistry, int transparentSkipY, boolean shouldExtendTillTheBottom, boolean flowers, boolean underair, Operation<Boolean> original) {
-        if (TileConverter.readyForRender && bchunk instanceof FakeChunk) {
+        if (ProgressCounter.readyForRender.get() && bchunk instanceof FakeChunk) {
             try {
                 light = (byte) ((FakeChunk)bchunk).lightAtPos(insideX, insideZ);
             } catch (Exception ignored) {}
@@ -183,13 +197,13 @@ public class MapWriterMixin {
 
     @WrapOperation(method = "onRender", at = @At(value = "FIELD", target = "Lxaero/map/MapProcessor;mainPlayerX:D", opcode = Opcodes.GETFIELD))
     private double fakePlayerLocationX(MapProcessor instance, Operation<Double> original) {
-        if (TileConverter.readyForRender) return TileConverter.fakePlayerLocationX;
+        if (ProgressCounter.readyForRender.get()) return TileConverter.fakePlayerLocationX;
         return original.call(instance);
     }
 
     @WrapOperation(method = "onRender", at = @At(value = "FIELD", target = "Lxaero/map/MapProcessor;mainPlayerZ:D", opcode = Opcodes.GETFIELD))
     private double fakePlayerLocationZ(MapProcessor instance, Operation<Double> original) {
-        if (TileConverter.readyForRender) return TileConverter.fakePlayerLocationZ;
+        if (ProgressCounter.readyForRender.get()) return TileConverter.fakePlayerLocationZ;
         return original.call(instance);
     }
 }

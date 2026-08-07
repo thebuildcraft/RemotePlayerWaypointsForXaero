@@ -25,12 +25,12 @@ import com.mojang.blaze3d.textures.GpuTexture;
 #endif
 import de.the_build_craft.maplink.common.AbstractModInitializer;
 import de.the_build_craft.maplink.common.MainThreadTaskQueue;
+import de.the_build_craft.maplink.common.level.AreaSelection;
 import de.the_build_craft.maplink.common.level.TileConverter;
 import de.the_build_craft.maplink.common.waypoints.CustomWorldMapWaypoint;
 import de.the_build_craft.maplink.common.waypoints.Int3;
 import de.the_build_craft.maplink.common.waypoints.Position;
 import de.the_build_craft.maplink.common.waypoints.WaypointState;
-import de.the_build_craft.maplink.mixins.common.mods.xaeroworldmap.WorldMapWaypointAccessor;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import xaero.map.WorldMap;
 import xaero.map.common.config.option.WorldMapProfiledConfigOptions;
@@ -53,7 +53,7 @@ import static de.the_build_craft.maplink.common.CommonModConfig.getPlayerWaypoin
 
 /**
  * @author Leander Knüttel
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 public class XaeroWorldMapSupport implements IXaeroWorldMapSupport {
     private static XaeroWorldMapSupport instance;
@@ -93,23 +93,23 @@ public class XaeroWorldMapSupport implements IXaeroWorldMapSupport {
                 XaeroClientMapHandler.queuedTaskMap.remove(position.id);
             } else {
                 queuedTask.future.thenRun(() -> {
-                    WorldMapWaypointAccessor w = (WorldMapWaypointAccessor) idToWaypoint.get(position.id);
+                    CustomWorldMapWaypoint w = (CustomWorldMapWaypoint) idToWaypoint.get(position.id);
                     if (w != null) {
                         Int3 pos = position.pos.floorToInt3();
-                        w.setX(pos.x);
-                        w.setY(pos.y);
-                        w.setZ(pos.z);
+                        w.x = pos.x;
+                        w.y = pos.y;
+                        w.z = pos.z;
                     }
                 });
                 return;
             }
         }
-        WorldMapWaypointAccessor w = (WorldMapWaypointAccessor) idToWaypoint.get(position.id);
+        CustomWorldMapWaypoint w = (CustomWorldMapWaypoint) idToWaypoint.get(position.id);
         if (w != null) {
             Int3 pos = position.pos.floorToInt3();
-            w.setX(pos.x);
-            w.setY(pos.y);
-            w.setZ(pos.z);
+            w.x = pos.x;
+            w.y = pos.y;
+            w.z = pos.z;
         } else {
             XaeroClientMapHandler.queuedTaskMap.put(position.id, MainThreadTaskQueue.queueTask(() -> {
                 idToWaypoint.put(position.id, new CustomWorldMapWaypoint(position, waypointState));
@@ -119,7 +119,7 @@ public class XaeroWorldMapSupport implements IXaeroWorldMapSupport {
 
     private static void updateWorldMapWaypointColors(Map<String, Waypoint> map, Function<Waypoint, Integer> waypointToColor) {
         for (Waypoint waypoint : map.values()) {
-            ((WorldMapWaypointAccessor) waypoint).setColor(CustomWorldMapWaypoint.XAERO_COLORS[waypointToColor.apply(waypoint)]);
+            ((CustomWorldMapWaypoint)waypoint).color = CustomWorldMapWaypoint.XAERO_COLORS[waypointToColor.apply(waypoint)];
         }
     }
 
@@ -172,11 +172,19 @@ public class XaeroWorldMapSupport implements IXaeroWorldMapSupport {
         idToWorldMapMarker.clear();
     }
 
-    #if MC_VER >= MC_1_21_11
+    #if MC_VER >= MC_26_1_0
+    @Override
+    public void createGuiNearestRenderer() {
+        GUI_NEAREST_Renderer = multiTextureRenderTypeRendererProvider.getRenderer(CustomRenderTypes.GUI_NEAREST);
+    }
+    #elif MC_VER >= MC_1_21_11
     @Override
     public void createGuiNearestRenderer() {
         GUI_NEAREST_Renderer = multiTextureRenderTypeRendererProvider.getRenderer(MultiTextureRenderTypeRendererProvider::defaultTextureBind, CustomRenderTypes.GUI_NEAREST);
     }
+    #endif
+
+    #if MC_VER >= MC_1_21_11
 
     @Override
     public Object getGuiNearestRenderer() {
@@ -210,17 +218,12 @@ public class XaeroWorldMapSupport implements IXaeroWorldMapSupport {
     }
 
     @Override
-    public void init(int centerChunkX, int centerChunkZ, int maxChunksX, int maxChunksZ) {
-        TileConverter.init(centerChunkX, centerChunkZ, maxChunksX, maxChunksZ);
+    public void init(AreaSelection areaSelection) {
+        TileConverter.init(areaSelection);
     }
 
     @Override
     public void writeBlock(int x, int z, int light, int height, int pixelRgb) {
         TileConverter.writeBlock(x, z, light, height, pixelRgb);
-    }
-
-    @Override
-    public void setReadyForRender() {
-        TileConverter.readyForRender = true;
     }
 }

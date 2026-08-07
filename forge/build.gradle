@@ -19,52 +19,96 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * file changed by: Leander Knüttel
- * date: 15.02.2026
+ * date: 06.08.2026
  */
 
 plugins {
-    id 'com.gradleup.shadow'
+    id 'net.neoforged.moddev.legacyforge' version '2.0.143'
 }
 
-architectury {
-    platformSetupLoomIde()
-    forge()
-}
+legacyForge {
+    version = "${rootProject.minecraft_version}-${rootProject.forge_version}"
 
-loom {
-    forge {
-        convertAccessWideners = true
-        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
-
-        mixinConfigs = [
-                "${mod_id}.forge.mixins.json"
-        ]
+    def at = file("src/main/resources/${accessWidenerVersion}.${mod_id}.accesstransformer.cfg")
+    if (at.exists()) {
+        accessTransformers.from(at.absolutePath)
     }
+    validateAccessTransformers = true
+
+    //runs {
+    //    client {
+    //        client()
+    //    }
+    //    data {
+    //        data()
+    //    }
+    //    server {
+    //        server()
+    //    }
+    //}
+//
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+//sourceSets {
+//    commonSource {
+//        java {
+//            srcDirs = [project(':common').file('src/main/java')]
+//        }
+//    }
+//}
+
+mixin {
+    add sourceSets.main, "${mod_id}.forge.mixins.refmap.json"
+    //add sourceSets.commonSource, "${mod_id}.forge.mixins.refmap.json"
+    config "${mod_id}.forge.mixins.json"
+}
+
+mainJarTask().configure {
+    if (it.hasProperty('inputFile')) {
+        it.inputFile = shadowJar.archiveFile
+    }
+    else {
+        from(zipTree(shadowJar.archiveFile)) {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        }
+    }
+    dependsOn shadowJar
+//    classifier null
+
+    //accessTransformers.add("${rootProject.mod_id}.accesstransformer.cfg")
+    manifest.attributes([
+            "MixinConfigs": "${mod_id}.forge.mixins.json"
+    ])
+}
+
+obfuscation {
+    reobfuscate(tasks.named('shadowJar'), sourceSets.main)
 }
 
 configurations {
-    common {
-        canBeResolved = true
-        canBeConsumed = false
-    }
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
-    developmentForge.extendsFrom common
+    // The addModJar basically embeds the mod to the built jar
+    addModJar
+    include.extendsFrom addModJar
+    modImplementation.extendsFrom addModJar
+}
 
-    // Files in this configuration will be bundled into your mod using the Shadow plugin.
-    // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
-    shadowBundle {
-        canBeResolved = true
-        canBeConsumed = false
-    }
+def addMod(path, enabled) {
+    if (enabled == "2")
+        dependencies { modImplementation(path) }
+    else if (enabled == "1")
+        dependencies { modCompileOnly(path) }
 }
 
 dependencies {
-    common(project(path: ':common', configuration: 'namedElements')) { transitive = false }
-    shadowBundle project(path: ':common', configuration: 'transformProductionForge')
-
-    forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
-
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.3"))
+    implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.5.3"))
     modApi "me.shedaniel.cloth:cloth-config-forge:${rootProject.cloth_config_api_forge_version}"
 
     if (rootProject.enable_xaeros_minimap == "true") {
@@ -94,185 +138,67 @@ dependencies {
         }
     }
     modCompileOnly "xaero.lib:xaerolib-forge-${rootProject.minecraft_version}:${rootProject.xaero_lib_version}"
-
-    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.0"))
-    implementation(include("io.github.llamalad7:mixinextras-forge:0.5.0"))
 }
 
-shadowJar {
-    configurations = [project.configurations.shadowBundle]
-    archiveClassifier = 'dev-shadow'
+tasks.register('deleteResources', Delete) {
+    delete file("build/resources/main")
 }
 
-remapJar {
-    inputFile.set shadowJar.archiveFile
+tasks.register('copyAllResources') {
+    dependsOn(tasks.named("copyCoreResources"))
+    //dependsOn(tasks.named("copyCommonLoaderResources"))
+    dependsOn(tasks.named("copyAccesstransformerResources"))
 }
 
 processResources {
-    dependsOn(copyCommonLoaderResources)
+    dependsOn(tasks.named('copyAllResources'))
+    exclude "*.accesswidener"
 }
 
-publisher {
-    // Setup the required API keys. You only need to define the keys for
-    // the platforms you plan on uploading to
-    apiKeys {
-        // Modrinth Token
-        modrinth System.getenv("MODRINTH_TOKEN")
-        // Curseforge Token
-        curseforge System.getenv("CURSE_TOKEN")
-        // GitHub Token
-        //github System.getenv("GITHUB_TOKEN") TODO: useless right now, because one would rather upload all the jars into one release
+publishMods {
+    file = mainJarTask().archiveFile
+    dryRun = publish_debug_mode.toBoolean()
+    changelog = file("$rootDir/docs/changelogs/${mod_version}.md").text.trim()
+    switch (release_type) {
+        case "alpha":
+            type = ALPHA
+            break
+        case "beta":
+            type = BETA
+            break
+        case "stable":
+            type = STABLE
+            break
     }
 
-    // Enable Debug mode. When enabled, no files will actually be uploaded
-    setDebug(publish_debug_mode.toBoolean())
+    displayName = "[Forge | ${rootProject.file_name}] ${mod_version}"
 
-    // Modrinth Project ID
-    setModrinthID(modrinth_id)
-
-    // Curseforge Project ID
-    setCurseID(curseforge_id)
-
-    // Type of release. beta, alpha or release
-    // You can also use VersionType.BETA, VersionType.ALPHA or VersionType.RELEASE
-    setVersionType(release_type)
-
-    // Changelog. This can be a file, string, OR, gist/github url
-    // For example: markdown.md, or "This is my changelog"
-    // Or: https://raw.githubusercontent.com/hypherionmc/changelogs/changelog.md
-    // Or https://gist.githubusercontent.com/hypherionmc/92f825d3c9337964cc77c9c8c9bf65e6/raw/ceeaaee5b98c688a23398864fe480b84796a1651/test_gist.md
-    setChangelog(file("$rootDir/docs/changelogs/${mod_version}.md").text.trim())
-
-    // Required for Modrinth/GitHub
-    setProjectVersion(mod_version)
-
-    // DisplayName is also used for github below
-    String DisplayName = "[Forge | ${rootProject.file_name}] ${mod_version}"
-    // Fancy display name for the upload.
-    // Will default to the project version if not set
-    setDisplayName(DisplayName)
+    modLoaders.add("forge")
 
     String gameVersionsString = rootProject.compatible_minecraft_versions
-    def gameVersions = gameVersionsString.replace("[", "").replace("]", "").replaceAll(" ", "").replaceAll("\"", "").split(",")
-    // The supported game versions
-    setGameVersions(gameVersions)
+    String[] gameVersions = gameVersionsString.replace("[", "").replace("]", "").replaceAll(" ", "").replaceAll("\"", "").split(",")
 
-    // The modloaders your upload supports.
-    // This can also be an Enum from ModLoader,
-    // like setLoaders(ModLoader.FABRIC, ModLoader.FORGE)
-    setLoaders("forge")
+    if (publish_to_modrinth.toBoolean()) {
+        modrinth {
+            accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+            projectId = modrinth_id
+            minecraftVersions.addAll(gameVersions)
 
-    // The new Curseforge Environment tag. Optional
-    // Valid values are "server", "client" or "both"
-    // You can also use CurseEnvironment.BOTH, or CurseEnvironment.SERVER or CurseEnvironment.CLIENT
-    setCurseEnvironment(curse_environment)
-
-    // The file to be uploaded. This can be a file, task, or string.
-    // setArtifact("build/libs/mymod.jar")
-    // setArtifact(jar.getArchiveFile().get())
-    // If this is a task, the task specified will be executed before publishing
-    //setArtifact(remapJar)
-    setArtifact("build/libs/${mod_id}-forge-${rootProject.versionStr}.jar")
-
-    // Override the artifact uploaded to modrinth
-    // setPlatformArtifact(Platform.Modrinth, "build/libs/mymod.jar")
-    // setPlatformArtifact(Platform.Modrinth, jar.getArchiveFile().get())
-    // If this is a task, the task specified will be executed before publishing
-    // Valid platforms are modrinth, curseforge and github
-    //setPlatformArtifact("modrinth", modrinthJar)
-
-    // Disable the built in Fractureizer scanner
-    setDisableMalwareScanner(false)
-
-    // Add supported java versions. Currently only used by CurseForge
-    // Supports anything that can be parsed using JavaVersion.toVersion()
-    setJavaVersions(new Integer[]{rootProject.java_version as Integer})
-
-    // Safety check to check if the artifact contains a valid mod metadata entry,
-    // which could possibly mean that the jar is empty
-    setDisableEmptyJarCheck(false)
-
-    // Additional files to upload. Same as artifact, this can be a task, file or string
-    //addAdditionalFile("build/libs/${mod_id}-forge-${rootProject.versionStr}-sources.jar")
-
-    // Additional files to upload with a custom display name and changelog.
-    // Currently only supported on Curseforge
-    //addAdditionalFile {
-    //    // File, Task or String
-    //    artifact jar
-    //    displayName "Some Name"
-    //    changelog "Hello Changelog"
-    //}
-
-    // GitHub options
-    github {
-        // GitHub repo to publish to. Overrides githubRepo
-        repo(mod_source)
-
-        // Tag to use for GitHub release. Defaults to version
-        tag("v${mod_version}") //FIXME: doesn't work!
-
-        // Whether to create a tag for the GitHub release, if one doesn't exist yet. Defaults to true
-        createTag(true)
-
-        // Whether to create the GitHub release if it doesn't exist yet. Defaults to true
-        createRelease(true)
-
-        // Whether to update the GitHub release if it already exists. Defaults to true
-        updateRelease(true)
-
-        // Whether the release should be left as an unpublished draft.
-        //
-        // If enabled, newly created releases and existing drafts will not be published.
-        // Instead, a draft release is used.
-        //
-        // If disabled, the release will be published.
-        // This option does not allow converting a published release to a draft.
-        //
-        // Defaults to false
-        draft(github_draft.toBoolean())
-
-        // The commitish ref the tag should target (ignored when tag already exists)
-        target(github_target)
-
-        displayName(DisplayName)
+            requires("cloth-config")
+            optional("xaeros-minimap", "xaeros-minimap-fair", "xaeros-world-map")
+        }
     }
 
-// Modrinth Dependencies.
-// Accepts a slug or id
-    modrinthDepends {
-        // Multiple required dependencies
-        //required "fabric-api", "craterlib"
+    if (publish_to_curseforge.toBoolean()) {
+        curseforge {
+            accessToken = providers.environmentVariable("CURSE_TOKEN")
+            projectId = curseforge_id
+            if (curse_environment == "both" || curse_environment == "server") serverRequired = true
+            if (curse_environment == "both" || curse_environment == "client") clientRequired = true
+            minecraftVersions.addAll(gameVersions)
 
-        // Single dependency
-        required "cloth-config"
-
-        // Optional dependency
-        optional "xaeros-minimap", "xaeros-minimap-fair", "xaeros-world-map"
-
-        // Your mod is not compatible with this mod
-        //incompatible 'breaks-with'
-
-        // Your mod embeds this dependency
-        //embedded 'fabric-api'
-    }
-
-// Curse Dependencies
-    curseDepends {
-        // Multiple required dependencies
-        //required "fabric-api", "craterlib"
-
-        // Single dependency
-        required "cloth-config"
-
-        // Optional dependency
-        optional "xaeros-minimap", "xaeros-minimap-fair-play-edition", "xaeros-world-map"
-
-        // Your mod is not compatible with this mod
-        //incompatible 'breaks-with'
-
-        // Your mod embeds this dependency
-        //embedded 'fabric-api'
+            requires("cloth-config")
+            optional("xaeros-minimap", "xaeros-minimap-fair-play-edition", "xaeros-world-map")
+        }
     }
 }
-

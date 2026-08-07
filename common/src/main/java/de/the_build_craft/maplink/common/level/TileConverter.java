@@ -22,28 +22,35 @@ package de.the_build_craft.maplink.common.level;
 
 /**
  * @author Leander Knüttel
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 public class TileConverter {
-    public static boolean readyForRender;
     public static int fakePlayerLocationX;
     public static int fakePlayerLocationZ;
     public static int fakeRange;
 
-    public static void clear() {
-        readyForRender = false;
+    public static final Object conversionLock = new Object();
 
-        ChunkCache.clear();
-        BlockCache.clear();
+    public static void clear() {
+        synchronized (conversionLock) {
+            ProgressCounter.clear();
+            ChunkCache.clear();
+            BlockCache.clear();
+        }
     }
 
-    public static void init(int centerChunkX, int centerChunkZ, int maxChunksX, int maxChunksZ) {
-        clear();
-        fakePlayerLocationX = centerChunkX << 4;
-        fakePlayerLocationZ = centerChunkZ << 4;
-        fakeRange = Math.max(maxChunksX, maxChunksZ) / 2 + 2;
-        ChunkCache.init((centerChunkX - (maxChunksX / 2)), (centerChunkZ - (maxChunksZ / 2)), maxChunksX, maxChunksZ);
-        BlockCache.cacheBlockColors();
+    public static void init(AreaSelection areaSelection) {
+        synchronized (conversionLock) {
+            clear();
+            ProgressCounter.init();
+
+            fakePlayerLocationX = areaSelection.centerX;
+            fakePlayerLocationZ = areaSelection.centerZ;
+            fakeRange = Math.max(areaSelection.chunksX, areaSelection.chunksZ) / 2 + 2;
+
+            ChunkCache.init(areaSelection);
+            BlockCache.cacheBlockColors();
+        }
     }
 
     public static void writeBlock(int x, int z, int light, int height, int pixelRgb) {

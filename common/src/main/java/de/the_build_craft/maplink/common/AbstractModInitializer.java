@@ -30,6 +30,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import de.the_build_craft.maplink.common.clientMapHandlers.XaeroClientMapHandler;
 import de.the_build_craft.maplink.common.connections.BlueMapConnection;
 import de.the_build_craft.maplink.common.connections.MapConnection;
+import de.the_build_craft.maplink.common.level.AreaSelection;
 import de.the_build_craft.maplink.common.waypoints.Double3;
 import de.the_build_craft.maplink.common.wrappers.Text;
 import de.the_build_craft.maplink.common.wrappers.Utils;
@@ -60,13 +61,13 @@ import static de.the_build_craft.maplink.common.CommonModConfig.*;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 public abstract class AbstractModInitializer
 {
 	public static final String MOD_ID = "maplink";
 	public static final String MOD_NAME = "Map Link";
-	public static final String VERSION = "4.4.0";
+	public static final String VERSION = "4.5.0";
 	public static final Logger LOGGER = LogManager.getLogger("MapLink");
 	public static AbstractModInitializer INSTANCE;
 	public LoaderType loaderType;
@@ -278,7 +279,7 @@ public abstract class AbstractModInitializer
                         int chunksZ = IntegerArgumentType.getInteger(context, "chunksZ") + 2;
                         BlockPos center = parseClientPos(context.getArgument("center", Coordinates.class));
                         float GB = (float) (Math.ceil(chunksX * chunksZ * 16*16 * 4 * 1e-9f * 100) / 100f);
-                        Utils.sendToClientChat(Text.literal("This will require at least ")
+                        Utils.sendToClientChat(Text.literal("(I recommend using the right-click option on the world map!) | This will require at least ")
                                 .append(Text.literal(GB + " GB").withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)))
                                 .append(Text.literal(" of memory!")));
                         Utils.sendToClientChat("Select one of these maps to confirm:");
@@ -305,7 +306,7 @@ public abstract class AbstractModInitializer
                                 String map = StringArgumentType.getString(context, "map");
                                 Thread thread = new Thread(() -> {
                                     Utils.sendToClientChat("converting tiles...");
-                                    if (connection.downloadTiles(map, center.getX() >> 4, center.getZ() >> 4, chunksX, chunksZ)) {
+                                    if (connection.downloadTiles(map, AreaSelection.fromCenter(center.getX() >> 4, center.getZ() >> 4, chunksX, chunksZ))) {
                                         Utils.sendToClientChat(Text.literal("Tiles converted. Don't forget to ")
                                                 .append(Text.literal("[stop]").withStyle(Style.EMPTY.withClickEvent(
                                                         #if MC_VER < MC_1_21_5

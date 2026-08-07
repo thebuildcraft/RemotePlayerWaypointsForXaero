@@ -24,6 +24,7 @@ import com.google.common.reflect.TypeToken;
 import de.the_build_craft.maplink.common.*;
 import de.the_build_craft.maplink.common.clientMapHandlers.ClientMapHandler;
 import de.the_build_craft.maplink.common.configurations.Pl3xMapConfiguration;
+import de.the_build_craft.maplink.common.level.AreaSelection;
 import de.the_build_craft.maplink.common.mapUpdates.*;
 import de.the_build_craft.maplink.common.waypoints.*;
 import de.the_build_craft.maplink.common.wrappers.Utils;
@@ -43,7 +44,7 @@ import static de.the_build_craft.maplink.common.CommonModConfig.*;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 public class Pl3xMapConnection extends MapConnection{
     private String markerLayerStringTemplate = "";
@@ -352,7 +353,7 @@ public class Pl3xMapConnection extends MapConnection{
     }
 
     @Override
-    public boolean downloadTiles(String map, int centerChunkX, int centerChunkZ, int maxChunksX, int maxChunksZ) {
+    public boolean downloadTiles(String map, AreaSelection areaSelection) {
         return false;
     }
 }

@@ -44,10 +44,12 @@ _Formerly known as "Remote Player Waypoints for Xaero's Map"_
 5. Put in the link to the web map (just copy it from the browser)
 
 ### How to download and convert map tiles
-1. `/maplink download_tiles <chunksX> <chunksZ> <centerX> <centerZ>` _(center is in block-coordinates)_
-2. select a map from the list by clicking the button in the chat
-3. wait for it to finish
-4. click stop or run `/maplink stop_tile_rendering`
+_Bluemap only for now_
+1. Right-Click-Drag on the Worldmap to select the chunks
+2. Select "Download Map Tiles"
+3. Select the correct world
+
+_...and then just wait until it's finished :)_
 
 ### Compatibility
 - Xaero's Minimap and Xaero's Better PvP + Fair Play Versions
@@ -59,5 +61,6 @@ _Formerly known as "Remote Player Waypoints for Xaero's Map"_
 - [eatmyvenom](https://github.com/eatmyvenom) for having the idea and helping with implementing the marker support
 - [James Seibel](https://gitlab.com/jeseibel) for making Distance Horizons: I used a lot of the multi-version build scripts from there.
 - [TheMrEngMan](https://github.com/TheMrEngMan) for letting me use the features from his own fork of the original RemotePlayers mod
+- [NotRyken](https://github.com/NotRyken) for helping with the 26.1 and 26.2 port
 
 _This mod is not officially affiliated with Bluemap, Dynmap, LiveAtlas, Pl3xMap, Squaremap or Xaero in any way._

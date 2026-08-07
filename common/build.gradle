@@ -18,45 +18,84 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * by: Leander Knüttel
- * date: 15.02.2026
+ * date: 06.08.2026
  */
 
-architectury {
-    common(((String) gradle.builds_for).split(","))
+plugins {
+    id 'net.neoforged.moddev' version '2.0.143' apply false
+    id 'net.neoforged.moddev.legacyforge' version '2.0.143' apply false
+}
+
+if (mcVers.contains("1.20.1") && mcIndex <= mcVers.indexOf("1.20.1")) {
+    apply plugin: "net.neoforged.moddev.legacyforge"
+
+    legacyForge {
+        mcpVersion = rootProject.minecraft_version
+        def at = file("src/main/resources/${accessWidenerVersion}.${rootProject.mod_id}.accesstransformer.cfg")
+        if (at.exists()) {
+            accessTransformers.from(at.absolutePath)
+        }
+        validateAccessTransformers = true
+    }
+
+    //obfuscation {
+    //    reobfuscate(tasks.named('shadowJar'), sourceSets.main)
+    //}
+} else {
+    apply plugin: "net.neoforged.moddev"
+
+    neoForge {
+        neoFormVersion = rootProject.neo_form_version
+        // Automatically enable AccessTransformers if the file exists
+        def at = file("src/main/resources/${accessWidenerVersion}.${rootProject.mod_id}.accesstransformer.cfg")
+        if (at.exists()) {
+            accessTransformers.from(at.absolutePath)
+        }
+        if (rootProject.minecraft_version.startsWith("1")) {
+            parchment {
+                minecraftVersion = rootProject.parchment_minecraft
+                mappingsVersion = rootProject.parchment_version
+            }
+        }
+    }
 }
 
 dependencies {
-    // We depend on Fabric Loader here to use the Fabric @Environment annotations,
-    // which get remapped to the correct annotations on each platform.
-    // Do NOT use other classes from Fabric Loader.
-    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-
-    if (rootProject.hasProperty("xaero_no_common") && rootProject.xaero_no_common == "true") {
-        if (rootProject.hasProperty("xaeros_minimap_fabric_version") && rootProject.xaeros_minimap_fabric_version != "") {
-            modCompileOnly "xaero.minimap:xaerominimap-fabric-${rootProject.minecraft_version}:${rootProject.xaeros_minimap_fabric_version}"
-        } else {
-            modCompileOnly "xaero.minimap:xaerominimap-fabric-${rootProject.minecraft_version}:${rootProject.default_xaeros_minimap_version}"
-        }
-        if (rootProject.hasProperty("xaeros_worldmap_fabric_version") && rootProject.xaeros_worldmap_fabric_version != "") {
-            modCompileOnly "xaero.map:xaeroworldmap-fabric-${rootProject.minecraft_version}:${rootProject.xaeros_worldmap_fabric_version}"
-        } else {
-            modCompileOnly "xaero.map:xaeroworldmap-fabric-${rootProject.minecraft_version}:${rootProject.default_xaeros_worldmap_version}"
-        }
-        modCompileOnly "xaero.lib:xaerolib-fabric-${rootProject.minecraft_version}:${rootProject.xaero_lib_version}"
-    } else {
-        if (rootProject.hasProperty("xaeros_minimap_fabric_version") && rootProject.xaeros_minimap_fabric_version != "") {
-            modCompileOnly "xaero.minimap:xaerominimap-common-${rootProject.minecraft_version}:${rootProject.xaeros_minimap_fabric_version}"
-        } else {
-            modCompileOnly "xaero.minimap:xaerominimap-common-${rootProject.minecraft_version}:${rootProject.default_xaeros_minimap_version}"
-        }
-        if (rootProject.hasProperty("xaeros_worldmap_fabric_version") && rootProject.xaeros_worldmap_fabric_version != "") {
-            modCompileOnly "xaero.map:xaeroworldmap-common-${rootProject.minecraft_version}:${rootProject.xaeros_worldmap_fabric_version}"
-        } else {
-            modCompileOnly "xaero.map:xaeroworldmap-common-${rootProject.minecraft_version}:${rootProject.default_xaeros_worldmap_version}"
-        }
-        modCompileOnly "xaero.lib:xaerolib-common-${rootProject.minecraft_version}:${rootProject.xaero_lib_version}"
+    // So mixins can be written in common
+    compileOnly group:'org.spongepowered', name:'mixin', version:'0.8.5'
+    // fabric and neoforge both bundle mixinextras, so it is safe to use it in common
+    compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.5.3'
+    annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.5.3'
+    if (rootProject.hasProperty("asm_version")) {
+        compileOnly("org.ow2.asm:asm:${rootProject.asm_version}")
     }
 
-    modImplementation "me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_config_api_fabric_version}"
+    if (rootProject.hasProperty("xaero_no_common") && rootProject.xaero_no_common == "true") {
+        if (rootProject.hasProperty("xaeros_minimap_neoforge_version") && rootProject.xaeros_minimap_neoforge_version != "") {
+            compileOnly "xaero.minimap:xaerominimap-neoforge-${rootProject.minecraft_version}:${rootProject.xaeros_minimap_neoforge_version}"
+        } else {
+            compileOnly "xaero.minimap:xaerominimap-neoforge-${rootProject.minecraft_version}:${rootProject.default_xaeros_minimap_version}"
+        }
+        if (rootProject.hasProperty("xaeros_worldmap_neoforge_version") && rootProject.xaeros_worldmap_neoforge_version != "") {
+            compileOnly "xaero.map:xaeroworldmap-neoforge-${rootProject.minecraft_version}:${rootProject.xaeros_worldmap_neoforge_version}"
+        } else {
+            compileOnly "xaero.map:xaeroworldmap-neoforge-${rootProject.minecraft_version}:${rootProject.default_xaeros_worldmap_version}"
+        }
+        compileOnly "xaero.lib:xaerolib-neoforge-${rootProject.minecraft_version}:${rootProject.xaero_lib_version}"
+    } else {
+        if (rootProject.hasProperty("xaeros_minimap_neoforge_version") && rootProject.xaeros_minimap_neoforge_version != "") {
+            compileOnly "xaero.minimap:xaerominimap-common-${rootProject.minecraft_version}:${rootProject.xaeros_minimap_neoforge_version}"
+        } else {
+            compileOnly "xaero.minimap:xaerominimap-common-${rootProject.minecraft_version}:${rootProject.default_xaeros_minimap_version}"
+        }
+        if (rootProject.hasProperty("xaeros_worldmap_neoforge_version") && rootProject.xaeros_worldmap_neoforge_version != "") {
+            compileOnly "xaero.map:xaeroworldmap-common-${rootProject.minecraft_version}:${rootProject.xaeros_worldmap_neoforge_version}"
+        } else {
+            compileOnly "xaero.map:xaeroworldmap-common-${rootProject.minecraft_version}:${rootProject.default_xaeros_worldmap_version}"
+        }
+        compileOnly "xaero.lib:xaerolib-common-${rootProject.minecraft_version}:${rootProject.xaero_lib_version}"
+    }
+
+    implementation "me.shedaniel.cloth:cloth-config-neoforge:${rootProject.cloth_config_api_neoforge_version}"
 }
 

@@ -20,12 +20,13 @@
 
 package de.the_build_craft.maplink.common.clientMapHandlers;
 
+import de.the_build_craft.maplink.common.level.AreaSelection;
 import de.the_build_craft.maplink.common.waypoints.Position;
 import de.the_build_craft.maplink.common.waypoints.WaypointState;
 
 /**
  * @author Leander Knüttel
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 public interface IXaeroWorldMapSupport extends IXaeroMapSupport {
     void addOrUpdateWorldMapWaypoint(Position position, WaypointState waypointState);
@@ -37,7 +38,6 @@ public interface IXaeroWorldMapSupport extends IXaeroMapSupport {
     #endif
     boolean getXaeroWaypointBackground();
     void clearTiles();
-    void init(int centerChunkX, int centerChunkZ, int maxChunksX, int maxChunksZ);
+    void init(AreaSelection areaSelection);
     void writeBlock(int x, int z, int light, int height, int pixelRgb);
-    void setReadyForRender();
 }

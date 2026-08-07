@@ -58,7 +58,7 @@ import static de.the_build_craft.maplink.common.FastUpdateTask.playerPositions;
 
 /**
  * @author Leander Knüttel
- * @version 20.02.2026
+ * @version 06.08.2026
  */
 public abstract class ClientMapHandler {
     public static final String waypointPrefix = "maplink_";
@@ -70,7 +70,7 @@ public abstract class ClientMapHandler {
     private static ClientMapHandler instance;
     protected final Minecraft mc;
 
-    private static final int maxMarkerCountBeforeWarning = 25;
+    private static final int maxMarkerCountBeforeWarning = 15;
     private boolean markerMessageWasShown = false;
 
     private int previousPlayerWaypointColor = 0;
@@ -474,7 +474,7 @@ public abstract class ClientMapHandler {
                 markerMessageWasShown = true;
                 Utils.sendToClientChat(Text.literal("[" + AbstractModInitializer.MOD_NAME + "]: " +
                                 "Looks like you have quite a lot of markers from the server visible! " +
-                                "Did you know that you can chose the marker layers that are shown in the config, decrease their maximum distance, set a limit on how many are displayed or disable marker waypoints entirely? (The default config already limits the amount to 40) ")
+                                "Did you know that you can chose the marker layers that are shown in the config, decrease their maximum distance, set a limit on how many are displayed or disable marker waypoints entirely? (The default config already limits the amount to 20) ")
                         .withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD))
                         .append(Text.literal("[Don't show this again]")
                                 .withStyle(Style.EMPTY.withClickEvent(

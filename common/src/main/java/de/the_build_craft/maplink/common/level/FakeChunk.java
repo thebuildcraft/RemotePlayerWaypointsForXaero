@@ -30,18 +30,20 @@ import net.minecraft.world.level.chunk.LevelChunk;
 
 /**
  * @author Leander Knüttel
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 public class FakeChunk extends LevelChunk {
     private final int startIndex;
+    private final boolean edge;
 
-    public FakeChunk(Level level, int x, int z, int startIndex) {
+    public FakeChunk(Level level, int x, int z, int startIndex, boolean edge) {
         #if MC_VER >= MC_1_18_2
         super(level, new ChunkPos(x, z));
         #else
         super(level, new ChunkPos(x, z), null);
         #endif
         this.startIndex = startIndex;
+        this.edge = edge;
     }
 
     @Override
@@ -59,5 +61,9 @@ public class FakeChunk extends LevelChunk {
 
     public ResourceKey<Biome> biomeAtPos(int x, int z) {
         return ChunkCache.getBiome(startIndex, x, z);
+    }
+
+    public void done() {
+        if (!edge) ChunkCache.setDone(startIndex);
     }
 }

@@ -19,66 +19,54 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * file changed by: Leander Knüttel
- * date: 02.01.2026
+ * date: 06.08.2026
  */
 
 pluginManagement {
     repositories {
-        maven {
-            name "Fabric"
-            url "https://maven.fabricmc.net/"
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "Fabric"
+                    url = "https://maven.fabricmc.net/"
+                }
+            }
+            filter {
+                includeGroupByRegex(".*fabric.*")
+                includeGroupAndSubgroups("net.fabricmc")
+                includeGroupAndSubgroups("fabric-loom")
+                includeGroupByRegex(".*cuchaz.*")
+            }
         }
-        maven {
-            name "Forge"
-            url "https://maven.minecraftforge.net/"
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "NeoForge Releases"
+                    url = "https://maven.neoforged.net/releases/"
+                }
+            }
+            forRepository {
+                maven {
+                    name = "NeoForge Snapshots"
+                    url = "https://maven.neoforged.net/snapshots/"
+                }
+            }
+            filter {
+                includeGroupByRegex(".*neoforge.*")
+                includeGroupByRegex(".*minecraftforge.*")
+                includeGroupAndSubgroups("net.neoforged")
+                includeGroupByRegex(".*cpw.*")
+                includeGroupByRegex(".*oceanlabs.*")
+            }
         }
-        maven {
-            name "NeoForge Releases"
-            url "https://maven.neoforged.net/releases/"
-        }
-        maven {
-            name "NeoForge Snapshot"
-            url "https://maven.neoforged.net/snapshots/"
-        }
-        maven {
-            name "Architectury (Better Forge because regular Forge is annoying)"
-            url "https://maven.architectury.dev/"
-        }
-        maven {
-            name "Quilt"
-            url "https://maven.quiltmc.org/repository/release"
-        }
-        maven { // Used for Vanilla Minecraft's libraries
-            name "Sponge"
-            url "https://repo.spongepowered.org/repository/maven-public/"
-        }
-        maven {
-            name "ParchmentMC"
-            url "https://maven.parchmentmc.org"
-        }
-        maven {
-            name "Spigot"
-            url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-        }
-        maven { // Used for ModPublisher
-            name "Firstdark"
-            url "https://maven.firstdark.dev/releases"
-        }
-        maven {
-            url "https://chocolateminecraft.com/maven"
-            name "Xaero's Maven"
-        }
-        mavenCentral()
         gradlePluginPortal()
-        
-        // Not needed, but useful for debugging gradle plugins
-        mavenLocal()
+        mavenCentral()
     }
 }
 
 /** Loads the VersionProperties field for the currently selected Minecraft version. */
 def loadProperties() {
-    def defaultMcVersion = "1.20.4"
+    def defaultMcVersion = "26.1.0"
 
     def mcVersion = ""
     def mcVers = fileTree("versionProperties").files.name // Get all the files in "versionProperties"
@@ -119,22 +107,19 @@ def loadProperties() {
  * needed so we can sort versions with different length strings
  * IE: 1.21.1 should come before 1.21.10
  */
-private static int sortSemanticVersionOldestToNewest(String version1, String version2)
-{
+private static int sortSemanticVersionOldestToNewest(String version1, String version2) {
     String[] parts1 = version1.split("\\.");
     String[] parts2 = version2.split("\\.");
 
     int major1 = Integer.parseInt(parts1[0]);
     int major2 = Integer.parseInt(parts2[0]);
-    if (major1 != major2)
-    {
+    if (major1 != major2) {
         return Integer.compare(major1, major2);
     }
 
     int minor1 = Integer.parseInt(parts1[1]);
     int minor2 = Integer.parseInt(parts2[1]);
-    if (minor1 != minor2)
-    {
+    if (minor1 != minor2) {
         return Integer.compare(minor1, minor2);
     }
 

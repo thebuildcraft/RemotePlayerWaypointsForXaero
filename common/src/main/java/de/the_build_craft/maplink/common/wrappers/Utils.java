@@ -34,14 +34,20 @@ import java.util.function.Supplier;
 
 /**
  * @author Leander Knüttel
- * @version 23.10.2025
+ * @version 06.08.2026
  */
 public class Utils {
     public static void sendToClientChat(Component text){
         if (Minecraft.getInstance().level == null) {
             AbstractModInitializer.LOGGER.warn("Caught client chat message outside the game:\n{}", text.getString());
         } else {
+            #if MC_VER >= MC_26_2_0
+            MainThreadTaskQueue.queueTask(() -> Minecraft.getInstance().gui.hud.getChat().addClientSystemMessage(text));
+            #elif MC_VER >= MC_26_1_0
+            MainThreadTaskQueue.queueTask(() -> Minecraft.getInstance().gui.getChat().addClientSystemMessage(text));
+            #else
             MainThreadTaskQueue.queueTask(() -> Minecraft.getInstance().gui.getChat().addMessage(text));
+            #endif
         }
     }
 

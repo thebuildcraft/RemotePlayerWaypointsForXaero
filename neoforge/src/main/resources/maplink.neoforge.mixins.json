@@ -8,21 +8,21 @@
         "common.client.PlayerListHudMixin",
         "common.mods.xaerominimap.WaypointMapRenderReaderMixin",
         "common.mods.xaerominimap.AbstractWaypointRenderProviderMixin",
-        "common.mods.xaeroworldmap.WorldMapWaypointAccessor",
         "common.mods.xaeroworldmap.WaypointReaderMixin",
         "common.mods.xaeroworldmap.WaypointRenderProviderMixin",
         "common.mods.xaeroworldmap.MapWriterMixin",
-        "neoforge.mods.xaerominimap.MinimapElementRendererHandlerMixin",
-        "neoforge.mods.xaerominimap.WaypointWorldRendererMixin",
-        "neoforge.mods.xaerominimap.WaypointsGuiRendererMixin",
-        "neoforge.mods.xaerominimap.SupportModsMixin",
-        "neoforge.mods.xaerominimap.PlayerTrackerMinimapElementRendererMixin",
-        "neoforge.mods.xaeroworldmap.HighlighterRegistryMixin",
-        "neoforge.mods.xaeroworldmap.WaypointRendererMixin",
-        "neoforge.mods.xaeroworldmap.SupportModMixin",
-        "neoforge.mods.xaeroworldmap.PlayerTrackerMapElementRendererMixin"
+        "common.mods.xaeroworldmap.GuiMapMixin",
+        "common.mods.xaeroworldmap.MapProcessorMixin",
+        "common.mods.xaerominimap.MinimapElementRendererHandlerMixin",
+        "common.mods.xaerominimap.WaypointWorldRendererMixin",
+        "common.mods.xaerominimap.WaypointsGuiRendererMixin",
+        "common.mods.xaerominimap.SupportModsMixin",
+        "common.mods.xaerominimap.PlayerTrackerMinimapElementRendererMixin",
+        "common.mods.xaeroworldmap.HighlighterRegistryMixin",
+        "common.mods.xaeroworldmap.WaypointRendererMixin",
+        "common.mods.xaeroworldmap.SupportModMixin",
+        "common.mods.xaeroworldmap.PlayerTrackerMapElementRendererMixin"
     ],
     "server": [
-    ],
-    "plugin": "de.the_build_craft.maplink.mixins.neoforge.NeoforgeMixinPlugin"
+    ]
 }

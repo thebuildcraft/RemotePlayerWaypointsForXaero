@@ -26,6 +26,8 @@ import de.the_build_craft.maplink.common.clientMapHandlers.ClientMapHandler;
 import de.the_build_craft.maplink.common.clientMapHandlers.XaeroClientMapHandler;
 import de.the_build_craft.maplink.common.configurations.BlueMapConfiguration;
 import de.the_build_craft.maplink.common.configurations.BlueMapMapSettings;
+import de.the_build_craft.maplink.common.level.AreaSelection;
+import de.the_build_craft.maplink.common.level.ProgressCounter;
 import de.the_build_craft.maplink.common.mapUpdates.BlueMapMarkerSet;
 import de.the_build_craft.maplink.common.mapUpdates.BlueMapPlayerUpdate;
 
@@ -46,7 +48,7 @@ import static de.the_build_craft.maplink.common.CommonModConfig.*;
 /**
  * @author Leander Knüttel
  * @author eatmyvenom
- * @version 08.03.2026
+ * @version 06.08.2026
  */
 public class BlueMapConnection extends MapConnection {
     List<Integer> lastWorldIndices = new ArrayList<>();
@@ -295,47 +297,47 @@ public class BlueMapConnection extends MapConnection {
     }
 
     @Override
-    public boolean downloadTiles(String map, int centerChunkX, int centerChunkZ, int maxChunksX, int maxChunksZ) {
+    public boolean downloadTiles(String map, AreaSelection areaSelection) {
         BlueMapMapSettings settings = maps.get(map);
         if (settings == null) return false;
         int tileSizeX = settings.lowres.tileSize[0];
         int tileSizeZ = settings.lowres.tileSize[1];
         String basePath = tilesUrlTemplate.replace("{world}", map);
 
-        int startX = (centerChunkX - (maxChunksX / 2)) * 16;
-        int startZ = (centerChunkZ - (maxChunksZ / 2)) * 16;
+        XaeroClientMapHandler.xaeroWorldMapSupport.init(areaSelection);
 
-        XaeroClientMapHandler.xaeroWorldMapSupport.init(centerChunkX, centerChunkZ, maxChunksX, maxChunksZ);
+        for (int tileX = Math.floorDiv(areaSelection.minX, tileSizeX); tileX <= Math.floorDiv(areaSelection.maxX, tileSizeX); tileX++) {
+            for (int tileZ = Math.floorDiv(areaSelection.minZ, tileSizeZ); tileZ <= Math.floorDiv(areaSelection.maxZ, tileSizeZ); tileZ++) {
+                int finalTileX = tileX;
+                int finalTileZ = tileZ;
 
-        boolean success = false;
+                if (!ProgressCounter.converting.get()) return false;
 
-        for (int tileX = Math.floorDiv(startX, tileSizeX); tileX <= Math.floorDiv(startX + maxChunksX * 16, tileSizeX); tileX++) {
-            for (int tileZ = Math.floorDiv(startZ, tileSizeZ); tileZ <= Math.floorDiv(startZ + maxChunksZ * 16, tileSizeZ); tileZ++) {
-                try (NativeImage tile = HTTP.makeImageHttpRequest(URI.create(pathFromCoords(basePath, tileX, tileZ)).toURL())) {
-                    for (int x = 0; x < tileSizeX; x++) {
-                        for (int z = 0; z < tileSizeZ; z++) {
-                            #if MC_VER > MC_1_21_1
-                            int pixelRgb = tile.getPixel(x, z);
-                            int metaRgb = tile.getPixel(x, tileSizeZ + 1 + z);
-                            #else
-                            int pixelRgb = Color.ABGRtoARGB(tile.getPixelRGBA(x, z));
-                            int metaRgb = Color.ABGRtoARGB(tile.getPixelRGBA(x, tileSizeZ + 1 + z));
-                            #endif
-                            XaeroClientMapHandler.xaeroWorldMapSupport.writeBlock(
-                                    tileX * tileSizeX + x,
-                                    tileZ * tileSizeZ + z,
-                                    metaToLight(metaRgb),
-                                    metaToHeight(metaRgb),
-                                    pixelRgb);
+                ProgressCounter.addTask(() -> {
+                    try (NativeImage tile = HTTP.makeImageHttpRequest(URI.create(pathFromCoords(basePath, finalTileX, finalTileZ)).toURL())) {
+                        for (int x = 0; x < tileSizeX; x++) {
+                            for (int z = 0; z < tileSizeZ; z++) {
+                                #if MC_VER > MC_1_21_1
+                                int pixelRgb = tile.getPixel(x, z);
+                                int metaRgb = tile.getPixel(x, tileSizeZ + 1 + z);
+                                #else
+                                int pixelRgb = Color.ABGRtoARGB(tile.getPixelRGBA(x, z));
+                                int metaRgb = Color.ABGRtoARGB(tile.getPixelRGBA(x, tileSizeZ + 1 + z));
+                                #endif
+                                XaeroClientMapHandler.xaeroWorldMapSupport.writeBlock(
+                                        finalTileX * tileSizeX + x,
+                                        finalTileZ * tileSizeZ + z,
+                                        metaToLight(metaRgb),
+                                        metaToHeight(metaRgb),
+                                        pixelRgb);
+                            }
                         }
                     }
-                    success = true;
-                } catch (Exception ignored) {}
+                });
             }
         }
 
-        if (success) XaeroClientMapHandler.xaeroWorldMapSupport.setReadyForRender();
-        return success;
+        return ProgressCounter.finishAllTasks();
     }
 
     //adapted from https://github.com/BlueMap-Minecraft/BlueMap licensed under the MIT License
