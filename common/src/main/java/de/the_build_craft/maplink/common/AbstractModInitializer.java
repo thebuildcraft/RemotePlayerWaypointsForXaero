@@ -61,13 +61,13 @@ import static de.the_build_craft.maplink.common.CommonModConfig.*;
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 06.08.2026
+ * @version 11.08.2026
  */
 public abstract class AbstractModInitializer
 {
 	public static final String MOD_ID = "maplink";
 	public static final String MOD_NAME = "Map Link";
-	public static final String VERSION = "4.5.0";
+	public static final String VERSION = "4.5.1";
 	public static final Logger LOGGER = LogManager.getLogger("MapLink");
 	public static AbstractModInitializer INSTANCE;
 	public LoaderType loaderType;

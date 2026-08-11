@@ -24,6 +24,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import de.the_build_craft.maplink.common.AbstractModInitializer;
 import de.the_build_craft.maplink.common.connections.BlueMapConnection;
 import de.the_build_craft.maplink.common.level.*;
@@ -47,7 +48,7 @@ import java.util.ArrayList;
 
 /**
  * @author Leander Knüttel
- * @version 06.08.2026
+ * @version 11.08.2026
  */
 @Pseudo
 @Mixin(GuiMap.class)
@@ -136,7 +137,7 @@ public class GuiMapMixin {
         }
         original.call(guiGraphics, font, string, x, y, color, bgRed, bgGreen, bgBlue, bgAlpha);
     }
-    #else
+    #elif MC_VER >= MC_1_21_6
     @WrapOperation(method = "render",
             at = @At(value = "INVOKE",
                     target = "Lxaero/map/graphics/MapRenderHelper;drawCenteredStringWithBackground(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIFFFF)V",
@@ -147,6 +148,18 @@ public class GuiMapMixin {
             if (progressString != null) string = progressString;
         }
         original.call(guiGraphics, font, string, x, y, color, bgRed, bgGreen, bgBlue, bgAlpha);
+    }
+    #else
+    @WrapOperation(method = "render",
+            at = @At(value = "INVOKE",
+                    target = "Lxaero/map/graphics/MapRenderHelper;drawCenteredStringWithBackground(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIFFFFLcom/mojang/blaze3d/vertex/VertexConsumer;)V",
+                    ordinal = 2))
+    private void drawAndIncrement(GuiGraphics guiGraphics, Font font, String string, int x, int y, int color, float bgRed, float bgGreen, float bgBlue, float bgAlpha, VertexConsumer backgroundVertexBuffer, Operation<Void> original) {
+        if (ProgressCounter.converting.get() || ProgressCounter.readyForRender.get()) {
+            String progressString = ProgressCounter.getProgressString();
+            if (progressString != null) string = progressString;
+        }
+        original.call(guiGraphics, font, string, x, y, color, bgRed, bgGreen, bgBlue, bgAlpha, backgroundVertexBuffer);
     }
     #endif
 }
