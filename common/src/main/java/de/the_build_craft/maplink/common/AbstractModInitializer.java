@@ -52,16 +52,18 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static de.the_build_craft.maplink.common.CommonModConfig.*;
 
 /**
- * Base for all mod loader initializers 
+ * Base for all mod loader initializers
  * and handles most setup.
  *
  * @author James Seibel
  * @author Leander Knüttel
- * @version 11.08.2026
+ * @author Maggesss
+ * @version 04.09.2026
  */
 public abstract class AbstractModInitializer
 {
@@ -95,21 +97,28 @@ public abstract class AbstractModInitializer
     public static boolean xaeroWorldMapInstalled = false;
 	public static boolean overwriteCurrentDimension = false;
 
-	private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
-	
+    private static final Object schedulerLock = new Object();
+    private static final AtomicInteger schedulerThreadId = new AtomicInteger();
+    private static final ScheduledExecutorService scheduler =
+            Executors.newScheduledThreadPool(2, runnable -> {
+                Thread thread = new Thread(runnable, "MapLink-Scheduler-" + schedulerThreadId.getAndIncrement());
+                thread.setDaemon(true);
+                return thread;
+            });
+
 	//==================//
 	// abstract methods //
 	//==================//
-	
+
 	protected abstract void createInitialBindings();
 	protected abstract IEventProxy createClientProxy();
 	protected abstract IEventProxy createServerProxy(boolean isDedicated);
 	protected abstract void initializeModCompat();
-	
+
 	//===================//
 	// initialize events //
 	//===================//
-	
+
 	public void onInitializeClient()
 	{
 		LOGGER.info("Initializing " + MOD_NAME);
@@ -140,11 +149,11 @@ public abstract class AbstractModInitializer
 
 		LOGGER.info(MOD_NAME + " Initialized");
 	}
-	
+
 	public void onInitializeServer()
 	{
 		LOGGER.info("Initializing " + MOD_NAME);
-		
+
 		this.startup();//<-- common mod init in here
 		this.printModInfo();
 
@@ -154,7 +163,7 @@ public abstract class AbstractModInitializer
 
 		LOGGER.info(MOD_NAME + " Initialized");
 	}
-	
+
 	//===========================//
 	// inner initializer methods //
 	//===========================//
@@ -168,7 +177,7 @@ public abstract class AbstractModInitializer
 		this.createInitialBindings();
 		//do common mod init here
 	}
-	
+
 	private void printModInfo()
 	{
 		LOGGER.info(MOD_NAME + ", Version: " + VERSION);
@@ -275,6 +284,7 @@ public abstract class AbstractModInitializer
                             Utils.sendErrorToClientChat("Currently only available for Bluemap. This will be expanded in future updates ☺");
                             return 0;
                         }
+
                         int chunksX = IntegerArgumentType.getInteger(context, "chunksX") + 2;
                         int chunksZ = IntegerArgumentType.getInteger(context, "chunksZ") + 2;
                         BlockPos center = parseClientPos(context.getArgument("center", Coordinates.class));
@@ -300,6 +310,7 @@ public abstract class AbstractModInitializer
                                     Utils.sendErrorToClientChat("Currently only available for Bluemap. This will be expanded in future updates ☺");
                                     return 0;
                                 }
+
                                 int chunksX = IntegerArgumentType.getInteger(context, "chunksX") + 2;
                                 int chunksZ = IntegerArgumentType.getInteger(context, "chunksZ") + 2;
                                 BlockPos center = parseClientPos(context.getArgument("center", Coordinates.class));
@@ -347,9 +358,11 @@ public abstract class AbstractModInitializer
 	private static LiteralArgumentBuilder<CommandSourceStack> literal(String string) {
 		return LiteralArgumentBuilder.literal(string);
 	}
+
 	private static <T> RequiredArgumentBuilder<CommandSourceStack, T> argument(String name, ArgumentType<T> type) {
 		return RequiredArgumentBuilder.argument(name, type);
 	}
+
     private static BlockPos parseClientPos(Coordinates coordinates) {
         WorldCoordinates worldCoordinates = (WorldCoordinates) coordinates;
         BlockPos playerPos = Minecraft.getInstance().player.blockPosition();
@@ -368,10 +381,12 @@ public abstract class AbstractModInitializer
 	public static void setUpdateDelay(int ms) {
 		int maxUpdateDelay = Math.min(4000, Math.max(config.general.maxUpdateDelay, 1000));
 		ms = Math.min(maxUpdateDelay, Math.max(ms, 1000));
-		if (ms == timerDelay || scheduledSlowUpdateTask == null) return;
-		timerDelay = ms;
-		scheduledSlowUpdateTask.cancel(true);
-		scheduledSlowUpdateTask = scheduler.scheduleAtFixedRate(slowUpdateTask::run, 0, timerDelay, TimeUnit.MILLISECONDS);
+		synchronized (schedulerLock) {
+			if (ms == timerDelay || scheduledSlowUpdateTask == null) return;
+			timerDelay = ms;
+			scheduledSlowUpdateTask.cancel(true);
+			scheduledSlowUpdateTask = scheduler.scheduleAtFixedRate(slowUpdateTask::run, 0, timerDelay, TimeUnit.MILLISECONDS);
+		}
 		LOGGER.info("Remote update delay has been set to " + ms + " ms");
 		if (config.general.debugMode) Utils.sendToClientChat("Remote update delay has been set to " + ms + " ms");
 	}
@@ -455,11 +470,11 @@ public abstract class AbstractModInitializer
 			return null;
 		}
 	}
-	
+
 	//================//
 	// helper classes //
 	//================//
-	
+
 	public interface IEventProxy
 	{
 		void registerEvents();
